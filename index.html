@@ -645,7 +645,7 @@ function processWb(wb, filename, source){
   // Date range defaults
   const minD=new Date(Math.min(...dates)), maxD=new Date(Math.max(...dates));
   document.getElementById('dateFrom').value='2026-01-01';
-  document.getElementById('dateTo').value=toYMD(maxD);
+  document.getElementById('dateTo').value=toYMD(now);
   document.getElementById('dateFrom').min=toYMD(minD);
   document.getElementById('dateTo').max=toYMD(now);
 
