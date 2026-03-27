@@ -647,7 +647,7 @@ function processWb(wb, filename, source){
   document.getElementById('dateFrom').value='2026-01-01';
   document.getElementById('dateTo').value=toYMD(maxD);
   document.getElementById('dateFrom').min=toYMD(minD);
-  document.getElementById('dateTo').max=toYMD(maxD);
+  document.getElementById('dateTo').max=toYMD(now);
 
   document.getElementById('loadingScreen').style.display='none';
   document.getElementById('errorBox').style.display='none';
