@@ -560,7 +560,7 @@ function countBy(dates,fn){
 // AUTO LOAD: fetch data.xlsx from same directory
 // ═══════════════════════════════════════════════════
 async function autoLoadData() {
-  const candidates = ['data.xlsx', 'Data.xlsx', 'DATA.xlsx'];
+  const candidates = ['scripts/data.xlsx', 'data.xlsx', 'Data.xlsx', 'DATA.xlsx'];
   for (const filename of candidates) {
     try {
       const res = await fetch(filename);
