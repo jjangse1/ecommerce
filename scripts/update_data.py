@@ -52,7 +52,7 @@ subprocess.run(["git", "add", "data.xlsx"], check=True)
 result = subprocess.run(["git", "diff", "--cached", "--quiet"], capture_output=True)
 if result.returncode != 0:   # 변경사항 있음
     subprocess.run(["git", "commit", "-m", f"auto: data.xlsx 업데이트 ({today})"], check=True)
-    subprocess.run(["git", "push"], check=True)
+    #subprocess.run(["git", "push"], check=True)
     print("✅ Git push 완료")
 else:
     print("ℹ️ 변경사항 없음 → push 생략")
