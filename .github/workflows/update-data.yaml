@@ -1,0 +1,36 @@
+name: Update data.xlsx (자동 다운로드)
+
+on:
+  schedule:
+    - cron: '0 10 * * *'        # 매일 새벽 4시 (한국시간 기준)
+  workflow_dispatch:           # 수동 실행 가능
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository 체크아웃
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false   # push를 위해 필요
+
+      - name: Python 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: data.xlsx 자동 다운로드 및 업데이트
+        env:
+          MYHUBON_BEARER_TOKEN: ${{ secrets.MYHUBON_BEARER_TOKEN }}
+        run: python scripts/update_data.py
+
+      - name: 변경사항 push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "Data Updater Bot"
+          git config user.email "bot@jjangse1.github.io"
+          git add data.xlsx
+          git commit -m "auto: data.xlsx 업데이트 ($(date +'%Y-%m-%d %H:%M'))" || echo "No changes"
+          git push
