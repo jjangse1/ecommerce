@@ -692,7 +692,7 @@ function countBizDays(from,to){
 function applyFilters(){
   const dates=getFilteredDates();
   const from=document.getElementById('dateFrom').value||toYMD(new Date(Math.min(...ALL_DATES)));
-  const to=document.getElementById('dateTo').value||toYMD(new Date(Math.max(...ALL_DATES)));
+  const to = document.getElementById('dateTo').value || toYMD(new Date());
   const bizDays=countBizDays(from,to);
   document.getElementById('fi-count').textContent=dates.length.toLocaleString();
   document.getElementById('fi-bizdays').textContent=bizDays.toLocaleString();
@@ -702,22 +702,22 @@ function applyFilters(){
   if(activeTab&&activeTab.dataset.tab==='gsc') renderGSC(from,to);
 }
 
-document.getElementById('presetChips').addEventListener('click',e=>{
-  const chip=e.target.closest('.chip'); if(!chip) return;
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+document.getElementById('presetChips').addEventListener('click', e => {
+  const chip = e.target.closest('.chip'); if (!chip) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   chip.classList.add('active');
-  const now=new Date();
-  const maxD=ALL_DATES.length?new Date(Math.max(...ALL_DATES)):now;
-  const minD=ALL_DATES.length?new Date(Math.min(...ALL_DATES)):now;
-  const p=chip.dataset.preset;
-  let from='', to=toYMD(maxD);
-  if(p==='all') from=toYMD(minD);
-  else if(p==='jan') from='2026-01-01';
-  else if(p==='1m'){ const d=new Date(maxD); d.setMonth(d.getMonth()-1); from=toYMD(d); }
-  else if(p==='3m'){ const d=new Date(maxD); d.setMonth(d.getMonth()-3); from=toYMD(d); }
-  else if(p==='thisY') from=`${maxD.getFullYear()}-01-01`;
-  document.getElementById('dateFrom').value=from;
-  document.getElementById('dateTo').value=to;
+  const now = new Date();
+  const todayStr = toYMD(now);          // ✅ 항상 오늘
+  const minD = ALL_DATES.length ? new Date(Math.min(...ALL_DATES)) : now;
+  const p = chip.dataset.preset;
+  let from = '', to = todayStr;          // ✅ maxD 대신 todayStr
+  if (p === 'all') from = toYMD(minD);
+  else if (p === 'jan') from = '2026-01-01';
+  else if (p === '1m') { const d = new Date(now); d.setMonth(d.getMonth()-1); from = toYMD(d); }
+  else if (p === '3m') { const d = new Date(now); d.setMonth(d.getMonth()-3); from = toYMD(d); }
+  else if (p === 'thisY') from = `${now.getFullYear()}-01-01`;
+  document.getElementById('dateFrom').value = from;
+  document.getElementById('dateTo').value   = to;
 });
 
 document.getElementById('applyBtn').addEventListener('click',()=>{
