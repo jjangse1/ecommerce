@@ -8,7 +8,8 @@ on:
 jobs:
   fetch-gsc:
     runs-on: ubuntu-latest
-
+    permissions:        # 이 부분을 추가해야 git push가 실패하지 않습니다.
+      contents: write
     steps:
       - name: Repository 체크아웃
         uses: actions/checkout@v4
@@ -19,7 +20,7 @@ jobs:
           python-version: '3.11'
 
       - name: 필요한 패키지 설치
-        run: pip install google-api-python-client google-auth-oauthlib
+        run: pip install google-api-python-client google-auth-oauthlib google-auth
 
       - name: GSC 데이터 가져오기
         env:
