@@ -8,11 +8,13 @@ on:
 jobs:
   update-data:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
     steps:
       - name: Repository 체크아웃
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           persist-credentials: false
 
       - name: Python 설정
@@ -39,5 +41,4 @@ jobs:
           git config user.name "Data Updater Bot"
           git config user.email "bot@jjangse1.github.io"
           git add data.xlsx
-          git commit -m "auto: data.xlsx 업데이트 ($(date +'%Y-%m-%d %H:%M'))" || echo "No changes"
-          git push
+          git diff --quiet && git diff --staged --quiet || (git commit -m "auto: data.xlsx 업데이트" && git push)
