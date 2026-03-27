@@ -30,8 +30,9 @@ start_date = end_date - timedelta(days=89)
 request = {
     'startDate': start_date.strftime('%Y-%m-%d'),
     'endDate': end_date.strftime('%Y-%m-%d'),
-    'dimensions': ['date'],
-    'rowLimit': 25000
+    # 'date'와 'query'를 함께 넣으면 "언제 어떤 단어가" 데이터가 나옵니다.
+    'dimensions': ['date', 'query', 'page'], 
+    'rowLimit': 25000  # 상세 데이터이므로 행 제한을 넉넉히 잡습니다.
 }
 
 response = service.searchanalytics().query(siteUrl=SITE_URL, body=request).execute()
