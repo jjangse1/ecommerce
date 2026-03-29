@@ -2,32 +2,30 @@ name: Update data.xlsx (자동 다운로드)
 
 on:
   schedule:
-    - cron: '0 10 * * *'        # 매일 새벽 4시 (한국시간 기준)
-  workflow_dispatch:           # 수동 실행 가능
+    - cron: '0 10 * * *'
+  workflow_dispatch:
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - name: Repository 체크아웃
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          persist-credentials: false
 
       - name: Python 설정
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # --- 이 단계를 새로 추가하세요 ---
       - name: 필요한 라이브러리 설치
         run: |
           python -m pip install --upgrade pip
           pip install requests
-      # ------------------------------
 
       - name: data.xlsx 자동 다운로드 및 업데이트
         env:
@@ -35,10 +33,5 @@ jobs:
         run: python scripts/update_data.py
 
       - name: 변경사항 push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "Data Updater Bot"
-          git config user.email "bot@jjangse1.github.io"
-          git add data.xlsx
-          git diff --quiet && git diff --staged --quiet || (git commit -m "auto: data.xlsx 업데이트" && git push)
+        if: failure()   # 스크립트에서 이미 push를 하므로, 실패 시에만 로그 용도로 사용 (선택)
+        run: echo "스크립트 내부에서 push를 처리합니다."
