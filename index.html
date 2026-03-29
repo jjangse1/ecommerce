@@ -421,43 +421,104 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
       </div>
     </div>
 
+    <div class="section-divider"><span>검색어 · 국가 분석</span></div>
+
     <div class="grid-2">
       <!-- Top queries -->
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title"><span class="dot" style="background:var(--accent3)"></span> 인기 검색어 Top 10</div>
+          <span class="panel-badge" id="badge-query-period"></span>
         </div>
         <div id="gscQueryTable"></div>
       </div>
       <!-- Country breakdown -->
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title"><span class="dot" style="background:var(--accent2)"></span> 국가별 클릭수</div>
+          <div class="panel-title"><span class="dot" style="background:var(--accent2)"></span> 국가별 클릭수 · 노출수</div>
+          <span class="panel-badge" id="badge-country-period"></span>
         </div>
         <div class="chart-wrap chart-h260"><canvas id="gscCountryChart"></canvas></div>
       </div>
     </div>
 
+    <div class="section-divider"><span>기기 · 페이지 분석</span></div>
+
     <div class="grid-2">
       <!-- Device breakdown -->
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title"><span class="dot" style="background:var(--warn)"></span> 기기별 분포</div>
+          <div class="panel-title"><span class="dot" style="background:var(--warn)"></span> 기기별 클릭 · 노출 분포</div>
+          <span class="panel-badge" id="badge-device-period"></span>
         </div>
-        <div class="chart-wrap chart-h220"><canvas id="gscDeviceChart"></canvas></div>
+        <div class="chart-wrap chart-h260"><canvas id="gscDeviceChart"></canvas></div>
       </div>
       <!-- Top pages -->
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title"><span class="dot" style="background:var(--accent)"></span> 인기 페이지 Top 8</div>
+          <span class="panel-badge" id="badge-page-period"></span>
         </div>
         <div id="gscPageTable"></div>
       </div>
     </div>
 
+    <div class="section-divider"><span>접속 패턴 · 마케팅 분석</span></div>
+
+    <!-- 요일별 클릭 패턴 + 검색 시간대 -->
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="dot" style="background:var(--accent)"></span> 요일별 클릭 패턴</div>
+          <span class="zoom-hint">선택 기간 기준</span>
+        </div>
+        <div class="chart-wrap chart-h260"><canvas id="gscDowChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="dot" style="background:var(--accent3)"></span> 주간 성장 추이 (7일 이동평균)</div>
+        </div>
+        <div class="chart-wrap chart-h260"><canvas id="gscMaChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 마케팅 분석: CTR 기회 버블 + 국가별 CTR vs 순위 -->
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="dot" style="background:var(--danger)"></span> 검색어 기회 분석 — 노출 vs CTR</div>
+          <span class="zoom-hint" style="font-size:10px">버블 크기 = 클릭수</span>
+        </div>
+        <div class="chart-wrap chart-h300"><canvas id="gscBubbleChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="dot" style="background:var(--accent2)"></span> 국가별 CTR vs 게재순위 매트릭스</div>
+          <span class="zoom-hint" style="font-size:10px">버블 크기 = 클릭수</span>
+        </div>
+        <div class="chart-wrap chart-h300"><canvas id="gscCountryMatrixChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 페이지 효율 + 성장률 -->
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="dot" style="background:var(--accent3)"></span> 페이지별 CTR 효율 비교</div>
+        </div>
+        <div class="chart-wrap chart-h260"><canvas id="gscPageCtrChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="dot" style="background:var(--warn)"></span> 기기별 CTR 비교</div>
+        </div>
+        <div class="chart-wrap chart-h260"><canvas id="gscDeviceCtrChart"></canvas></div>
+      </div>
+    </div>
+
     <!-- Insights -->
     <div class="panel">
-      <div class="panel-header"><div class="panel-title"><span class="dot" style="background:var(--accent3)"></span> SEO 인사이트</div></div>
+      <div class="panel-header"><div class="panel-title"><span class="dot" style="background:var(--accent3)"></span> SEO · 마케팅 인사이트</div></div>
       <div class="insight-list" id="gscInsights"></div>
     </div>
 
@@ -981,6 +1042,7 @@ const GSC_CHART = [
   {date:'2026-03-20',clicks:10,impr:64,ctr:0.1562,pos:5.0},{date:'2026-03-21',clicks:0,impr:12,ctr:0.0,pos:6.4},
   {date:'2026-03-22',clicks:3,impr:55,ctr:0.0545,pos:4.6},{date:'2026-03-23',clicks:13,impr:160,ctr:0.0812,pos:5.1}
 ];
+window._GSC_CHART = GSC_CHART;
 
 const GSC_QUERIES = [
   {query:'myhubon',clicks:35,impr:128,ctr:0.2734,pos:1.84},
@@ -994,6 +1056,7 @@ const GSC_QUERIES = [
   {query:'0010-36408',clicks:1,impr:2,ctr:0.5,pos:4.5},
   {query:'0040-20703',clicks:0,impr:26,ctr:0.0,pos:5.65},
 ];
+window._GSC_QUERIES = GSC_QUERIES;
 
 const GSC_COUNTRIES = [
   {country:'한국',clicks:328,impr:2236,ctr:0.1467,pos:5.06},
@@ -1005,12 +1068,14 @@ const GSC_COUNTRIES = [
   {country:'싱가포르',clicks:12,impr:194,ctr:0.0619,pos:5.02},
   {country:'말레이시아',clicks:8,impr:102,ctr:0.0784,pos:5.43},
 ];
+window._GSC_COUNTRIES = GSC_COUNTRIES;
 
 const GSC_DEVICES = [
   {device:'데스크톱',clicks:474,impr:4510,ctr:0.1051,pos:6.16},
   {device:'모바일',clicks:63,impr:830,ctr:0.0759,pos:7.5},
   {device:'태블릿',clicks:1,impr:42,ctr:0.0238,pos:7.43},
 ];
+window._GSC_DEVICES = GSC_DEVICES;
 
 const GSC_PAGES = [
   {page:'https://myhubon.com/',clicks:42,impr:332,ctr:0.1265,pos:2.59},
@@ -1022,21 +1087,67 @@ const GSC_PAGES = [
   {page:'/products/detail/ebc23454',clicks:7,impr:29,ctr:0.2414,pos:3.79},
   {page:'/community/news',clicks:6,impr:45,ctr:0.1333,pos:1.93},
 ];
+window._GSC_PAGES = GSC_PAGES;
 
 let gscRendered = false;
 
+// ── 데이터 라벨 플러그인 (업로드 차트와 동일 스타일) ──
+function makeLabelPlugin(color, values, threshold, suffix=''){
+  return {
+    id:'lbl_'+Math.random().toString(36).slice(2,7),
+    afterDatasetsDraw(ch){
+      if(values.length > threshold) return;
+      const ctx=ch.ctx, meta=ch.getDatasetMeta(0);
+      ctx.save();
+      ctx.font="500 10px 'DM Mono',monospace";
+      ctx.fillStyle=color; ctx.textAlign='center'; ctx.textBaseline='bottom';
+      meta.data.forEach((pt,i)=>{
+        const v=values[i]; if(!v&&v!==0) return;
+        if(v===0) return;
+        ctx.fillText(v+suffix, pt.x, pt.y-6);
+      });
+      ctx.restore();
+    }
+  };
+}
+
+// 요일별 집계 헬퍼
+function groupByDow(filtered){
+  const dow=['일','월','화','수','목','금','토'];
+  const counts=Array(7).fill(0), imprs=Array(7).fill(0);
+  filtered.forEach(d=>{
+    const day=new Date(d.date+'T00:00:00').getDay();
+    counts[day]+=d.clicks; imprs[day]+=d.impr;
+  });
+  return {dow, counts, imprs};
+}
+
+// 7일 이동평균
+function movingAvg(arr, n=7){
+  return arr.map((_,i)=>{
+    if(i<n-1) return null;
+    const slice=arr.slice(i-n+1,i+1);
+    return +(slice.reduce((a,b)=>a+b,0)/n).toFixed(2);
+  });
+}
+
 function renderGSC(from, to){
-  // from/to are 'YYYY-MM-DD' strings; if omitted use full range
+  const GSC_CHART   = window._GSC_CHART;
+  const GSC_QUERIES = window._GSC_QUERIES;
+  const GSC_COUNTRIES = window._GSC_COUNTRIES;
+  const GSC_DEVICES = window._GSC_DEVICES;
+  const GSC_PAGES   = window._GSC_PAGES;
+
   const f = from || GSC_CHART[0].date;
   const t = to   || GSC_CHART[GSC_CHART.length-1].date;
+  const periodLabel = `${f} ~ ${t}`;
 
   const filtered = GSC_CHART.filter(d => d.date >= f && d.date <= t);
-
-  const labels = filtered.map(d=>d.date);
-  const clicks = filtered.map(d=>d.clicks);
-  const imprs  = filtered.map(d=>d.impr);
-  const ctrs   = filtered.map(d=>+(d.ctr*100).toFixed(2));
-  const poses  = filtered.map(d=>d.pos===0?null:d.pos);
+  const labels   = filtered.map(d=>d.date);
+  const clicks   = filtered.map(d=>d.clicks);
+  const imprs    = filtered.map(d=>d.impr);
+  const ctrs     = filtered.map(d=>+(d.ctr*100).toFixed(2));
+  const poses    = filtered.map(d=>d.pos===0?null:d.pos);
 
   const totalClicks = clicks.reduce((a,b)=>a+b,0);
   const totalImpr   = imprs.reduce((a,b)=>a+b,0);
@@ -1044,67 +1155,70 @@ function renderGSC(from, to){
   const validPos    = filtered.filter(d=>d.pos>0);
   const avgPos      = validPos.length ? validPos.reduce((a,d)=>a+d.pos,0)/validPos.length : 0;
 
-  // KPI
+  // ── KPI ──
   document.getElementById('gsc-clicks').textContent = totalClicks.toLocaleString();
   document.getElementById('gsc-impr').textContent   = totalImpr.toLocaleString();
   document.getElementById('gsc-ctr').textContent    = avgCtr.toFixed(1)+'%';
   document.getElementById('gsc-pos').textContent    = avgPos.toFixed(1);
 
-  // Daily dual-axis chart
+  // ── 기간 배지 업데이트 ──
+  ['badge-query-period','badge-country-period','badge-device-period','badge-page-period'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.textContent=periodLabel;
+  });
+
+  const topts = {backgroundColor:'#fff',borderColor:'#E2E0D8',borderWidth:1,titleColor:'#18181A',bodyColor:'#5C5C60',padding:10};
+
+  // ── 1. 일별 클릭+노출 (듀얼축) ──
   destroyChart('gscDailyChart');
-  const ctx1 = document.getElementById('gscDailyChart').getContext('2d');
-  charts['gscDailyChart'] = new Chart(ctx1,{
+  const ctx1=document.getElementById('gscDailyChart').getContext('2d');
+  charts['gscDailyChart']=new Chart(ctx1,{
     type:'bar',
-    data:{
-      labels,
-      datasets:[
-        {label:'노출수',data:imprs,backgroundColor:'#2563EB18',borderColor:'#2563EB',borderWidth:1.5,borderRadius:3,yAxisID:'y1'},
-        {label:'클릭수',data:clicks,backgroundColor:'#059669cc',borderColor:'#059669',borderWidth:1.5,borderRadius:3,yAxisID:'y'}
-      ]
-    },
+    data:{labels,datasets:[
+      {label:'노출수',data:imprs,backgroundColor:'#2563EB18',borderColor:'#2563EB',borderWidth:1.5,borderRadius:3,yAxisID:'y1'},
+      {label:'클릭수',data:clicks,backgroundColor:'#059669cc',borderColor:'#059669',borderWidth:1.5,borderRadius:3,yAxisID:'y'}
+    ]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,position:'top',labels:{font:{size:11,family:"'Pretendard',sans-serif"},color:'#5C5C60'}},
-        tooltip:{backgroundColor:'#fff',borderColor:'#E2E0D8',borderWidth:1,titleColor:'#18181A',bodyColor:'#5C5C60',padding:10},
-        zoom:zoomOpts()},
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:11},color:'#5C5C60'}},
+        tooltip:{...topts},zoom:zoomOpts()},
       scales:{
         x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:10,family:"'DM Mono',monospace"},maxTicksLimit:20}},
         y:{grid:{color:'#E2E0D8'},ticks:{color:'#059669',font:{size:11}},beginAtZero:true,position:'left'},
         y1:{grid:{display:false},ticks:{color:'#2563EB',font:{size:11}},beginAtZero:true,position:'right'}
       }
-    }
+    },
+    plugins:[makeLabelPlugin('#059669',clicks,45)]
   });
 
-  // CTR chart
+  // ── 2. CTR 추이 ──
   destroyChart('gscCtrChart');
-  const ctx2 = document.getElementById('gscCtrChart').getContext('2d');
-  const g2 = ctx2.createLinearGradient(0,0,0,260);
+  const ctx2=document.getElementById('gscCtrChart').getContext('2d');
+  const g2=ctx2.createLinearGradient(0,0,0,260);
   g2.addColorStop(0,'#D9770622'); g2.addColorStop(1,'#D9770600');
-  charts['gscCtrChart'] = new Chart(ctx2,{
+  charts['gscCtrChart']=new Chart(ctx2,{
     type:'line',
-    data:{labels,datasets:[{label:'CTR (%)',data:ctrs,borderColor:'#D97706',borderWidth:2,
+    data:{labels,datasets:[{label:'CTR(%)',data:ctrs,borderColor:'#D97706',borderWidth:2,
       pointRadius:ctrs.length>60?0:3,pointHoverRadius:5,tension:0.3,fill:true,backgroundColor:g2}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#E2E0D8',borderWidth:1,
-        titleColor:'#18181A',bodyColor:'#5C5C60',padding:10,callbacks:{label:i=>` CTR: ${i.raw}%`}},zoom:zoomOpts()},
+      plugins:{legend:{display:false},tooltip:{...topts,callbacks:{label:i=>` CTR: ${i.raw}%`}},zoom:zoomOpts()},
       scales:{
         x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:10},maxTicksLimit:15}},
         y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11},callback:v=>v+'%'},beginAtZero:true}
       }
-    }
+    },
+    plugins:[makeLabelPlugin('#D97706',ctrs,40,'%')]
   });
 
-  // Position chart
+  // ── 3. 게재순위 추이 ──
   destroyChart('gscPosChart');
-  const ctx3 = document.getElementById('gscPosChart').getContext('2d');
-  const g3 = ctx3.createLinearGradient(0,0,0,260);
+  const ctx3=document.getElementById('gscPosChart').getContext('2d');
+  const g3=ctx3.createLinearGradient(0,0,0,260);
   g3.addColorStop(0,'#7C3AED22'); g3.addColorStop(1,'#7C3AED00');
-  charts['gscPosChart'] = new Chart(ctx3,{
+  charts['gscPosChart']=new Chart(ctx3,{
     type:'line',
     data:{labels,datasets:[{label:'게재순위',data:poses,borderColor:'#7C3AED',borderWidth:2,
       pointRadius:poses.length>60?0:3,pointHoverRadius:5,tension:0.3,fill:true,backgroundColor:g3,spanGaps:true}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#E2E0D8',borderWidth:1,
-        titleColor:'#18181A',bodyColor:'#5C5C60',padding:10,callbacks:{label:i=>` 순위: ${i.raw}`}},zoom:zoomOpts()},
+      plugins:{legend:{display:false},tooltip:{...topts,callbacks:{label:i=>` 순위: ${i.raw}`}},zoom:zoomOpts()},
       scales:{
         x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:10},maxTicksLimit:15}},
         y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:false}
@@ -1112,47 +1226,271 @@ function renderGSC(from, to){
     }
   });
 
-  // Country chart — static (not date-filterable from xlsx)
-  if(!gscRendered){
-    destroyChart('gscCountryChart');
-    const ctx4 = document.getElementById('gscCountryChart').getContext('2d');
-    const countryColors = ['#2563EB','#059669','#D97706','#7C3AED','#DC2626','#0891B2','#65A30D','#9333EA'];
-    charts['gscCountryChart'] = new Chart(ctx4,{
-      type:'bar',
-      data:{
-        labels:GSC_COUNTRIES.map(c=>c.country),
-        datasets:[{label:'클릭수',data:GSC_COUNTRIES.map(c=>c.clicks),
-          backgroundColor:countryColors.map(c=>c+'bb'),borderColor:countryColors,borderWidth:1.5,borderRadius:5}]
-      },
-      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
-        plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#E2E0D8',borderWidth:1,
-          titleColor:'#18181A',bodyColor:'#5C5C60',padding:10,callbacks:{label:i=>` 클릭: ${i.raw}회`}}},
-        scales:{
-          x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true},
-          y:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:12,family:"'Pretendard',sans-serif"}}}
-        }
+  // ── 4. 국가별 클릭+노출 (날짜 필터 연동 — 전체 데이터 기준) ──
+  destroyChart('gscCountryChart');
+  const ctx4=document.getElementById('gscCountryChart').getContext('2d');
+  const cColors=['#2563EB','#059669','#D97706','#7C3AED','#DC2626','#0891B2','#65A30D','#9333EA'];
+  const cClicks=GSC_COUNTRIES.map(c=>c.clicks), cImpr=GSC_COUNTRIES.map(c=>c.impr);
+  const maxC=Math.max(...cClicks)||1;
+  charts['gscCountryChart']=new Chart(ctx4,{
+    type:'bar',
+    data:{labels:GSC_COUNTRIES.map(c=>c.country),datasets:[
+      {label:'클릭수',data:cClicks,backgroundColor:cColors.map(c=>c+'bb'),borderColor:cColors,borderWidth:1.5,borderRadius:5,yAxisID:'y'},
+      {label:'노출수',data:cImpr,backgroundColor:'#94A3B820',borderColor:'#94A3B8',borderWidth:1,borderRadius:3,yAxisID:'y1'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#5C5C60',boxWidth:10}},
+        tooltip:{...topts}},
+      scales:{
+        x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true},
+        y:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:12,family:"'Pretendard',sans-serif"}}},
+        y1:{display:false,beginAtZero:true}
       }
-    });
+    },
+    plugins:[{
+      id:'ctrLabels',
+      afterDatasetsDraw(ch){
+        const ctx=ch.ctx, meta=ch.getDatasetMeta(0);
+        ctx.save(); ctx.font="500 10px 'DM Mono',monospace"; ctx.textAlign='left'; ctx.textBaseline='middle';
+        meta.data.forEach((pt,i)=>{
+          const v=cClicks[i]; if(!v) return;
+          ctx.fillStyle=cColors[i]||'#2563EB';
+          ctx.fillText(v, pt.x+5, pt.y);
+        });
+        ctx.restore();
+      }
+    }]
+  });
 
-    // Device doughnut — static
-    destroyChart('gscDeviceChart');
-    const ctx5 = document.getElementById('gscDeviceChart').getContext('2d');
-    charts['gscDeviceChart'] = new Chart(ctx5,{
-      type:'doughnut',
-      data:{
-        labels:GSC_DEVICES.map(d=>d.device),
-        datasets:[{data:GSC_DEVICES.map(d=>d.clicks),
-          backgroundColor:['#2563EBcc','#059669cc','#D97706cc'],
-          borderColor:['#2563EB','#059669','#D97706'],borderWidth:2}]
+  // ── 5. 기기별 — 클릭+노출 나란히 바 ──
+  destroyChart('gscDeviceChart');
+  const ctx5=document.getElementById('gscDeviceChart').getContext('2d');
+  const devClicks=GSC_DEVICES.map(d=>d.clicks), devImpr=GSC_DEVICES.map(d=>d.impr);
+  const devColors=['#2563EB','#059669','#D97706'];
+  charts['gscDeviceChart']=new Chart(ctx5,{
+    type:'bar',
+    data:{labels:GSC_DEVICES.map(d=>d.device),datasets:[
+      {label:'클릭수',data:devClicks,backgroundColor:devColors.map(c=>c+'cc'),borderColor:devColors,borderWidth:1.5,borderRadius:5},
+      {label:'노출수',data:devImpr,backgroundColor:devColors.map(c=>c+'22'),borderColor:devColors,borderWidth:1,borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:11},color:'#5C5C60',boxWidth:10}},
+        tooltip:{...topts}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:12,family:"'Pretendard',sans-serif"}}},
+        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}
+      }
+    },
+    plugins:[makeLabelPlugin('#2563EB',devClicks,10)]
+  });
+
+  // ── 6. 요일별 클릭 패턴 (선택 기간 기준) ──
+  destroyChart('gscDowChart');
+  const ctx6=document.getElementById('gscDowChart').getContext('2d');
+  const {dow,counts:dowCounts,imprs:dowImprs}=groupByDow(filtered);
+  const dowColors=dowCounts.map((v,i)=>{
+    if(i===0||i===6) return '#DC262699'; // 주말 빨강
+    return v>=Math.max(...dowCounts)*0.8?'#2563EBdd':'#2563EB88';
+  });
+  charts['gscDowChart']=new Chart(ctx6,{
+    type:'bar',
+    data:{labels:dow.map(d=>d+'요일'),datasets:[{
+      label:'클릭수',data:dowCounts,
+      backgroundColor:dowColors,borderColor:dowColors.map(c=>c.slice(0,7)),borderWidth:1.5,borderRadius:6
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...topts,callbacks:{label:i=>` 클릭: ${i.raw}회`}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:12}}},
+        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}
+      }
+    },
+    plugins:[makeLabelPlugin('#2563EB',dowCounts,10)]
+  });
+
+  // ── 7. 7일 이동평균 클릭 추이 ──
+  destroyChart('gscMaChart');
+  const ctx7=document.getElementById('gscMaChart').getContext('2d');
+  const ma7=movingAvg(clicks,7);
+  const gMA=ctx7.createLinearGradient(0,0,0,260);
+  gMA.addColorStop(0,'#2563EB18'); gMA.addColorStop(1,'#2563EB00');
+  charts['gscMaChart']=new Chart(ctx7,{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'일별 클릭',data:clicks,borderColor:'#2563EB33',borderWidth:1,pointRadius:0,tension:0.3,fill:false},
+      {label:'7일 이동평균',data:ma7,borderColor:'#2563EB',borderWidth:2.5,pointRadius:0,pointHoverRadius:5,
+       tension:0.4,fill:true,backgroundColor:gMA,spanGaps:true}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#5C5C60',boxWidth:10}},
+        tooltip:{...topts,callbacks:{label:i=>i.datasetIndex===1?` 평균: ${i.raw}`:` 클릭: ${i.raw}`}},zoom:zoomOpts()},
+      scales:{
+        x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:10},maxTicksLimit:15}},
+        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}
+      }
+    }
+  });
+
+  // ── 8. 검색어 기회 버블 (노출 vs CTR, 버블=클릭) ──
+  destroyChart('gscBubbleChart');
+  const ctx8=document.getElementById('gscBubbleChart').getContext('2d');
+  const bubbleData=GSC_QUERIES.map((q,i)=>({
+    x: q.impr,
+    y: +(q.ctr*100).toFixed(1),
+    r: Math.max(5, Math.sqrt(q.clicks+1)*4),
+    label: q.query, clicks: q.clicks
+  }));
+  const bColors=['#2563EB','#059669','#D97706','#7C3AED','#DC2626','#0891B2','#65A30D','#9333EA','#F59E0B','#6366F1'];
+  charts['gscBubbleChart']=new Chart(ctx8,{
+    type:'bubble',
+    data:{datasets:bubbleData.map((d,i)=>({
+      label:d.label, data:[d],
+      backgroundColor:bColors[i%bColors.length]+'99',
+      borderColor:bColors[i%bColors.length],borderWidth:1.5
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{...topts,callbacks:{
+          title:items=>`"${items[0].dataset.label}"`,
+          label:i=>[` 노출: ${i.raw.x}회`,` CTR: ${i.raw.y}%`,` 클릭: ${bubbleData[i.datasetIndex].clicks}회`]
+        }},
       },
-      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
-        plugins:{legend:{display:true,position:'bottom',labels:{font:{size:12,family:"'Pretendard',sans-serif"},color:'#5C5C60',padding:16}},
-          tooltip:{backgroundColor:'#fff',borderColor:'#E2E0D8',borderWidth:1,titleColor:'#18181A',bodyColor:'#5C5C60',padding:10,
-            callbacks:{label:i=>` ${i.label}: ${i.raw}회 (${(i.raw/GSC_DEVICES.reduce((a,d)=>a+d.clicks,0)*100).toFixed(1)}%)`}}}}
-    });
+      scales:{
+        x:{grid:{color:'#E2E0D8'},title:{display:true,text:'노출수',color:'#9494A0',font:{size:10}},
+          ticks:{color:'#9494A0',font:{size:10}}},
+        y:{grid:{color:'#E2E0D8'},title:{display:true,text:'CTR (%)',color:'#9494A0',font:{size:10}},
+          ticks:{color:'#9494A0',font:{size:10},callback:v=>v+'%'},beginAtZero:true}
+      }
+    },
+    plugins:[{
+      id:'bubbleLabels',
+      afterDatasetsDraw(ch){
+        const ctx=ch.ctx;
+        ctx.save(); ctx.font="500 9px 'Pretendard',sans-serif"; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ch.data.datasets.forEach((ds,i)=>{
+          const meta=ch.getDatasetMeta(i);
+          if(!meta.data[0]) return;
+          const pt=meta.data[0];
+          ctx.fillStyle='#fff';
+          const lbl=ds.label.length>8?ds.label.slice(0,7)+'…':ds.label;
+          ctx.fillText(lbl, pt.x, pt.y);
+        });
+        ctx.restore();
+      }
+    }]
+  });
 
-    // Query & page tables (static) — inject style once
-    const queryStyle = `<style>
+  // ── 9. 국가별 CTR vs 게재순위 버블 ──
+  destroyChart('gscCountryMatrixChart');
+  const ctx9=document.getElementById('gscCountryMatrixChart').getContext('2d');
+  const cMatData=GSC_COUNTRIES.map((c,i)=>({
+    x: +c.pos.toFixed(2),
+    y: +(c.ctr*100).toFixed(1),
+    r: Math.max(5, Math.sqrt(c.clicks)*3.5),
+    label:c.country, clicks:c.clicks
+  }));
+  charts['gscCountryMatrixChart']=new Chart(ctx9,{
+    type:'bubble',
+    data:{datasets:cMatData.map((d,i)=>({
+      label:d.label, data:[d],
+      backgroundColor:cColors[i%cColors.length]+'99',
+      borderColor:cColors[i%cColors.length],borderWidth:1.5
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{...topts,callbacks:{
+          title:items=>`${items[0].dataset.label}`,
+          label:i=>[` 게재순위: ${i.raw.x}위`,` CTR: ${i.raw.y}%`,` 클릭: ${cMatData[i.datasetIndex].clicks}회`]
+        }}
+      },
+      scales:{
+        x:{grid:{color:'#E2E0D8'},title:{display:true,text:'평균 게재순위 (낮을수록 좋음)',color:'#9494A0',font:{size:10}},
+          ticks:{color:'#9494A0',font:{size:10}},reverse:false},
+        y:{grid:{color:'#E2E0D8'},title:{display:true,text:'CTR (%)',color:'#9494A0',font:{size:10}},
+          ticks:{color:'#9494A0',font:{size:10},callback:v=>v+'%'},beginAtZero:true}
+      }
+    },
+    plugins:[{
+      id:'cMatLabels',
+      afterDatasetsDraw(ch){
+        const ctx=ch.ctx;
+        ctx.save(); ctx.font="bold 9px 'Pretendard',sans-serif"; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ch.data.datasets.forEach((ds,i)=>{
+          const meta=ch.getDatasetMeta(i);
+          if(!meta.data[0]) return;
+          const pt=meta.data[0];
+          ctx.fillStyle='#fff';
+          ctx.fillText(ds.label, pt.x, pt.y);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+
+  // ── 10. 페이지별 CTR 효율 ──
+  destroyChart('gscPageCtrChart');
+  const ctx10=document.getElementById('gscPageCtrChart').getContext('2d');
+  const pageLabels=GSC_PAGES.map(p=>p.page.replace('https://myhubon.com','').replace(/\/products\/detail\/.{8}.*/,'/products/…') || '/');
+  const pageCtr=GSC_PAGES.map(p=>+(p.ctr*100).toFixed(1));
+  const pageClicks=GSC_PAGES.map(p=>p.clicks);
+  const pColors=pageCtr.map(v=>v>40?'#059669cc':v>20?'#2563EBcc':'#94A3B8cc');
+  charts['gscPageCtrChart']=new Chart(ctx10,{
+    type:'bar',
+    data:{labels:pageLabels,datasets:[{
+      label:'CTR(%)',data:pageCtr,
+      backgroundColor:pColors,borderColor:pColors.map(c=>c.slice(0,7)),borderWidth:1.5,borderRadius:5
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{...topts,callbacks:{
+        label:i=>` CTR: ${i.raw}%  (클릭 ${pageClicks[i.dataIndex]}회)`
+      }}},
+      scales:{
+        x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11},callback:v=>v+'%'},beginAtZero:true},
+        y:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:10}}}
+      }
+    },
+    plugins:[{
+      id:'pageCtrLbl',
+      afterDatasetsDraw(ch){
+        const ctx=ch.ctx,meta=ch.getDatasetMeta(0);
+        ctx.save(); ctx.font="500 10px 'DM Mono',monospace"; ctx.textBaseline='middle'; ctx.textAlign='left';
+        meta.data.forEach((pt,i)=>{
+          const v=pageCtr[i]; if(!v) return;
+          ctx.fillStyle=pColors[i].slice(0,7);
+          ctx.fillText(v+'%', pt.x+5, pt.y);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+
+  // ── 11. 기기별 CTR 비교 ──
+  destroyChart('gscDeviceCtrChart');
+  const ctx11=document.getElementById('gscDeviceCtrChart').getContext('2d');
+  const devCtr=GSC_DEVICES.map(d=>+(d.ctr*100).toFixed(1));
+  const devPos=GSC_DEVICES.map(d=>d.pos);
+  charts['gscDeviceCtrChart']=new Chart(ctx11,{
+    type:'bar',
+    data:{labels:GSC_DEVICES.map(d=>d.device),datasets:[
+      {label:'CTR(%)',data:devCtr,backgroundColor:devColors.map(c=>c+'cc'),borderColor:devColors,borderWidth:1.5,borderRadius:5,yAxisID:'y'},
+      {label:'평균순위',data:devPos,backgroundColor:devColors.map(c=>c+'33'),borderColor:devColors,borderWidth:1,borderRadius:3,yAxisID:'y1',type:'line',
+       tension:0.3,pointRadius:6,pointHoverRadius:8}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#5C5C60',boxWidth:10}},
+        tooltip:{...topts}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:12}}},
+        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11},callback:v=>v+'%'},beginAtZero:true,position:'left'},
+        y1:{grid:{display:false},ticks:{color:'#9494A0',font:{size:11},callback:v=>v+'위'},beginAtZero:false,position:'right'}
+      }
+    },
+    plugins:[makeLabelPlugin('#2563EB',devCtr,10,'%')]
+  });
+
+  // ── 검색어 테이블 ──
+  if(!gscRendered){
+    document.head.insertAdjacentHTML('beforeend',`<style>
       .gsc-table{width:100%;border-collapse:collapse;font-size:12px}
       .gsc-table th{padding:7px 10px;text-align:left;color:var(--text-muted);font-size:10px;letter-spacing:.8px;text-transform:uppercase;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace}
       .gsc-table td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text-dim)}
@@ -1161,56 +1499,70 @@ function renderGSC(from, to){
       .gsc-bar-cell{display:flex;align-items:center;gap:7px}
       .gsc-bar{height:6px;border-radius:3px;background:var(--accent);transition:width .5s}
       .pos-badge{font-size:10px;padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-weight:500}
-    </style>`;
-    const maxQClicks = Math.max(...GSC_QUERIES.map(q=>q.clicks))||1;
-    document.getElementById('gscQueryTable').innerHTML = queryStyle + `
-      <table class="gsc-table">
-        <thead><tr><th>#</th><th>검색어</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead>
-        <tbody>${GSC_QUERIES.map((q,i)=>`
-          <tr>
-            <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
-            <td style="font-weight:500;color:var(--text);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.query}</td>
-            <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(q.clicks/maxQClicks*80).toFixed(0)}px"></div><span style="font-family:'DM Mono',monospace;color:var(--accent)">${q.clicks}</span></div></td>
-            <td style="font-family:'DM Mono',monospace">${q.impr}</td>
-            <td style="font-family:'DM Mono',monospace;color:${q.ctr>0.2?'var(--accent3)':'var(--text-dim)'}">${(q.ctr*100).toFixed(1)}%</td>
-            <td><span class="pos-badge" style="background:${q.pos<3?'#ECFDF5':q.pos<6?'#EFF4FF':'#FFFBEB'};color:${q.pos<3?'var(--accent3)':q.pos<6?'var(--accent)':'var(--warn)'};border:1px solid ${q.pos<3?'#A7F3D0':q.pos<6?'#C0CDFD':'#FDE68A'}">${q.pos}</span></td>
-          </tr>`).join('')}
-        </tbody>
-      </table>`;
-    const maxPClicks = Math.max(...GSC_PAGES.map(p=>p.clicks))||1;
-    document.getElementById('gscPageTable').innerHTML = `
-      <table class="gsc-table">
-        <thead><tr><th>#</th><th>페이지</th><th>클릭</th><th>CTR</th><th>순위</th></tr></thead>
-        <tbody>${GSC_PAGES.map((p,i)=>`
-          <tr>
-            <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
-            <td style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent)">${p.page}</td>
-            <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(p.clicks/maxPClicks*70).toFixed(0)}px"></div><span style="font-family:'DM Mono',monospace;color:var(--accent)">${p.clicks}</span></div></td>
-            <td style="font-family:'DM Mono',monospace;color:${p.ctr>0.3?'var(--accent3)':'var(--text-dim)'}">${(p.ctr*100).toFixed(1)}%</td>
-            <td><span class="pos-badge" style="background:#EFF4FF;color:var(--accent);border:1px solid #C0CDFD">${p.pos}</span></td>
-          </tr>`).join('')}
-        </tbody>
-      </table>`;
+    </style>`);
   }
+
+  const maxQC=Math.max(...GSC_QUERIES.map(q=>q.clicks),1);
+  document.getElementById('gscQueryTable').innerHTML=`
+    <table class="gsc-table">
+      <thead><tr><th>#</th><th>검색어</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead>
+      <tbody>${GSC_QUERIES.map((q,i)=>`
+        <tr>
+          <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
+          <td style="font-weight:500;color:var(--text)">${q.query}</td>
+          <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(q.clicks/maxQC*80).toFixed(0)}px"></div>
+              <span style="font-family:'DM Mono',monospace;color:var(--accent);font-weight:600">${q.clicks}</span></div></td>
+          <td style="font-family:'DM Mono',monospace">${q.impr}</td>
+          <td style="font-family:'DM Mono',monospace;color:${q.ctr>0.2?'var(--accent3)':'var(--text-dim)'}">
+            <strong>${(q.ctr*100).toFixed(1)}%</strong></td>
+          <td><span class="pos-badge" style="background:${q.pos<3?'#ECFDF5':q.pos<6?'#EFF4FF':'#FFFBEB'};color:${q.pos<3?'var(--accent3)':q.pos<6?'var(--accent)':'var(--warn)'};border:1px solid ${q.pos<3?'#A7F3D0':q.pos<6?'#C0CDFD':'#FDE68A'}">${q.pos}</span></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+  const maxPC=Math.max(...GSC_PAGES.map(p=>p.clicks),1);
+  document.getElementById('gscPageTable').innerHTML=`
+    <table class="gsc-table">
+      <thead><tr><th>#</th><th>페이지</th><th>클릭</th><th>CTR</th><th>순위</th></tr></thead>
+      <tbody>${GSC_PAGES.map((p,i)=>`
+        <tr>
+          <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
+          <td style="font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent)" title="${p.page}">
+            ${p.page.replace('https://myhubon.com','')}</td>
+          <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(p.clicks/maxPC*70).toFixed(0)}px"></div>
+              <span style="font-family:'DM Mono',monospace;color:var(--accent);font-weight:600">${p.clicks}</span></div></td>
+          <td style="font-family:'DM Mono',monospace;color:${p.ctr>0.3?'var(--accent3)':'var(--text-dim)'}">
+            <strong>${(p.ctr*100).toFixed(1)}%</strong></td>
+          <td><span class="pos-badge" style="background:#EFF4FF;color:var(--accent);border:1px solid #C0CDFD">${p.pos}</span></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
 
   gscRendered = true;
 
-  // SEO Insights — recalculate from filtered data
-  const half = Math.floor(filtered.length/2);
-  const recentClicks = filtered.slice(half).reduce((a,d)=>a+d.clicks,0);
-  const prevClicks   = filtered.slice(0,half).reduce((a,d)=>a+d.clicks,0);
-  const clickGrowth  = prevClicks>0?((recentClicks-prevClicks)/prevClicks*100):0;
-  const allDevClicks = GSC_DEVICES.reduce((a,d)=>a+d.clicks,0)||1;
-  const topQuery = GSC_QUERIES[0];
-  const krPct = (GSC_COUNTRIES[0].clicks/GSC_COUNTRIES.reduce((a,c)=>a+c.clicks,0)*100).toFixed(1);
-  const insights = [
-    {icon:'📈',text:`선택 기간 총 클릭수 <strong>${totalClicks.toLocaleString()}회</strong>. 전반 대비 후반 <strong style="color:${clickGrowth>=0?'var(--accent3)':'var(--danger)'}">${clickGrowth>=0?'+':''}${clickGrowth.toFixed(1)}%</strong> 변화했습니다.`},
-    {icon:'🎯',text:`선택 기간 평균 CTR <strong>${avgCtr.toFixed(1)}%</strong>, 평균 게재순위 <strong>${avgPos.toFixed(1)}위</strong>.`},
-    {icon:'🌏',text:`전체 트래픽의 <strong>${krPct}%</strong>는 한국에서 발생합니다. 미국·인도·일본 등 해외 유입도 점진적으로 증가 중입니다.`},
-    {icon:'💻',text:`기기 중 <strong>데스크톱</strong>이 전체 클릭의 <strong>${(GSC_DEVICES[0].clicks/allDevClicks*100).toFixed(1)}%</strong>를 차지합니다. 모바일 최적화로 추가 유입을 노릴 수 있습니다.`},
-    {icon:'🔑',text:`최다 클릭 검색어는 <strong>'${topQuery.query}'</strong> (클릭 ${topQuery.clicks}회, 평균 ${topQuery.pos}위). 브랜드 검색이 상위를 차지합니다.`},
+  // ── 인사이트 (선택 기간 기반 동적 계산) ──
+  const half=Math.floor(filtered.length/2);
+  const recentC=filtered.slice(half).reduce((a,d)=>a+d.clicks,0);
+  const prevC=filtered.slice(0,half).reduce((a,d)=>a+d.clicks,0);
+  const growth=prevC>0?((recentC-prevC)/prevC*100):0;
+  const topDow=dow[dowCounts.indexOf(Math.max(...dowCounts))];
+  const bottomDow=dow[dowCounts.indexOf(Math.min(...dowCounts))];
+  const highCtrPage=GSC_PAGES.reduce((a,b)=>b.ctr>a.ctr?b:a);
+  const opportunityQ=GSC_QUERIES.filter(q=>q.impr>10&&q.ctr<0.05);
+  const allDevC=GSC_DEVICES.reduce((a,d)=>a+d.clicks,0)||1;
+  const mobileShare=(GSC_DEVICES.find(d=>d.device.includes('모바일')||d.device==='MOBILE')?.clicks||0)/allDevC*100;
+
+  const insights=[
+    {icon:'📈',text:`선택 기간 총 클릭 <strong>${totalClicks}회</strong> · 노출 <strong>${totalImpr}회</strong>. 전반 대비 후반 클릭 <strong style="color:${growth>=0?'var(--accent3)':'var(--danger)'}">${growth>=0?'+':''}${growth.toFixed(1)}%</strong>.`},
+    {icon:'📅',text:`<strong>${topDow}요일</strong>에 클릭이 가장 많고, <strong>${bottomDow}요일</strong>이 가장 적습니다. ${topDow}요일 맞춤 콘텐츠 발행을 권장합니다.`},
+    {icon:'🎯',text:`평균 CTR <strong>${avgCtr.toFixed(1)}%</strong> · 평균 게재순위 <strong>${avgPos.toFixed(1)}위</strong>. 1~3위 키워드 집중 최적화가 필요합니다.`},
+    {icon:'🌟',text:`CTR 최고 페이지: <strong>${highCtrPage.page.replace('https://myhubon.com','')}</strong> (${(highCtrPage.ctr*100).toFixed(1)}%). 이 페이지의 제목·설명 구조를 타 페이지에 적용하세요.`},
+    opportunityQ.length>0
+      ? {icon:'💡',text:`<strong>CTR 기회 키워드</strong> ${opportunityQ.length}개 발견: ${opportunityQ.map(q=>'"'+q.query+'"').join(', ')}. 노출은 있으나 클릭율이 낮아 메타 설명 개선 여지가 있습니다.`}
+      : {icon:'✅',text:`검색어 CTR이 전반적으로 양호합니다. 브랜드 검색 위주의 안정적인 유입 패턴입니다.`},
+    {icon:'📱',text:`모바일 클릭 비중 <strong>${mobileShare.toFixed(1)}%</strong>. 데스크톱 중심 트래픽이므로 B2B/전문가 타겟 마케팅이 효과적입니다.`},
   ];
-  document.getElementById('gscInsights').innerHTML =
+  document.getElementById('gscInsights').innerHTML=
     insights.map(i=>`<div class="insight-item"><div class="insight-icon">${i.icon}</div><div class="insight-text">${i.text}</div></div>`).join('');
 }
 
