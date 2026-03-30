@@ -279,6 +279,14 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
 
   <!-- Overview -->
   <div id="tab-overview" class="tab-content">
+
+    <!-- ── 상품 현황 요약 KPI (엑셀 데이터 로드 시 표시) ── -->
+    <div id="productSummaryPanel" style="display:none;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.8px;text-transform:uppercase;
+                  font-family:'DM Mono',monospace;margin-bottom:10px" id="productSummaryTitle">상품 현황 요약</div>
+      <div id="productSummaryKPI" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px"></div>
+    </div>
+
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title"><span class="dot" style="background:var(--accent)"></span> 일별 업로드 추이</div>
@@ -338,9 +346,9 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
       </div>
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title"><span class="dot" style="background:var(--warn)"></span> 브랜드별 상품수 Top 15</div>
+          <div class="panel-title"><span class="dot" style="background:var(--warn)"></span> 브랜드별 상품수 Top 15 <span style="font-size:10px;color:var(--text-muted);font-weight:400;margin-left:6px">막대 위: 건수 / 비율</span></div>
         </div>
-        <div class="chart-wrap chart-h260"><canvas id="brandChart"></canvas></div>
+        <div class="chart-wrap" style="height:320px"><canvas id="brandChart"></canvas></div>
       </div>
     </div>
   </div>
@@ -734,6 +742,44 @@ function processWb(wb, filename, source){
   TOTAL_ROWS=rows.length;
   window._COND_COL=condCol; window._CAT_COL=catCol; window._BRAND_COL=brandCol;
 
+  // ── 상품 현황 KPI 집계 ──
+  const statusCol = Object.keys(s).find(k=>/status/i.test(k));
+  const priceCol  = Object.keys(s).find(k=>/^price$/i.test(k.trim()) || /sale.*price/i.test(k) || /^price/i.test(k.trim()));
+  const stockCol  = Object.keys(s).find(k=>/stock|quantity|qty/i.test(k));
+
+  const total = rows.length;
+  // Sold Out: condition에 'sold' 포함 OR status에 'sold'/'inactive' 포함
+  const soldOut = rows.filter(r=>{
+    const c=(r[condCol]||'').toString().toLowerCase();
+    const st=(r[statusCol]||'').toString().toLowerCase();
+    return c.includes('sold') || st.includes('sold') || st.includes('inactive') || st.includes('out');
+  }).length;
+  // 활성 상품: Not sold out
+  const active = total - soldOut;
+  // 가격 미공개: price 컬럼이 없거나 0이거나 비어있는 것
+  const noPriceCount = priceCol
+    ? rows.filter(r=>{ const v=r[priceCol]; return !v||v===0||v===''||v==='0'; }).length
+    : 0;
+  const noPricePct = total>0?(noPriceCount/total*100).toFixed(1):0;
+  // 재고 합산
+  const totalStock = stockCol
+    ? rows.reduce((sum,r)=>{ const v=parseFloat(r[stockCol])||0; return sum+v; },0)
+    : null;
+  // 중위 판매가
+  let medianPrice = null;
+  if(priceCol){
+    const prices=rows.map(r=>parseFloat(r[priceCol])).filter(v=>v>0).sort((a,b)=>a-b);
+    if(prices.length){
+      const mid=Math.floor(prices.length/2);
+      medianPrice = prices.length%2===0?(prices[mid-1]+prices[mid])/2:prices[mid];
+    }
+  }
+  // Parts / Equip breakdown from category
+  const partsCount = catCol ? rows.filter(r=>/parts|part/i.test((r[catCol]||'').toString())).length : null;
+  const equipCount = catCol ? rows.filter(r=>/equip|equipment/i.test((r[catCol]||'').toString())).length : null;
+
+  buildProductSummaryKPI({total,active,soldOut,noPriceCount,noPricePct,totalStock,medianPrice,partsCount,equipCount,priceCol,stockCol});
+
   // UI updates
   const now=new Date();
   document.getElementById('fileInfo').textContent=`📄 ${filename}  (${rows.length.toLocaleString()}행)`;
@@ -997,6 +1043,65 @@ function buildBnInsights(dowCounts,dowNames,avgBiz){
     items.map(i=>`<div class="insight-item"><div class="insight-icon">${i.icon}</div><div class="insight-text">${i.text}</div></div>`).join('');
 }
 
+function buildProductSummaryKPI({total,active,soldOut,noPriceCount,noPricePct,totalStock,medianPrice,partsCount,equipCount,priceCol,stockCol}){
+  const panel = document.getElementById('productSummaryPanel');
+  const grid  = document.getElementById('productSummaryKPI');
+  const title = document.getElementById('productSummaryTitle');
+  if(!panel||!grid) return;
+
+  const activePct = total>0?(active/total*100).toFixed(1):0;
+  const soldPct   = total>0?(soldOut/total*100).toFixed(1):0;
+
+  const subParts = (partsCount!==null&&equipCount!==null)
+    ? `Parts ${partsCount.toLocaleString()} · Equip ${equipCount.toLocaleString()}`
+    : `활성 ${activePct}%`;
+
+  const onSaleNote = `On Sale+In Stock+노출 ${activePct}%`;
+
+  const cards = [
+    { color:'blue',  icon:'📦', label:'전체 상품',    val: total.toLocaleString(),
+      sub: subParts },
+    { color:'green', icon:'✅', label:'활성 상품',    val: active.toLocaleString(),
+      sub: onSaleNote },
+    { color:'amber', icon:'🚫', label:'Sold Out',     val: soldOut.toLocaleString(),
+      sub: `전체의 ${soldPct}%` },
+    { color:'red',   icon:'🔒', label:'가격 미공개',  val: noPricePct+'%',
+      sub: priceCol ? `${noPriceCount.toLocaleString()}개 · AMAT 미설정` : '가격 컬럼 없음' },
+  ];
+
+  if(totalStock!==null){
+    cards.push({ color:'teal', icon:'📊', label:'총 재고 수량', val: totalStock.toLocaleString(),
+      sub: `평균 ${total>0?(totalStock/total).toFixed(1):0}개/상품` });
+  }
+  if(medianPrice!==null){
+    cards.push({ color:'purple', icon:'💵', label:'중위 판매가', val: '$'+Math.round(medianPrice).toLocaleString(),
+      sub: `가격공개 ${(total-noPriceCount).toLocaleString()}개 기준` });
+  }
+
+  const colorMap={
+    blue:'var(--accent)',green:'var(--accent3)',amber:'var(--warn)',
+    red:'var(--danger)',teal:'#0891B2',purple:'var(--accent2)'
+  };
+  const bgMap={
+    blue:'#EFF4FF',green:'#ECFDF5',amber:'#FFFBEB',
+    red:'#FEF2F2',teal:'#E0F2FE',purple:'#F5F3FF'
+  };
+
+  grid.innerHTML = cards.map(c=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;
+                position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${colorMap[c.color]}"></div>
+      <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;
+                  font-weight:700;margin-bottom:8px;font-family:'DM Mono',monospace">${c.label}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:24px;font-weight:500;
+                  color:${colorMap[c.color]};line-height:1">${c.val}</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:5px">${c.sub}</div>
+    </div>`).join('');
+
+  title.textContent = `상품 현황 요약 (총 ${total.toLocaleString()}개)`;
+  panel.style.display = 'block';
+}
+
 function buildProductAttrCharts(){
   const condCol  = window._COND_COL;
   const catCol   = window._CAT_COL;
@@ -1098,6 +1203,7 @@ function buildProductAttrCharts(){
   if(brandCol && brand.keys.length){
     const ctx=document.getElementById('brandChart').getContext('2d');
     const colors=brand.keys.map((_,i)=>PALETTE[i%PALETTE.length]);
+    const total=rows.length||1;
     charts['brandChart']=new Chart(ctx,{
       type:'bar',
       data:{labels:brand.keys,datasets:[{label:'상품수',data:brand.vals,
@@ -1105,22 +1211,30 @@ function buildProductAttrCharts(){
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},
           tooltip:{backgroundColor:'#fff',borderColor:'#E2E0D8',borderWidth:1,titleColor:'#18181A',bodyColor:'#5C5C60',padding:10,
-            callbacks:{label:i=>` ${i.raw.toLocaleString()}개`}}},
+            callbacks:{label:i=>` ${i.raw.toLocaleString()}개 (${(i.raw/total*100).toFixed(1)}%)`}}},
         scales:{
           x:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:11,family:"'Pretendard',sans-serif"},maxRotation:35}},
-          y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}
+          y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true,
+            suggestedMax: brand.vals.length ? Math.ceil(Math.max(...brand.vals)*1.22) : undefined}
         }
       },
       plugins:[{
         id:'brandDL',
         afterDatasetsDraw(ch){
           const ctx=ch.ctx, meta=ch.getDatasetMeta(0);
-          ctx.save(); ctx.font="500 10px 'DM Mono',monospace";
-          ctx.textAlign='center'; ctx.textBaseline='bottom';
+          ctx.save();
           meta.data.forEach((bar,i)=>{
             const v=brand.vals[i];
+            const pct=(v/total*100).toFixed(1);
+            // 건수
+            ctx.font="600 10px 'DM Mono',monospace";
             ctx.fillStyle=colors[i]||'#2563EB';
-            ctx.fillText(v.toLocaleString(), bar.x, bar.y-4);
+            ctx.textAlign='center'; ctx.textBaseline='bottom';
+            ctx.fillText(v.toLocaleString(), bar.x, bar.y-3);
+            // 비율 (건수 아래 작게)
+            ctx.font="400 9px 'DM Mono',monospace";
+            ctx.fillStyle='#9494A0';
+            ctx.fillText(pct+'%', bar.x, bar.y-3+12);
           });
           ctx.restore();
         }
@@ -1395,7 +1509,23 @@ function renderGSC(from, to){
         y1:{grid:{display:false},ticks:{color:'#2563EB',font:{size:11}},beginAtZero:true,position:'right'}
       }
     },
-    plugins:[makeLabelPlugin('#059669',clicks,90)]
+    plugins:[{
+      id:'dualDL',
+      afterDatasetsDraw(ch){
+        if(clicks.length > 90) return;
+        const ctx=ch.ctx; ctx.save();
+        ctx.font="500 10px 'DM Mono',monospace"; ctx.textAlign='center'; ctx.textBaseline='bottom';
+        // 클릭수 레이블 (dataset index 1)
+        const metaC=ch.getDatasetMeta(1);
+        ctx.fillStyle='#059669';
+        metaC.data.forEach((pt,i)=>{ const v=clicks[i]; if(!v) return; ctx.fillText(v, pt.x, pt.y-5); });
+        // 노출수 레이블 (dataset index 0) — 우측 y1축 위에 표시
+        const metaI=ch.getDatasetMeta(0);
+        ctx.fillStyle='#2563EB';
+        metaI.data.forEach((pt,i)=>{ const v=imprs[i]; if(!v) return; ctx.fillText(v, pt.x, pt.y-5); });
+        ctx.restore();
+      }
+    }]
   });
 
   // ── 2. CTR 추이 ──
@@ -1425,14 +1555,30 @@ function renderGSC(from, to){
   charts['gscPosChart']=new Chart(ctx3,{
     type:'line',
     data:{labels,datasets:[{label:'게재순위',data:poses,borderColor:'#7C3AED',borderWidth:2,
-      pointRadius:poses.length>60?0:3,pointHoverRadius:5,tension:0.3,fill:true,backgroundColor:g3,spanGaps:true}]},
+      pointRadius:poses.length>60?0:4,pointBackgroundColor:'#7C3AED',
+      pointHoverRadius:6,tension:0.3,fill:true,backgroundColor:g3,spanGaps:true}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{...topts,callbacks:{label:i=>` 순위: ${i.raw}`}},zoom:zoomOpts()},
+      plugins:{legend:{display:false},tooltip:{...topts,callbacks:{label:i=>` 순위: ${i.raw}위`}},zoom:zoomOpts()},
       scales:{
         x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:10},maxTicksLimit:15}},
-        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:false}
+        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11},callback:v=>v+'위'},beginAtZero:false,
+          reverse:false}
       }
-    }
+    },
+    plugins:[{
+      id:'posDL',
+      afterDatasetsDraw(ch){
+        if(poses.length > 90) return;
+        const ctx=ch.ctx, meta=ch.getDatasetMeta(0);
+        ctx.save(); ctx.font="500 10px 'DM Mono',monospace";
+        ctx.fillStyle='#7C3AED'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+        meta.data.forEach((pt,i)=>{
+          const v=poses[i]; if(!v&&v!==0) return;
+          ctx.fillText(v+'위', pt.x, pt.y-7);
+        });
+        ctx.restore();
+      }
+    }]
   });
 
   // ── 4. 국가별 클릭+노출 (날짜 필터 연동 — 전체 데이터 기준) ──
