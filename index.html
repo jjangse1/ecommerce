@@ -1333,7 +1333,16 @@ const GSC_CHART = [
 ];
 window._GSC_CHART = GSC_CHART;
 
-// ── gsc-data.json 자동 fetch (GitHub Pages에서 자동 업데이트)
+// ── 초기값: 하드코딩 fallback (gsc-data.json 로드 전까지 사용) ──
+window._GSC_QUERIES   = [];
+window._GSC_COUNTRIES = [];
+window._GSC_DEVICES   = [];
+window._GSC_PAGES     = [];
+
+// ════════════════════════════════════════════════════════════
+// gsc-data.json 자동 fetch — daily + queries + countries + devices + pages
+// fetch_gsc.py 가 매일 GitHub Actions 로 이 파일을 갱신합니다.
+// ════════════════════════════════════════════════════════════
 (async function fetchGscJson(){
   const candidates = ['gsc-data.json', 'scripts/gsc-data.json', '../gsc-data.json'];
   for(const path of candidates){
@@ -1341,75 +1350,70 @@ window._GSC_CHART = GSC_CHART;
       const res = await fetch(path);
       if(!res.ok) continue;
       const json = await res.json();
-      if(json && json.daily && json.daily.length){
-        window._GSC_CHART = json.daily.map(d=>({
-          date: d.date, clicks: d.clicks, impr: d.impr, ctr: d.ctr, pos: d.pos
+      if(!json || !json.daily || !json.daily.length) continue;
+
+      // ── daily ──
+      window._GSC_CHART = json.daily.map(d=>({
+        date:d.date, clicks:d.clicks, impr:d.impr, ctr:d.ctr, pos:d.pos
+      }));
+      window._GSC_CHART.sort((a,b)=>a.date.localeCompare(b.date));
+
+      // ── queries ──
+      if(json.queries && json.queries.length){
+        window._GSC_QUERIES = json.queries.map(q=>({
+          query:q.query, clicks:q.clicks, impr:q.impr, ctr:q.ctr, pos:q.pos
         }));
-        // 날짜순 정렬 보장
-        window._GSC_CHART.sort((a,b)=>a.date.localeCompare(b.date));
-        // GSC 탭이 열려있으면 다시 렌더
-        const activeTab = document.querySelector('.tab.active');
-        if(activeTab && activeTab.dataset.tab==='gsc'){
-          const from=document.getElementById('dateFrom').value;
-          const to=document.getElementById('dateTo').value;
-          renderGSC(from,to);
-        }
-        const badge = document.getElementById('gscDataBadge');
-        if(badge){ badge.textContent = `🔄 자동갱신 · ${json.updated||'최신'}`; badge.style.display='inline-flex'; }
-        const note = document.getElementById('gscDataFallbackNote');
-        if(note) note.textContent = `✅ gsc-data.json 로드됨 (${json.daily.length}일치)`;
-        return;
       }
-    } catch(e){ /* try next */ }
+
+      // ── countries ──
+      if(json.countries && json.countries.length){
+        window._GSC_COUNTRIES = json.countries.map(c=>({
+          country:c.country, clicks:c.clicks, impr:c.impr, ctr:c.ctr, pos:c.pos
+        }));
+      }
+
+      // ── devices ──
+      if(json.devices && json.devices.length){
+        window._GSC_DEVICES = json.devices.map(d=>({
+          device:d.device, clicks:d.clicks, impr:d.impr, ctr:d.ctr, pos:d.pos
+        }));
+      }
+
+      // ── pages ──
+      if(json.pages && json.pages.length){
+        window._GSC_PAGES = json.pages.map(p=>({
+          page:p.page, clicks:p.clicks, impr:p.impr||0, ctr:p.ctr, pos:p.pos
+        }));
+      }
+
+      // ── 배지 & 노트 업데이트 ──
+      const period = json.period
+        ? `${json.period.start} ~ ${json.period.end}`
+        : `${json.daily[0]?.date} ~ ${json.daily[json.daily.length-1]?.date}`;
+      const badge = document.getElementById('gscDataBadge');
+      if(badge){
+        badge.textContent = `🔄 자동갱신 · ${json.updated||'최신'}`;
+        badge.style.display='inline-flex';
+      }
+      const note = document.getElementById('gscDataFallbackNote');
+      if(note) note.textContent =
+        `✅ gsc-data.json 로드됨 · ${json.daily.length}일 · ${period}`;
+
+      // ── GSC 탭이 열려있으면 즉시 재렌더 ──
+      const activeTab = document.querySelector('.tab.active');
+      if(activeTab && activeTab.dataset.tab==='gsc'){
+        const from=document.getElementById('dateFrom').value;
+        const to=document.getElementById('dateTo').value;
+        renderGSC(from,to);
+      }
+      return; // 성공 → 루프 종료
+
+    } catch(e){ /* 다음 경로 시도 */ }
   }
+  // 모든 경로 실패
   const note = document.getElementById('gscDataFallbackNote');
-  if(note) note.textContent = '⚠ gsc-data.json 미발견 — 하드코딩 데이터 사용 중';
+  if(note) note.textContent = '⚠ gsc-data.json 미발견 — 데이터 없음 (fetch_gsc.py 실행 확인)';
 })();
-
-const GSC_QUERIES = [
-  {query:'myhubon',clicks:35,impr:128,ctr:0.2734,pos:1.84},
-  {query:'0920-01116',clicks:14,impr:50,ctr:0.28,pos:4.66},
-  {query:'0200-00289',clicks:1,impr:35,ctr:0.0286,pos:7.03},
-  {query:'0190-13707',clicks:1,impr:20,ctr:0.05,pos:8.35},
-  {query:'3690-03269',clicks:1,impr:14,ctr:0.0714,pos:8.86},
-  {query:'0010-30686',clicks:1,impr:10,ctr:0.1,pos:8.5},
-  {query:'0200-89032',clicks:1,impr:7,ctr:0.1429,pos:3.86},
-  {query:'0020-23041',clicks:1,impr:6,ctr:0.1667,pos:6.33},
-  {query:'0010-36408',clicks:1,impr:2,ctr:0.5,pos:4.5},
-  {query:'0040-20703',clicks:0,impr:26,ctr:0.0,pos:5.65},
-];
-window._GSC_QUERIES = GSC_QUERIES;
-
-const GSC_COUNTRIES = [
-  {country:'한국',clicks:328,impr:2236,ctr:0.1467,pos:5.06},
-  {country:'미국',clicks:50,impr:857,ctr:0.0583,pos:9.39},
-  {country:'인도',clicks:41,impr:237,ctr:0.173,pos:6.27},
-  {country:'일본',clicks:38,impr:239,ctr:0.159,pos:5.36},
-  {country:'대만',clicks:19,impr:512,ctr:0.0371,pos:6.18},
-  {country:'중국',clicks:18,impr:191,ctr:0.0942,pos:4.81},
-  {country:'싱가포르',clicks:12,impr:194,ctr:0.0619,pos:5.02},
-  {country:'말레이시아',clicks:8,impr:102,ctr:0.0784,pos:5.43},
-];
-window._GSC_COUNTRIES = GSC_COUNTRIES;
-
-const GSC_DEVICES = [
-  {device:'데스크톱',clicks:474,impr:4510,ctr:0.1051,pos:6.16},
-  {device:'모바일',clicks:63,impr:830,ctr:0.0759,pos:7.5},
-  {device:'태블릿',clicks:1,impr:42,ctr:0.0238,pos:7.43},
-];
-window._GSC_DEVICES = GSC_DEVICES;
-
-const GSC_PAGES = [
-  {page:'https://myhubon.com/',clicks:42,impr:332,ctr:0.1265,pos:2.59},
-  {page:'/products/detail/34684e81',clicks:31,impr:67,ctr:0.4627,pos:3.48},
-  {page:'/signin',clicks:12,impr:144,ctr:0.0833,pos:6.12},
-  {page:'/products/detail/34677f22',clicks:11,impr:37,ctr:0.2973,pos:3.95},
-  {page:'/help',clicks:8,impr:136,ctr:0.0588,pos:2.93},
-  {page:'/products/detail/34689992',clicks:8,impr:15,ctr:0.5333,pos:2.87},
-  {page:'/products/detail/ebc23454',clicks:7,impr:29,ctr:0.2414,pos:3.79},
-  {page:'/community/news',clicks:6,impr:45,ctr:0.1333,pos:1.93},
-];
-window._GSC_PAGES = GSC_PAGES;
 
 let gscRendered = false;
 
@@ -1455,11 +1459,16 @@ function movingAvg(arr, n=7){
 }
 
 function renderGSC(from, to){
-  const GSC_CHART   = window._GSC_CHART;
-  const GSC_QUERIES = window._GSC_QUERIES;
-  const GSC_COUNTRIES = window._GSC_COUNTRIES;
-  const GSC_DEVICES = window._GSC_DEVICES;
-  const GSC_PAGES   = window._GSC_PAGES;
+  const GSC_CHART     = window._GSC_CHART   || [];
+  const GSC_QUERIES   = window._GSC_QUERIES  || [];
+  const GSC_COUNTRIES = window._GSC_COUNTRIES|| [];
+  const GSC_DEVICES   = window._GSC_DEVICES  || [];
+  const GSC_PAGES     = window._GSC_PAGES    || [];
+
+  if(!GSC_CHART.length){
+    // 아직 JSON 미로드 상태 — 렌더 스킵 (fetch 완료 후 재호출됨)
+    return;
+  }
 
   const f = from || GSC_CHART[0].date;
   const t = to   || GSC_CHART[GSC_CHART.length-1].date;
@@ -1904,29 +1913,29 @@ function renderGSC(from, to){
       </tbody>
     </table>`;
 
-  gscRendered = true;
-
-  // ── 인사이트 (선택 기간 기반 동적 계산) ──
+  // ── 인사이트 (선택 기간 기반 동적 계산 — 모두 실시간 데이터) ──
   const half=Math.floor(filtered.length/2);
   const recentC=filtered.slice(half).reduce((a,d)=>a+d.clicks,0);
   const prevC=filtered.slice(0,half).reduce((a,d)=>a+d.clicks,0);
   const growth=prevC>0?((recentC-prevC)/prevC*100):0;
   const topDow=dow[dowCounts.indexOf(Math.max(...dowCounts))];
   const bottomDow=dow[dowCounts.indexOf(Math.min(...dowCounts))];
-  const highCtrPage=GSC_PAGES.reduce((a,b)=>b.ctr>a.ctr?b:a);
+  const highCtrPage=GSC_PAGES.length ? GSC_PAGES.reduce((a,b)=>b.ctr>a.ctr?b:a) : null;
   const opportunityQ=GSC_QUERIES.filter(q=>q.impr>10&&q.ctr<0.05);
   const allDevC=GSC_DEVICES.reduce((a,d)=>a+d.clicks,0)||1;
   const mobileShare=(GSC_DEVICES.find(d=>d.device.includes('모바일')||d.device==='MOBILE')?.clicks||0)/allDevC*100;
 
   const insights=[
-    {icon:'📈',text:`선택 기간 총 클릭 <strong>${totalClicks}회</strong> · 노출 <strong>${totalImpr}회</strong>. 전반 대비 후반 클릭 <strong style="color:${growth>=0?'var(--accent3)':'var(--danger)'}">${growth>=0?'+':''}${growth.toFixed(1)}%</strong>.`},
+    {icon:'📈',text:`선택 기간 총 클릭 <strong>${totalClicks.toLocaleString()}회</strong> · 노출 <strong>${totalImpr.toLocaleString()}회</strong>. 전반 대비 후반 클릭 <strong style="color:${growth>=0?'var(--accent3)':'var(--danger)'}">${growth>=0?'+':''}${growth.toFixed(1)}%</strong>.`},
     {icon:'📅',text:`<strong>${topDow}요일</strong>에 클릭이 가장 많고, <strong>${bottomDow}요일</strong>이 가장 적습니다. ${topDow}요일 맞춤 콘텐츠 발행을 권장합니다.`},
     {icon:'🎯',text:`평균 CTR <strong>${avgCtr.toFixed(1)}%</strong> · 평균 게재순위 <strong>${avgPos.toFixed(1)}위</strong>. 1~3위 키워드 집중 최적화가 필요합니다.`},
-    {icon:'🌟',text:`CTR 최고 페이지: <strong>${highCtrPage.page.replace('https://myhubon.com','')}</strong> (${(highCtrPage.ctr*100).toFixed(1)}%). 이 페이지의 제목·설명 구조를 타 페이지에 적용하세요.`},
+    highCtrPage
+      ? {icon:'🌟',text:`CTR 최고 페이지: <strong>${highCtrPage.page.replace('https://myhubon.com','')}</strong> (${(highCtrPage.ctr*100).toFixed(1)}%). 이 페이지의 제목·설명 구조를 타 페이지에 적용하세요.`}
+      : {icon:'🌟',text:`페이지 데이터가 로드되면 CTR 최고 페이지 분석이 표시됩니다.`},
     opportunityQ.length>0
       ? {icon:'💡',text:`<strong>CTR 기회 키워드</strong> ${opportunityQ.length}개 발견: ${opportunityQ.map(q=>'"'+q.query+'"').join(', ')}. 노출은 있으나 클릭율이 낮아 메타 설명 개선 여지가 있습니다.`}
-      : {icon:'✅',text:`검색어 CTR이 전반적으로 양호합니다. 브랜드 검색 위주의 안정적인 유입 패턴입니다.`},
-    {icon:'📱',text:`모바일 클릭 비중 <strong>${mobileShare.toFixed(1)}%</strong>. 데스크톱 중심 트래픽이므로 B2B/전문가 타겟 마케팅이 효과적입니다.`},
+      : {icon:'✅',text:GSC_QUERIES.length ? `검색어 CTR이 전반적으로 양호합니다. 브랜드 검색 위주의 안정적인 유입 패턴입니다.` : `검색어 데이터 로딩 중...`},
+    {icon:'📱',text:`모바일 클릭 비중 <strong>${mobileShare.toFixed(1)}%</strong>. ${mobileShare<30?'데스크톱 중심 트래픽이므로 B2B/전문가 타겟 마케팅이 효과적입니다.':'모바일 유입이 활발합니다. 모바일 UX 최적화를 권장합니다.'}`},
   ];
   document.getElementById('gscInsights').innerHTML=
     insights.map(i=>`<div class="insight-item"><div class="insight-icon">${i.icon}</div><div class="insight-text">${i.text}</div></div>`).join('');
