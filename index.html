@@ -318,9 +318,32 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
         <div class="chart-wrap chart-h220"><canvas id="monthlyOverviewChart"></canvas></div>
       </div>
     </div>
-  </div>
 
-  <!-- Daily Detail -->
+    <!-- ── 상품 속성 분석 (condition / category / brand) ── -->
+    <div id="productAttrSection" style="display:none">
+      <div class="section-divider"><span>상품 속성 분석</span></div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><span class="dot" style="background:var(--accent3)"></span> Condition (제품 상태)별 상품수</div>
+          </div>
+          <div class="chart-wrap chart-h220"><canvas id="conditionChart"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><span class="dot" style="background:var(--accent2)"></span> 카테고리별 상품수 Top 10</div>
+          </div>
+          <div class="chart-wrap chart-h220"><canvas id="categoryChart"></canvas></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="dot" style="background:var(--warn)"></span> 브랜드별 상품수 Top 15</div>
+        </div>
+        <div class="chart-wrap chart-h260"><canvas id="brandChart"></canvas></div>
+      </div>
+    </div>
+  </div>
   <div id="tab-daily" class="tab-content" style="display:none">
     <div class="panel">
       <div class="panel-header">
@@ -381,6 +404,12 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
 
   <!-- Google Search Console Tab -->
   <div id="tab-gsc" class="tab-content" style="display:none">
+
+    <!-- GSC 데이터 갱신 상태 -->
+    <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:10px;gap:8px">
+      <span id="gscDataBadge" style="display:none;font-size:10px;padding:3px 10px;border-radius:20px;background:#ECFDF5;border:1px solid #A7F3D0;color:#059669;font-family:'DM Mono',monospace;font-weight:500"></span>
+      <span id="gscDataFallbackNote" style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace">데이터: gsc-data.json 로딩 중...</span>
+    </div>
 
     <!-- GSC KPI -->
     <div class="kpi-grid" id="gscKpiGrid">
@@ -604,7 +633,7 @@ function makeDLPlugin(color,values,threshold){
       ctx.save();
       ctx.font="500 10px 'DM Mono',monospace";
       ctx.fillStyle=color; ctx.textAlign='center'; ctx.textBaseline='bottom';
-      meta.data.forEach((pt,i)=>{ const v=values[i]; if(!v) return; ctx.fillText(v,pt.x,pt.y-8); });
+      meta.data.forEach((pt,i)=>{ const v=values[i]; if(!v) return; ctx.fillText(v,pt.x,pt.y-5); });
       ctx.restore();
     }
   };
@@ -673,6 +702,8 @@ function handleFileObj(file){
 // ═══════════════════════════════════════════════════
 // Process workbook
 // ═══════════════════════════════════════════════════
+let ALL_ROWS_RAW = []; // 원본 행 (condition/category/brand 분석용)
+
 function processWb(wb, filename, source){
   const sheet=wb.Sheets[wb.SheetNames[0]];
   const rows=XLSX.utils.sheet_to_json(sheet,{defval:''});
@@ -680,6 +711,14 @@ function processWb(wb, filename, source){
   const col=Object.keys(s).find(k=>k.toLowerCase().replace(/\s/g,'_')==='created_at')
          ||Object.keys(s).find(k=>k.toLowerCase().includes('created'));
   if(!col){ alert('⚠️ created_at 컬럼을 찾을 수 없습니다.'); showError(); return; }
+
+  // ── condition, category, brand 컬럼 자동 탐지 ──
+  const condCol = Object.keys(s).find(k=>/^condition$/i.test(k.trim()))
+               || Object.keys(s).find(k=>/condition/i.test(k));
+  const catCol  = Object.keys(s).find(k=>/^categor/i.test(k.trim()))
+               || Object.keys(s).find(k=>/categ/i.test(k));
+  const brandCol= Object.keys(s).find(k=>/^brand$/i.test(k.trim()))
+               || Object.keys(s).find(k=>/brand/i.test(k));
 
   const dates=rows.map(r=>{
     let v=r[col]; if(!v) return null;
@@ -691,7 +730,9 @@ function processWb(wb, filename, source){
   if(!dates.length){ alert('유효한 날짜 데이터가 없습니다.'); showError(); return; }
 
   ALL_DATES=dates;
+  ALL_ROWS_RAW=rows;
   TOTAL_ROWS=rows.length;
+  window._COND_COL=condCol; window._CAT_COL=catCol; window._BRAND_COL=brandCol;
 
   // UI updates
   const now=new Date();
@@ -859,6 +900,7 @@ function renderDashboard(dates,bizDays,from,to){
     buildPatternInsights(wdCounts,wdNames,hourCounts,avgPerBizDay,maxDay,maxDayKey);
     buildBnInsights(wdCounts,wdNames,avgPerBizDay);
     buildHolidayTable(holidaysInRange);
+    buildProductAttrCharts();
   },60);
 }
 
@@ -955,6 +997,138 @@ function buildBnInsights(dowCounts,dowNames,avgBiz){
     items.map(i=>`<div class="insight-item"><div class="insight-icon">${i.icon}</div><div class="insight-text">${i.text}</div></div>`).join('');
 }
 
+function buildProductAttrCharts(){
+  const condCol  = window._COND_COL;
+  const catCol   = window._CAT_COL;
+  const brandCol = window._BRAND_COL;
+  const rows     = ALL_ROWS_RAW;
+  const section  = document.getElementById('productAttrSection');
+
+  if(!rows.length || (!condCol && !catCol && !brandCol)){
+    if(section) section.style.display='none';
+    return;
+  }
+  if(section) section.style.display='block';
+
+  // ── 집계 헬퍼 ──
+  function countCol(col, topN){
+    if(!col) return {keys:[],vals:[]};
+    const m={};
+    rows.forEach(r=>{ const v=(r[col]||'기타').toString().trim()||'기타'; m[v]=(m[v]||0)+1; });
+    const sorted=Object.entries(m).sort((a,b)=>b[1]-a[1]);
+    const top = topN ? sorted.slice(0,topN) : sorted;
+    return { keys: top.map(e=>e[0]), vals: top.map(e=>e[1]) };
+  }
+
+  const PALETTE=['#2563EB','#059669','#D97706','#7C3AED','#DC2626','#0891B2','#65A30D','#9333EA',
+                 '#F59E0B','#10B981','#EF4444','#6366F1','#14B8A6','#F97316','#8B5CF6'];
+
+  // ── Condition 차트 ──
+  const cond = countCol(condCol);
+  destroyChart('conditionChart');
+  if(condCol && cond.keys.length){
+    const ctx=document.getElementById('conditionChart').getContext('2d');
+    const colors=PALETTE.slice(0,cond.keys.length);
+    charts['conditionChart']=new Chart(ctx,{
+      type:'doughnut',
+      data:{labels:cond.keys,datasets:[{data:cond.vals,backgroundColor:colors.map(c=>c+'cc'),
+        borderColor:colors,borderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:true,position:'right',labels:{font:{size:12,family:"'Pretendard',sans-serif"},color:'#5C5C60',padding:10}},
+          tooltip:{backgroundColor:'#fff',borderColor:'#E2E0D8',borderWidth:1,titleColor:'#18181A',bodyColor:'#5C5C60',padding:10,
+            callbacks:{label:i=>`${i.label}: ${i.raw.toLocaleString()}개 (${(i.raw/rows.length*100).toFixed(1)}%)`}},
+          // 숫자 레이블 플러그인
+          datalabels: false
+        }
+      },
+      plugins:[{
+        id:'condDL',
+        afterDatasetsDraw(ch){
+          const ctx=ch.ctx; ctx.save();
+          ch.getDatasetMeta(0).data.forEach((arc,i)=>{
+            const v=cond.vals[i]; if(!v) return;
+            const pct=(v/rows.length*100).toFixed(1);
+            const {x,y}=arc.tooltipPosition();
+            ctx.font="600 11px 'DM Mono',monospace";
+            ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+            if(v/rows.length > 0.05) ctx.fillText(`${v}`, x, y);
+          });
+          ctx.restore();
+        }
+      }]
+    });
+  }
+
+  // ── Category 차트 ──
+  const cat = countCol(catCol, 10);
+  destroyChart('categoryChart');
+  if(catCol && cat.keys.length){
+    const ctx=document.getElementById('categoryChart').getContext('2d');
+    const colors=PALETTE.slice(0,cat.keys.length);
+    charts['categoryChart']=new Chart(ctx,{
+      type:'bar',
+      data:{labels:cat.keys,datasets:[{label:'상품수',data:cat.vals,
+        backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:1.5,borderRadius:5}]},
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+        plugins:{legend:{display:false},
+          tooltip:{backgroundColor:'#fff',borderColor:'#E2E0D8',borderWidth:1,titleColor:'#18181A',bodyColor:'#5C5C60',padding:10,
+            callbacks:{label:i=>` ${i.raw.toLocaleString()}개`}}},
+        scales:{
+          x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true},
+          y:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:11,family:"'Pretendard',sans-serif"}}}
+        }
+      },
+      plugins:[{
+        id:'catDL',
+        afterDatasetsDraw(ch){
+          const ctx=ch.ctx, meta=ch.getDatasetMeta(0);
+          ctx.save(); ctx.font="500 10px 'DM Mono',monospace";
+          ctx.fillStyle='#2563EB'; ctx.textAlign='left'; ctx.textBaseline='middle';
+          meta.data.forEach((bar,i)=>{ ctx.fillText(cat.vals[i].toLocaleString(), bar.x+5, bar.y); });
+          ctx.restore();
+        }
+      }]
+    });
+  }
+
+  // ── Brand 차트 ──
+  const brand = countCol(brandCol, 15);
+  destroyChart('brandChart');
+  if(brandCol && brand.keys.length){
+    const ctx=document.getElementById('brandChart').getContext('2d');
+    const colors=brand.keys.map((_,i)=>PALETTE[i%PALETTE.length]);
+    charts['brandChart']=new Chart(ctx,{
+      type:'bar',
+      data:{labels:brand.keys,datasets:[{label:'상품수',data:brand.vals,
+        backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:1.5,borderRadius:5}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},
+          tooltip:{backgroundColor:'#fff',borderColor:'#E2E0D8',borderWidth:1,titleColor:'#18181A',bodyColor:'#5C5C60',padding:10,
+            callbacks:{label:i=>` ${i.raw.toLocaleString()}개`}}},
+        scales:{
+          x:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:11,family:"'Pretendard',sans-serif"},maxRotation:35}},
+          y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}
+        }
+      },
+      plugins:[{
+        id:'brandDL',
+        afterDatasetsDraw(ch){
+          const ctx=ch.ctx, meta=ch.getDatasetMeta(0);
+          ctx.save(); ctx.font="500 10px 'DM Mono',monospace";
+          ctx.textAlign='center'; ctx.textBaseline='bottom';
+          meta.data.forEach((bar,i)=>{
+            const v=brand.vals[i];
+            ctx.fillStyle=colors[i]||'#2563EB';
+            ctx.fillText(v.toLocaleString(), bar.x, bar.y-4);
+          });
+          ctx.restore();
+        }
+      }]
+    });
+  }
+}
+
 function buildHolidayTable(entries){
   document.getElementById('badge-holiday-count').textContent=`${entries.length}일`;
   const tbody=document.getElementById('holidayTableBody');
@@ -995,54 +1169,88 @@ function setupTabs(){
 // ═══════════════════════════════════════════════════
 // GOOGLE SEARCH CONSOLE DATA (from xlsx export)
 // ═══════════════════════════════════════════════════
+// GSC_CHART: 최신 gsc-data.json 에서 자동 fetch 후 덮어씀 (fallback: 하드코딩)
 const GSC_CHART = [
-  {date:'2025-12-24',clicks:1,impr:7,ctr:0.1429,pos:8.1},{date:'2025-12-25',clicks:1,impr:6,ctr:0.1667,pos:16.0},
-  {date:'2025-12-26',clicks:0,impr:5,ctr:0.0,pos:11.6},{date:'2025-12-27',clicks:0,impr:1,ctr:0.0,pos:6.0},
-  {date:'2025-12-28',clicks:1,impr:6,ctr:0.1667,pos:5.3},{date:'2025-12-29',clicks:1,impr:15,ctr:0.0667,pos:20.7},
-  {date:'2025-12-30',clicks:0,impr:3,ctr:0.0,pos:36.0},{date:'2025-12-31',clicks:0,impr:3,ctr:0.0,pos:28.7},
-  {date:'2026-01-01',clicks:0,impr:4,ctr:0.0,pos:16.8},{date:'2026-01-02',clicks:0,impr:1,ctr:0.0,pos:4.0},
-  {date:'2026-01-03',clicks:0,impr:4,ctr:0.0,pos:3.8},{date:'2026-01-04',clicks:4,impr:9,ctr:0.4444,pos:4.9},
-  {date:'2026-01-05',clicks:3,impr:21,ctr:0.1429,pos:5.0},{date:'2026-01-06',clicks:0,impr:8,ctr:0.0,pos:3.2},
-  {date:'2026-01-07',clicks:5,impr:33,ctr:0.1515,pos:37.3},{date:'2026-01-08',clicks:8,impr:13,ctr:0.6154,pos:3.8},
-  {date:'2026-01-09',clicks:0,impr:4,ctr:0.0,pos:5.8},{date:'2026-01-10',clicks:0,impr:7,ctr:0.0,pos:15.6},
-  {date:'2026-01-11',clicks:3,impr:12,ctr:0.25,pos:2.2},{date:'2026-01-12',clicks:6,impr:21,ctr:0.2857,pos:2.8},
-  {date:'2026-01-13',clicks:4,impr:24,ctr:0.1667,pos:4.5},{date:'2026-01-14',clicks:2,impr:22,ctr:0.0909,pos:5.6},
-  {date:'2026-01-15',clicks:3,impr:20,ctr:0.15,pos:5.4},{date:'2026-01-16',clicks:7,impr:25,ctr:0.28,pos:3.9},
-  {date:'2026-01-17',clicks:5,impr:16,ctr:0.3125,pos:3.6},{date:'2026-01-18',clicks:1,impr:9,ctr:0.1111,pos:5.7},
-  {date:'2026-01-19',clicks:3,impr:26,ctr:0.1154,pos:5.7},{date:'2026-01-20',clicks:6,impr:27,ctr:0.2222,pos:4.4},
-  {date:'2026-01-21',clicks:5,impr:35,ctr:0.1429,pos:6.2},{date:'2026-01-22',clicks:4,impr:29,ctr:0.1379,pos:5.8},
-  {date:'2026-01-23',clicks:7,impr:52,ctr:0.1346,pos:6.1},{date:'2026-01-24',clicks:2,impr:13,ctr:0.1538,pos:5.6},
-  {date:'2026-01-25',clicks:2,impr:12,ctr:0.1667,pos:8.2},{date:'2026-01-26',clicks:6,impr:53,ctr:0.1132,pos:5.7},
-  {date:'2026-01-27',clicks:8,impr:55,ctr:0.1455,pos:5.8},{date:'2026-01-28',clicks:2,impr:14,ctr:0.1429,pos:6.4},
-  {date:'2026-01-29',clicks:5,impr:34,ctr:0.1471,pos:8.0},{date:'2026-01-30',clicks:5,impr:39,ctr:0.1282,pos:5.4},
-  {date:'2026-01-31',clicks:1,impr:19,ctr:0.0526,pos:5.4},{date:'2026-02-01',clicks:4,impr:34,ctr:0.1176,pos:6.1},
-  {date:'2026-02-02',clicks:7,impr:68,ctr:0.1029,pos:7.3},{date:'2026-02-03',clicks:5,impr:54,ctr:0.0926,pos:5.4},
-  {date:'2026-02-04',clicks:5,impr:52,ctr:0.0962,pos:5.2},{date:'2026-02-05',clicks:9,impr:73,ctr:0.1233,pos:5.0},
-  {date:'2026-02-06',clicks:7,impr:86,ctr:0.0814,pos:4.9},{date:'2026-02-07',clicks:2,impr:29,ctr:0.069,pos:7.8},
-  {date:'2026-02-08',clicks:1,impr:22,ctr:0.0455,pos:8.1},{date:'2026-02-09',clicks:5,impr:60,ctr:0.0833,pos:5.3},
-  {date:'2026-02-10',clicks:8,impr:80,ctr:0.1,pos:5.4},{date:'2026-02-11',clicks:4,impr:53,ctr:0.0755,pos:6.7},
-  {date:'2026-02-12',clicks:9,impr:75,ctr:0.12,pos:5.8},{date:'2026-02-13',clicks:5,impr:60,ctr:0.0833,pos:5.3},
-  {date:'2026-02-14',clicks:2,impr:26,ctr:0.0769,pos:6.9},{date:'2026-02-15',clicks:2,impr:25,ctr:0.08,pos:5.6},
-  {date:'2026-02-16',clicks:7,impr:64,ctr:0.1094,pos:5.2},{date:'2026-02-17',clicks:0,impr:0,ctr:0.0,pos:0},
-  {date:'2026-02-18',clicks:4,impr:60,ctr:0.0667,pos:7.9},{date:'2026-02-19',clicks:7,impr:91,ctr:0.0769,pos:5.7},
-  {date:'2026-02-20',clicks:10,impr:108,ctr:0.0926,pos:5.4},{date:'2026-02-21',clicks:3,impr:39,ctr:0.0769,pos:7.1},
-  {date:'2026-02-22',clicks:5,impr:83,ctr:0.0602,pos:7.4},{date:'2026-02-23',clicks:5,impr:114,ctr:0.0439,pos:4.8},
-  {date:'2026-02-24',clicks:5,impr:77,ctr:0.0649,pos:6.7},{date:'2026-02-25',clicks:11,impr:101,ctr:0.1089,pos:5.7},
-  {date:'2026-02-26',clicks:8,impr:80,ctr:0.1,pos:5.0},{date:'2026-02-27',clicks:2,impr:36,ctr:0.0556,pos:5.6},
-  {date:'2026-02-28',clicks:2,impr:18,ctr:0.1111,pos:10.6},{date:'2026-03-01',clicks:0,impr:91,ctr:0.0,pos:8.2},
-  {date:'2026-03-02',clicks:9,impr:114,ctr:0.0789,pos:6.8},{date:'2026-03-03',clicks:9,impr:115,ctr:0.0783,pos:6.4},
-  {date:'2026-03-04',clicks:14,impr:121,ctr:0.1157,pos:5.3},{date:'2026-03-05',clicks:9,impr:146,ctr:0.0616,pos:5.9},
-  {date:'2026-03-06',clicks:3,impr:58,ctr:0.0517,pos:8.8},{date:'2026-03-07',clicks:0,impr:16,ctr:0.0,pos:6.4},
-  {date:'2026-03-08',clicks:13,impr:95,ctr:0.1368,pos:6.0},{date:'2026-03-09',clicks:3,impr:107,ctr:0.028,pos:7.6},
-  {date:'2026-03-10',clicks:11,impr:120,ctr:0.0917,pos:6.6},{date:'2026-03-11',clicks:20,impr:223,ctr:0.0897,pos:6.3},
-  {date:'2026-03-12',clicks:9,impr:132,ctr:0.0682,pos:5.5},{date:'2026-03-13',clicks:4,impr:71,ctr:0.0563,pos:6.1},
-  {date:'2026-03-14',clicks:2,impr:62,ctr:0.0323,pos:6.1},{date:'2026-03-15',clicks:5,impr:76,ctr:0.0658,pos:4.8},
-  {date:'2026-03-16',clicks:15,impr:119,ctr:0.1261,pos:5.2},{date:'2026-03-17',clicks:15,impr:129,ctr:0.1163,pos:4.9},
-  {date:'2026-03-18',clicks:22,impr:129,ctr:0.1705,pos:5.5},{date:'2026-03-19',clicks:20,impr:151,ctr:0.1325,pos:4.3},
-  {date:'2026-03-20',clicks:10,impr:64,ctr:0.1562,pos:5.0},{date:'2026-03-21',clicks:0,impr:12,ctr:0.0,pos:6.4},
-  {date:'2026-03-22',clicks:3,impr:55,ctr:0.0545,pos:4.6},{date:'2026-03-23',clicks:13,impr:160,ctr:0.0812,pos:5.1}
+  {date:'2025-12-29',clicks:1,impr:15,ctr:0.0667,pos:20.7},{date:'2025-12-30',clicks:0,impr:3,ctr:0.0,pos:36.0},
+  {date:'2025-12-31',clicks:0,impr:3,ctr:0.0,pos:28.7},{date:'2026-01-01',clicks:0,impr:4,ctr:0.0,pos:16.8},
+  {date:'2026-01-02',clicks:0,impr:1,ctr:0.0,pos:4.0},{date:'2026-01-03',clicks:0,impr:4,ctr:0.0,pos:3.8},
+  {date:'2026-01-04',clicks:4,impr:9,ctr:0.4444,pos:4.9},{date:'2026-01-05',clicks:3,impr:21,ctr:0.1429,pos:5.0},
+  {date:'2026-01-06',clicks:0,impr:8,ctr:0.0,pos:3.2},{date:'2026-01-07',clicks:5,impr:33,ctr:0.1515,pos:37.3},
+  {date:'2026-01-08',clicks:8,impr:13,ctr:0.6154,pos:3.8},{date:'2026-01-09',clicks:0,impr:4,ctr:0.0,pos:5.8},
+  {date:'2026-01-10',clicks:0,impr:7,ctr:0.0,pos:15.6},{date:'2026-01-11',clicks:3,impr:12,ctr:0.25,pos:2.2},
+  {date:'2026-01-12',clicks:6,impr:21,ctr:0.2857,pos:2.8},{date:'2026-01-13',clicks:1,impr:1,ctr:1.0,pos:1.0},
+  {date:'2026-01-14',clicks:2,impr:5,ctr:0.4,pos:7.8},{date:'2026-01-15',clicks:7,impr:20,ctr:0.35,pos:3.0},
+  {date:'2026-01-16',clicks:3,impr:8,ctr:0.375,pos:5.4},{date:'2026-01-17',clicks:0,impr:6,ctr:0.0,pos:39.5},
+  {date:'2026-01-18',clicks:7,impr:15,ctr:0.4667,pos:11.4},{date:'2026-01-19',clicks:22,impr:85,ctr:0.2588,pos:2.7},
+  {date:'2026-01-20',clicks:12,impr:42,ctr:0.2857,pos:9.9},{date:'2026-01-21',clicks:8,impr:38,ctr:0.2105,pos:2.2},
+  {date:'2026-01-22',clicks:13,impr:42,ctr:0.3095,pos:3.6},{date:'2026-01-23',clicks:3,impr:24,ctr:0.125,pos:6.1},
+  {date:'2026-01-24',clicks:2,impr:16,ctr:0.125,pos:15.4},{date:'2026-01-25',clicks:11,impr:64,ctr:0.1719,pos:8.5},
+  {date:'2026-01-26',clicks:23,impr:141,ctr:0.1631,pos:5.8},{date:'2026-01-27',clicks:19,impr:132,ctr:0.1439,pos:6.4},
+  {date:'2026-01-28',clicks:7,impr:107,ctr:0.0654,pos:7.0},{date:'2026-01-29',clicks:6,impr:89,ctr:0.0674,pos:6.2},
+  {date:'2026-01-30',clicks:5,impr:45,ctr:0.1111,pos:6.9},{date:'2026-01-31',clicks:0,impr:18,ctr:0.0,pos:15.8},
+  {date:'2026-02-01',clicks:7,impr:138,ctr:0.0507,pos:9.2},{date:'2026-02-02',clicks:4,impr:90,ctr:0.0444,pos:5.8},
+  {date:'2026-02-03',clicks:10,impr:112,ctr:0.0893,pos:6.3},{date:'2026-02-04',clicks:11,impr:115,ctr:0.0957,pos:5.8},
+  {date:'2026-02-05',clicks:4,impr:105,ctr:0.0381,pos:7.4},{date:'2026-02-06',clicks:2,impr:49,ctr:0.0408,pos:5.9},
+  {date:'2026-02-07',clicks:0,impr:18,ctr:0.0,pos:6.3},{date:'2026-02-08',clicks:2,impr:68,ctr:0.0294,pos:4.8},
+  {date:'2026-02-09',clicks:4,impr:80,ctr:0.05,pos:5.2},{date:'2026-02-10',clicks:8,impr:105,ctr:0.0762,pos:5.3},
+  {date:'2026-02-11',clicks:9,impr:114,ctr:0.0789,pos:5.6},{date:'2026-02-12',clicks:2,impr:66,ctr:0.0303,pos:7.3},
+  {date:'2026-02-13',clicks:1,impr:31,ctr:0.0323,pos:5.5},{date:'2026-02-14',clicks:0,impr:25,ctr:0.0,pos:7.8},
+  {date:'2026-02-15',clicks:1,impr:29,ctr:0.0345,pos:8.7},{date:'2026-02-16',clicks:1,impr:22,ctr:0.0455,pos:6.6},
+  {date:'2026-02-17',clicks:3,impr:42,ctr:0.0714,pos:6.0},{date:'2026-02-18',clicks:5,impr:62,ctr:0.0806,pos:5.7},
+  {date:'2026-02-19',clicks:25,impr:108,ctr:0.2315,pos:4.8},{date:'2026-02-20',clicks:8,impr:39,ctr:0.2051,pos:4.5},
+  {date:'2026-02-21',clicks:0,impr:8,ctr:0.0,pos:8.4},{date:'2026-02-22',clicks:5,impr:83,ctr:0.0602,pos:7.4},
+  {date:'2026-02-23',clicks:5,impr:114,ctr:0.0439,pos:4.8},{date:'2026-02-24',clicks:5,impr:77,ctr:0.0649,pos:6.7},
+  {date:'2026-02-25',clicks:11,impr:101,ctr:0.1089,pos:5.7},{date:'2026-02-26',clicks:8,impr:80,ctr:0.1,pos:5.0},
+  {date:'2026-02-27',clicks:2,impr:36,ctr:0.0556,pos:5.6},{date:'2026-02-28',clicks:2,impr:18,ctr:0.1111,pos:10.6},
+  {date:'2026-03-01',clicks:0,impr:91,ctr:0.0,pos:8.2},{date:'2026-03-02',clicks:9,impr:114,ctr:0.0789,pos:6.8},
+  {date:'2026-03-03',clicks:9,impr:115,ctr:0.0783,pos:6.4},{date:'2026-03-04',clicks:14,impr:121,ctr:0.1157,pos:5.3},
+  {date:'2026-03-05',clicks:9,impr:146,ctr:0.0616,pos:5.9},{date:'2026-03-06',clicks:3,impr:58,ctr:0.0517,pos:8.8},
+  {date:'2026-03-07',clicks:0,impr:16,ctr:0.0,pos:6.4},{date:'2026-03-08',clicks:13,impr:95,ctr:0.1368,pos:6.0},
+  {date:'2026-03-09',clicks:3,impr:107,ctr:0.028,pos:7.6},{date:'2026-03-10',clicks:11,impr:120,ctr:0.0917,pos:6.6},
+  {date:'2026-03-11',clicks:20,impr:223,ctr:0.0897,pos:6.3},{date:'2026-03-12',clicks:9,impr:132,ctr:0.0682,pos:5.5},
+  {date:'2026-03-13',clicks:4,impr:71,ctr:0.0563,pos:6.1},{date:'2026-03-14',clicks:2,impr:62,ctr:0.0323,pos:6.1},
+  {date:'2026-03-15',clicks:5,impr:76,ctr:0.0658,pos:4.8},{date:'2026-03-16',clicks:15,impr:119,ctr:0.1261,pos:5.2},
+  {date:'2026-03-17',clicks:15,impr:129,ctr:0.1163,pos:4.9},{date:'2026-03-18',clicks:22,impr:129,ctr:0.1705,pos:5.5},
+  {date:'2026-03-19',clicks:20,impr:151,ctr:0.1325,pos:4.3},{date:'2026-03-20',clicks:10,impr:64,ctr:0.1562,pos:5.0},
+  {date:'2026-03-21',clicks:0,impr:12,ctr:0.0,pos:6.4},{date:'2026-03-22',clicks:3,impr:55,ctr:0.0545,pos:4.6},
+  {date:'2026-03-23',clicks:13,impr:160,ctr:0.0813,pos:5.1},{date:'2026-03-24',clicks:10,impr:116,ctr:0.0862,pos:5.9},
+  {date:'2026-03-25',clicks:10,impr:117,ctr:0.0855,pos:4.1},{date:'2026-03-26',clicks:8,impr:71,ctr:0.1127,pos:4.4},
+  {date:'2026-03-27',clicks:7,impr:63,ctr:0.1111,pos:4.3},{date:'2026-03-28',clicks:1,impr:32,ctr:0.0312,pos:4.2}
 ];
 window._GSC_CHART = GSC_CHART;
+
+// ── gsc-data.json 자동 fetch (GitHub Pages에서 자동 업데이트)
+(async function fetchGscJson(){
+  const candidates = ['gsc-data.json', 'scripts/gsc-data.json', '../gsc-data.json'];
+  for(const path of candidates){
+    try {
+      const res = await fetch(path);
+      if(!res.ok) continue;
+      const json = await res.json();
+      if(json && json.daily && json.daily.length){
+        window._GSC_CHART = json.daily.map(d=>({
+          date: d.date, clicks: d.clicks, impr: d.impr, ctr: d.ctr, pos: d.pos
+        }));
+        // 날짜순 정렬 보장
+        window._GSC_CHART.sort((a,b)=>a.date.localeCompare(b.date));
+        // GSC 탭이 열려있으면 다시 렌더
+        const activeTab = document.querySelector('.tab.active');
+        if(activeTab && activeTab.dataset.tab==='gsc'){
+          const from=document.getElementById('dateFrom').value;
+          const to=document.getElementById('dateTo').value;
+          renderGSC(from,to);
+        }
+        const badge = document.getElementById('gscDataBadge');
+        if(badge){ badge.textContent = `🔄 자동갱신 · ${json.updated||'최신'}`; badge.style.display='inline-flex'; }
+        const note = document.getElementById('gscDataFallbackNote');
+        if(note) note.textContent = `✅ gsc-data.json 로드됨 (${json.daily.length}일치)`;
+        return;
+      }
+    } catch(e){ /* try next */ }
+  }
+  const note = document.getElementById('gscDataFallbackNote');
+  if(note) note.textContent = '⚠ gsc-data.json 미발견 — 하드코딩 데이터 사용 중';
+})();
 
 const GSC_QUERIES = [
   {query:'myhubon',clicks:35,impr:128,ctr:0.2734,pos:1.84},
@@ -1102,9 +1310,10 @@ function makeLabelPlugin(color, values, threshold, suffix=''){
       ctx.font="500 10px 'DM Mono',monospace";
       ctx.fillStyle=color; ctx.textAlign='center'; ctx.textBaseline='bottom';
       meta.data.forEach((pt,i)=>{
-        const v=values[i]; if(!v&&v!==0) return;
-        if(v===0) return;
-        ctx.fillText(v+suffix, pt.x, pt.y-6);
+        const v=values[i];
+        if(v===undefined||v===null) return;
+        if(v===0) return; // 0은 생략
+        ctx.fillText(v+suffix, pt.x, pt.y-5);
       });
       ctx.restore();
     }
@@ -1186,7 +1395,7 @@ function renderGSC(from, to){
         y1:{grid:{display:false},ticks:{color:'#2563EB',font:{size:11}},beginAtZero:true,position:'right'}
       }
     },
-    plugins:[makeLabelPlugin('#059669',clicks,45)]
+    plugins:[makeLabelPlugin('#059669',clicks,90)]
   });
 
   // ── 2. CTR 추이 ──
@@ -1205,7 +1414,7 @@ function renderGSC(from, to){
         y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11},callback:v=>v+'%'},beginAtZero:true}
       }
     },
-    plugins:[makeLabelPlugin('#D97706',ctrs,40,'%')]
+    plugins:[makeLabelPlugin('#D97706',ctrs,90,'%')]
   });
 
   // ── 3. 게재순위 추이 ──
@@ -1281,7 +1490,7 @@ function renderGSC(from, to){
         y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}
       }
     },
-    plugins:[makeLabelPlugin('#2563EB',devClicks,10)]
+    plugins:[makeLabelPlugin('#2563EB',devClicks,20)]
   });
 
   // ── 6. 요일별 클릭 패턴 (선택 기간 기준) ──
@@ -1305,7 +1514,7 @@ function renderGSC(from, to){
         y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}
       }
     },
-    plugins:[makeLabelPlugin('#2563EB',dowCounts,10)]
+    plugins:[makeLabelPlugin('#2563EB',dowCounts,20)]
   });
 
   // ── 7. 7일 이동평균 클릭 추이 ──
@@ -1485,7 +1694,7 @@ function renderGSC(from, to){
         y1:{grid:{display:false},ticks:{color:'#9494A0',font:{size:11},callback:v=>v+'위'},beginAtZero:false,position:'right'}
       }
     },
-    plugins:[makeLabelPlugin('#2563EB',devCtr,10,'%')]
+    plugins:[makeLabelPlugin('#2563EB',devCtr,20,'%')]
   });
 
   // ── 검색어 테이블 ──
@@ -1523,18 +1732,29 @@ function renderGSC(from, to){
   const maxPC=Math.max(...GSC_PAGES.map(p=>p.clicks),1);
   document.getElementById('gscPageTable').innerHTML=`
     <table class="gsc-table">
-      <thead><tr><th>#</th><th>페이지</th><th>클릭</th><th>CTR</th><th>순위</th></tr></thead>
-      <tbody>${GSC_PAGES.map((p,i)=>`
-        <tr>
+      <thead><tr><th>#</th><th>페이지</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead>
+      <tbody>${GSC_PAGES.map((p,i)=>{
+        const fullUrl = p.page.startsWith('http') ? p.page : 'https://myhubon.com'+p.page;
+        const displayPath = p.page.replace('https://myhubon.com','') || '/';
+        const shortPath = displayPath.length > 30 ? displayPath.slice(0,28)+'…' : displayPath;
+        return `<tr>
           <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
-          <td style="font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent)" title="${p.page}">
-            ${p.page.replace('https://myhubon.com','')}</td>
+          <td style="font-size:11px;max-width:160px">
+            <a href="${fullUrl}" target="_blank" rel="noopener"
+               style="color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace"
+               title="${fullUrl}">
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shortPath}</span>
+              <span style="font-size:9px;opacity:.6;flex-shrink:0">↗</span>
+            </a>
+          </td>
           <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(p.clicks/maxPC*70).toFixed(0)}px"></div>
               <span style="font-family:'DM Mono',monospace;color:var(--accent);font-weight:600">${p.clicks}</span></div></td>
+          <td style="font-family:'DM Mono',monospace;color:var(--text-dim)">${p.impr||'-'}</td>
           <td style="font-family:'DM Mono',monospace;color:${p.ctr>0.3?'var(--accent3)':'var(--text-dim)'}">
             <strong>${(p.ctr*100).toFixed(1)}%</strong></td>
           <td><span class="pos-badge" style="background:#EFF4FF;color:var(--accent);border:1px solid #C0CDFD">${p.pos}</span></td>
-        </tr>`).join('')}
+        </tr>`;
+      }).join('')}
       </tbody>
     </table>`;
 
