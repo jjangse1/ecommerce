@@ -2,14 +2,15 @@ name: Update Google Search Console Data
 
 on:
   schedule:
-    - cron: '10 10 * * *'        # 매일 한국시간 새벽 3시 (UTC 기준)
-  workflow_dispatch:           # 수동으로도 실행 가능
+    - cron: '10 10 * * *'   # 매일 UTC 10:10 = KST 19:10 (GSC 2일 지연 감안)
+  workflow_dispatch:         # 수동 실행 가능
 
 jobs:
   fetch-gsc:
     runs-on: ubuntu-latest
-    permissions:        # 이 부분을 추가해야 git push가 실패하지 않습니다.
+    permissions:
       contents: write
+
     steps:
       - name: Repository 체크아웃
         uses: actions/checkout@v4
@@ -19,24 +20,24 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: 필요한 패키지 설치
-        run: pip install google-api-python-client google-auth-oauthlib google-auth
+      - name: 패키지 설치
+        run: pip install google-api-python-client google-auth
 
-      - name: GSC 데이터 가져오기
+      - name: GSC 데이터 수집
         env:
-          GSC_CLIENT_ID: ${{ secrets.GSC_CLIENT_ID }}
+          GSC_CLIENT_ID:     ${{ secrets.GSC_CLIENT_ID }}
           GSC_CLIENT_SECRET: ${{ secrets.GSC_CLIENT_SECRET }}
           GSC_REFRESH_TOKEN: ${{ secrets.GSC_REFRESH_TOKEN }}
         run: python scripts/fetch_gsc.py
 
       - name: 변경사항 커밋 & 푸시
         run: |
-          git config user.name "GSC Auto Updater"
+          git config user.name  "GSC Auto Updater"
           git config user.email "bot@github.com"
           git add gsc-data.json
           if git diff --staged --quiet; then
-            echo "No changes to commit"
+            echo "변경 없음 — 스킵"
           else
-            git commit -m "chore: 자동 GSC 데이터 업데이트 ($(date +'%Y-%m-%d'))"
+            git commit -m "chore: GSC 자동 업데이트 ($(date +'%Y-%m-%d'))"
             git push
           fi
