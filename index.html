@@ -458,7 +458,7 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
       </div>
     </div>
 
-    <div class="section-divider"><span>검색어 · 국가 분석</span></div>
+    <div class="section-divider"><span>인기 검색어 · 인기 페이지</span></div>
 
     <div class="grid-2">
       <!-- Top queries -->
@@ -469,6 +469,19 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
         </div>
         <div id="gscQueryTable"></div>
       </div>
+      <!-- Top pages -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><span class="dot" style="background:var(--accent)"></span> 인기 페이지 Top 10</div>
+          <span class="panel-badge" id="badge-page-period"></span>
+        </div>
+        <div id="gscPageTable"></div>
+      </div>
+    </div>
+
+    <div class="section-divider"><span>국가별 · 기기별 분석</span></div>
+
+    <div class="grid-2">
       <!-- Country breakdown -->
       <div class="panel">
         <div class="panel-header">
@@ -477,11 +490,6 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
         </div>
         <div class="chart-wrap chart-h260"><canvas id="gscCountryChart"></canvas></div>
       </div>
-    </div>
-
-    <div class="section-divider"><span>기기 · 페이지 분석</span></div>
-
-    <div class="grid-2">
       <!-- Device breakdown -->
       <div class="panel">
         <div class="panel-header">
@@ -489,14 +497,6 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
           <span class="panel-badge" id="badge-device-period"></span>
         </div>
         <div class="chart-wrap chart-h260"><canvas id="gscDeviceChart"></canvas></div>
-      </div>
-      <!-- Top pages -->
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title"><span class="dot" style="background:var(--accent)"></span> 인기 페이지 Top 8</div>
-          <span class="panel-badge" id="badge-page-period"></span>
-        </div>
-        <div id="gscPageTable"></div>
       </div>
     </div>
 
@@ -1852,7 +1852,7 @@ function renderGSC(from, to){
     plugins:[makeLabelPlugin('#2563EB',devCtr,20,'%')]
   });
 
-  // ── 검색어 테이블 ──
+  // ── 검색어 테이블 (Top 10) ──
   if(!gscRendered){
     document.head.insertAdjacentHTML('beforeend',`<style>
       .gsc-table{width:100%;border-collapse:collapse;font-size:12px}
@@ -1863,55 +1863,67 @@ function renderGSC(from, to){
       .gsc-bar-cell{display:flex;align-items:center;gap:7px}
       .gsc-bar{height:6px;border-radius:3px;background:var(--accent);transition:width .5s}
       .pos-badge{font-size:10px;padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-weight:500}
+      .gsc-empty{padding:32px 16px;text-align:center;color:var(--text-muted);font-size:12px}
     </style>`);
   }
 
-  const maxQC=Math.max(...GSC_QUERIES.map(q=>q.clicks),1);
-  document.getElementById('gscQueryTable').innerHTML=`
-    <table class="gsc-table">
-      <thead><tr><th>#</th><th>검색어</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead>
-      <tbody>${GSC_QUERIES.map((q,i)=>`
-        <tr>
-          <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
-          <td style="font-weight:500;color:var(--text)">${q.query}</td>
-          <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(q.clicks/maxQC*80).toFixed(0)}px"></div>
-              <span style="font-family:'DM Mono',monospace;color:var(--accent);font-weight:600">${q.clicks}</span></div></td>
-          <td style="font-family:'DM Mono',monospace">${q.impr}</td>
-          <td style="font-family:'DM Mono',monospace;color:${q.ctr>0.2?'var(--accent3)':'var(--text-dim)'}">
-            <strong>${(q.ctr*100).toFixed(1)}%</strong></td>
-          <td><span class="pos-badge" style="background:${q.pos<3?'#ECFDF5':q.pos<6?'#EFF4FF':'#FFFBEB'};color:${q.pos<3?'var(--accent3)':q.pos<6?'var(--accent)':'var(--warn)'};border:1px solid ${q.pos<3?'#A7F3D0':q.pos<6?'#C0CDFD':'#FDE68A'}">${q.pos}</span></td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
+  const topQueries = GSC_QUERIES.slice(0, 10);
+  if(!topQueries.length){
+    document.getElementById('gscQueryTable').innerHTML=`<div class="gsc-empty">🔄 검색어 데이터 로딩 중...<br><span style="font-size:11px">gsc-data.json fetch 확인</span></div>`;
+  } else {
+    const maxQC=Math.max(...topQueries.map(q=>q.clicks),1);
+    document.getElementById('gscQueryTable').innerHTML=`
+      <table class="gsc-table">
+        <thead><tr><th>#</th><th>검색어</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead>
+        <tbody>${topQueries.map((q,i)=>`
+          <tr>
+            <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
+            <td style="font-weight:500;color:var(--text);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.query}</td>
+            <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(q.clicks/maxQC*70).toFixed(0)}px"></div>
+                <span style="font-family:'DM Mono',monospace;color:var(--accent);font-weight:600">${q.clicks}</span></div></td>
+            <td style="font-family:'DM Mono',monospace">${q.impr}</td>
+            <td style="font-family:'DM Mono',monospace;color:${q.ctr>0.2?'var(--accent3)':'var(--text-dim)'}">
+              <strong>${(q.ctr*100).toFixed(1)}%</strong></td>
+            <td><span class="pos-badge" style="background:${q.pos<3?'#ECFDF5':q.pos<6?'#EFF4FF':'#FFFBEB'};color:${q.pos<3?'var(--accent3)':q.pos<6?'var(--accent)':'var(--warn)'};border:1px solid ${q.pos<3?'#A7F3D0':q.pos<6?'#C0CDFD':'#FDE68A'}">${q.pos}</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
 
-  const maxPC=Math.max(...GSC_PAGES.map(p=>p.clicks),1);
-  document.getElementById('gscPageTable').innerHTML=`
-    <table class="gsc-table">
-      <thead><tr><th>#</th><th>페이지</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead>
-      <tbody>${GSC_PAGES.map((p,i)=>{
-        const fullUrl = p.page.startsWith('http') ? p.page : 'https://myhubon.com'+p.page;
-        const displayPath = p.page.replace('https://myhubon.com','') || '/';
-        const shortPath = displayPath.length > 30 ? displayPath.slice(0,28)+'…' : displayPath;
-        return `<tr>
-          <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
-          <td style="font-size:11px;max-width:160px">
-            <a href="${fullUrl}" target="_blank" rel="noopener"
-               style="color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace"
-               title="${fullUrl}">
-              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shortPath}</span>
-              <span style="font-size:9px;opacity:.6;flex-shrink:0">↗</span>
-            </a>
-          </td>
-          <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(p.clicks/maxPC*70).toFixed(0)}px"></div>
-              <span style="font-family:'DM Mono',monospace;color:var(--accent);font-weight:600">${p.clicks}</span></div></td>
-          <td style="font-family:'DM Mono',monospace;color:var(--text-dim)">${p.impr||'-'}</td>
-          <td style="font-family:'DM Mono',monospace;color:${p.ctr>0.3?'var(--accent3)':'var(--text-dim)'}">
-            <strong>${(p.ctr*100).toFixed(1)}%</strong></td>
-          <td><span class="pos-badge" style="background:#EFF4FF;color:var(--accent);border:1px solid #C0CDFD">${p.pos}</span></td>
-        </tr>`;
-      }).join('')}
-      </tbody>
-    </table>`;
+  // ── 페이지 테이블 (Top 10) ──
+  const topPages = GSC_PAGES.slice(0, 10);
+  if(!topPages.length){
+    document.getElementById('gscPageTable').innerHTML=`<div class="gsc-empty">🔄 페이지 데이터 로딩 중...<br><span style="font-size:11px">gsc-data.json fetch 확인</span></div>`;
+  } else {
+    const maxPC=Math.max(...topPages.map(p=>p.clicks),1);
+    document.getElementById('gscPageTable').innerHTML=`
+      <table class="gsc-table">
+        <thead><tr><th>#</th><th>페이지</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead>
+        <tbody>${topPages.map((p,i)=>{
+          const fullUrl = p.page.startsWith('http') ? p.page : 'https://myhubon.com'+p.page;
+          const displayPath = p.page.replace('https://myhubon.com','') || '/';
+          const shortPath = displayPath.length > 28 ? displayPath.slice(0,26)+'…' : displayPath;
+          return `<tr>
+            <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
+            <td style="font-size:11px;max-width:150px">
+              <a href="${fullUrl}" target="_blank" rel="noopener"
+                 style="color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace"
+                 title="${fullUrl}">
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${shortPath}</span>
+                <span style="font-size:9px;opacity:.6;flex-shrink:0">↗</span>
+              </a>
+            </td>
+            <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(p.clicks/maxPC*60).toFixed(0)}px"></div>
+                <span style="font-family:'DM Mono',monospace;color:var(--accent);font-weight:600">${p.clicks}</span></div></td>
+            <td style="font-family:'DM Mono',monospace;color:var(--text-dim)">${p.impr||'-'}</td>
+            <td style="font-family:'DM Mono',monospace;color:${p.ctr>0.3?'var(--accent3)':'var(--text-dim)'}">
+              <strong>${(p.ctr*100).toFixed(1)}%</strong></td>
+            <td><span class="pos-badge" style="background:#EFF4FF;color:var(--accent);border:1px solid #C0CDFD">${p.pos}</span></td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>`;
+  }
 
   // ── 인사이트 (선택 기간 기반 동적 계산 — 모두 실시간 데이터) ──
   const half=Math.floor(filtered.length/2);
