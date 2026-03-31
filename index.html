@@ -744,11 +744,13 @@ function processWb(wb, filename, source){
 
   // ── 상품 현황 KPI 집계 ──
   const statusCol = Object.keys(s).find(k=>/status/i.test(k));
-  const priceCol  = Object.keys(s).find(k=>/^price$/i.test(k.trim()) || /sale.*price/i.test(k) || /^price/i.test(k.trim()));
   const stockCol  = Object.keys(s).find(k=>/stock|quantity|qty/i.test(k));
+  // product_price: 1 이상이면 가격 공개, 0/비어있음/null 이면 미공개
+  const priceCol  = Object.keys(s).find(k=>k.trim().toLowerCase()==='product_price')
+                 || Object.keys(s).find(k=>/product.?price/i.test(k));
 
   const total = rows.length;
-  // Sold Out: condition에 'sold' 포함 OR status에 'sold'/'inactive' 포함
+  // Sold Out: condition에 'sold' 포함 OR status에 'sold'/'inactive'/'out' 포함
   const soldOut = rows.filter(r=>{
     const c=(r[condCol]||'').toString().toLowerCase();
     const st=(r[statusCol]||'').toString().toLowerCase();
@@ -756,29 +758,21 @@ function processWb(wb, filename, source){
   }).length;
   // 활성 상품: Not sold out
   const active = total - soldOut;
-  // 가격 미공개: price 컬럼이 없거나 0이거나 비어있는 것
+  // 가격 미공개: product_price 가 없거나 1 미만
   const noPriceCount = priceCol
-    ? rows.filter(r=>{ const v=r[priceCol]; return !v||v===0||v===''||v==='0'; }).length
-    : 0;
-  const noPricePct = total>0?(noPriceCount/total*100).toFixed(1):0;
+    ? rows.filter(r=>{ const v=parseFloat(r[priceCol]||0); return !(v>=1); }).length
+    : null; // 컬럼 자체 없으면 null → 카드 미표시
+  const noPricePct = (noPriceCount!==null&&total>0)
+    ? (noPriceCount/total*100).toFixed(1) : null;
   // 재고 합산
   const totalStock = stockCol
     ? rows.reduce((sum,r)=>{ const v=parseFloat(r[stockCol])||0; return sum+v; },0)
     : null;
-  // 중위 판매가
-  let medianPrice = null;
-  if(priceCol){
-    const prices=rows.map(r=>parseFloat(r[priceCol])).filter(v=>v>0).sort((a,b)=>a-b);
-    if(prices.length){
-      const mid=Math.floor(prices.length/2);
-      medianPrice = prices.length%2===0?(prices[mid-1]+prices[mid])/2:prices[mid];
-    }
-  }
   // Parts / Equip breakdown from category
   const partsCount = catCol ? rows.filter(r=>/parts|part/i.test((r[catCol]||'').toString())).length : null;
   const equipCount = catCol ? rows.filter(r=>/equip|equipment/i.test((r[catCol]||'').toString())).length : null;
 
-  buildProductSummaryKPI({total,active,soldOut,noPriceCount,noPricePct,totalStock,medianPrice,partsCount,equipCount,priceCol,stockCol});
+  buildProductSummaryKPI({total,active,soldOut,noPriceCount,noPricePct,totalStock,partsCount,equipCount,stockCol});
 
   // UI updates
   const now=new Date();
@@ -1043,7 +1037,7 @@ function buildBnInsights(dowCounts,dowNames,avgBiz){
     items.map(i=>`<div class="insight-item"><div class="insight-icon">${i.icon}</div><div class="insight-text">${i.text}</div></div>`).join('');
 }
 
-function buildProductSummaryKPI({total,active,soldOut,noPriceCount,noPricePct,totalStock,medianPrice,partsCount,equipCount,priceCol,stockCol}){
+function buildProductSummaryKPI({total,active,soldOut,noPriceCount,noPricePct,totalStock,partsCount,equipCount,stockCol}){
   const panel = document.getElementById('productSummaryPanel');
   const grid  = document.getElementById('productSummaryKPI');
   const title = document.getElementById('productSummaryTitle');
@@ -1056,35 +1050,33 @@ function buildProductSummaryKPI({total,active,soldOut,noPriceCount,noPricePct,to
     ? `Parts ${partsCount.toLocaleString()} · Equip ${equipCount.toLocaleString()}`
     : `활성 ${activePct}%`;
 
-  const onSaleNote = `On Sale+In Stock+노출 ${activePct}%`;
-
   const cards = [
-    { color:'blue',  icon:'📦', label:'전체 상품',    val: total.toLocaleString(),
+    { color:'blue',  label:'전체 상품',  val: total.toLocaleString(),
       sub: subParts },
-    { color:'green', icon:'✅', label:'활성 상품',    val: active.toLocaleString(),
-      sub: onSaleNote },
-    { color:'amber', icon:'🚫', label:'Sold Out',     val: soldOut.toLocaleString(),
+    { color:'green', label:'활성 상품',  val: active.toLocaleString(),
+      sub: `On Sale+In Stock+노출 ${activePct}%` },
+    { color:'amber', label:'SOLD OUT',   val: soldOut.toLocaleString(),
       sub: `전체의 ${soldPct}%` },
-    { color:'red',   icon:'🔒', label:'가격 미공개',  val: noPricePct+'%',
-      sub: priceCol ? `${noPriceCount.toLocaleString()}개 · AMAT 미설정` : '가격 컬럼 없음' },
   ];
 
-  if(totalStock!==null){
-    cards.push({ color:'teal', icon:'📊', label:'총 재고 수량', val: totalStock.toLocaleString(),
-      sub: `평균 ${total>0?(totalStock/total).toFixed(1):0}개/상품` });
+  // 가격 미공개 — product_price 컬럼 감지됐을 때만 표시
+  if(noPriceCount!==null){
+    const pricedCount = total - noPriceCount;
+    cards.push({
+      color:'red', label:'가격 미공개',
+      val: noPricePct+'%',
+      sub: `${noPriceCount.toLocaleString()}개 미설정 · 공개 ${pricedCount.toLocaleString()}개`
+    });
   }
-  if(medianPrice!==null){
-    cards.push({ color:'purple', icon:'💵', label:'중위 판매가', val: '$'+Math.round(medianPrice).toLocaleString(),
-      sub: `가격공개 ${(total-noPriceCount).toLocaleString()}개 기준` });
+
+  if(totalStock!==null){
+    cards.push({ color:'teal', label:'총 재고 수량', val: totalStock.toLocaleString(),
+      sub: `평균 ${total>0?(totalStock/total).toFixed(1):0}개/상품` });
   }
 
   const colorMap={
-    blue:'var(--accent)',green:'var(--accent3)',amber:'var(--warn)',
-    red:'var(--danger)',teal:'#0891B2',purple:'var(--accent2)'
-  };
-  const bgMap={
-    blue:'#EFF4FF',green:'#ECFDF5',amber:'#FFFBEB',
-    red:'#FEF2F2',teal:'#E0F2FE',purple:'#F5F3FF'
+    blue:'var(--accent)', green:'var(--accent3)', amber:'var(--warn)',
+    red:'var(--danger)', teal:'#0891B2'
   };
 
   grid.innerHTML = cards.map(c=>`
