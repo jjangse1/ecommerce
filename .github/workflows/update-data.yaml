@@ -29,9 +29,6 @@ jobs:
 
       - name: data.xlsx 자동 다운로드 및 업데이트
         env:
-          MYHUBON_BEARER_TOKEN: ${{ secrets.MYHUBON_BEARER_TOKEN }}
+          MYHUBON_EMAIL: ${{ secrets.MYHUBON_EMAIL }}
+          MYHUBON_PASSWORD: ${{ secrets.MYHUBON_PASSWORD }}
         run: python scripts/update_data.py
-
-      - name: 변경사항 push
-        if: failure()   # 스크립트에서 이미 push를 하므로, 실패 시에만 로그 용도로 사용 (선택)
-        run: echo "스크립트 내부에서 push를 처리합니다."
