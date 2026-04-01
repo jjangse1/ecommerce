@@ -1,76 +1,121 @@
 import os
 import requests
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # ====================== 설정 ======================
 os.chdir(os.getenv('GITHUB_WORKSPACE', '.'))
 
-DATA_DIR = "scripts"
+DATA_DIR  = "scripts"
 DATA_FILE = os.path.join(DATA_DIR, "data.xlsx")
 TEMP_FILE = os.path.join(DATA_DIR, "temp.xlsx")
 
-URL = "https://api.myhubon.com/admin/product/manage/excel-download"
-BEARER_TOKEN = os.getenv('MYHUBON_BEARER_TOKEN')
+EMAIL    = os.getenv('MYHUBON_EMAIL')
+PASSWORD = os.getenv('MYHUBON_PASSWORD')
 
-if not BEARER_TOKEN:
-    print("❌ MYHUBON_BEARER_TOKEN secret이 설정되지 않았습니다.")
+if not EMAIL or not PASSWORD:
+    print("❌ MYHUBON_EMAIL 또는 MYHUBON_PASSWORD secret이 설정되지 않았습니다.")
     exit(1)
 
-headers = {
-    "Authorization": f"Bearer {BEARER_TOKEN}",
-    "User-Agent": "Mozilla/5.0",
-    "X-Client-Type": "ADMIN",
-    "Content-Type": "application/json",
-    "Origin": "https://seller.myhubon.com",
-    "Referer": "https://seller.myhubon.com/"
+# ====================== 공통 헤더 ======================
+BASE_HEADERS = {
+    "Content-Type":       "application/json",
+    "User-Agent":         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0",
+    "sec-ch-ua":          '"Chromium";v="146", "Not-A.Brand";v="24", "Microsoft Edge";v="146"',
+    "sec-ch-ua-mobile":   "?0",
+    "sec-ch-ua-platform": '"Windows"',
+    "Origin":             "https://seller.myhubon.com",
+    "Referer":            "https://seller.myhubon.com/",
+    "X-Client-Type":      "ADMIN",
+    "accept":             "application/json, text/plain, */*",
+}
+
+# ====================== STEP 1: 로그인 → 토큰 발급 ======================
+print("🔐 로그인 중...")
+
+login_resp = requests.post(
+    "https://api.myhubon.com/auth/login",
+    headers=BASE_HEADERS,
+    json={"email_id": EMAIL, "password": PASSWORD},
+    timeout=30
+)
+
+if login_resp.status_code != 200:
+    print(f"❌ 로그인 실패: {login_resp.status_code}")
+    print("응답:", login_resp.text[:800])
+    exit(1)
+
+login_data = login_resp.json()
+
+# ✅ 확인된 응답 구조: {"state": {"accessToken": "...", "refreshToken": "..."}}
+def extract_token(data):
+    candidates = [
+        data.get("state", {}).get("accessToken")  if isinstance(data.get("state"), dict) else None,
+        data.get("state", {}).get("access_token") if isinstance(data.get("state"), dict) else None,
+        data.get("accessToken"),
+        data.get("access_token"),
+        data.get("token"),
+        data.get("data", {}).get("accessToken")   if isinstance(data.get("data"), dict) else None,
+        data.get("data", {}).get("access_token")  if isinstance(data.get("data"), dict) else None,
+    ]
+    return next((t for t in candidates if t), None)
+
+token = extract_token(login_data)
+
+if not token:
+    print("❌ 응답에서 토큰을 찾을 수 없습니다.")
+    print("전체 응답 JSON:", login_resp.text[:1000])
+    exit(1)
+
+print(f"✅ 로그인 성공 (토큰 앞 20자: {token[:20]}...)")
+
+# ====================== STEP 2: 엑셀 다운로드 ======================
+print("📥 엑셀 다운로드 시작...")
+
+download_headers = {
+    **BASE_HEADERS,
+    "Authorization": f"Bearer {token}",
+}
+
+payload = {
+    "startDate": "2024-01-01",
+    "endDate":   datetime.now().strftime("%Y-%m-%d"),
 }
 
 os.makedirs(DATA_DIR, exist_ok=True)
 
-print("📥 엑셀 다운로드 시작...")
+dl_resp = requests.post(
+    "https://api.myhubon.com/admin/product/manage/excel-download",
+    headers=download_headers,
+    json=payload,
+    timeout=120
+)
 
-# ==================== 요청 payload (전체 데이터 받기 위해 수정) ====================
-payload = {
-    "startDate": "2024-01-01",                    # 충분히 과거 날짜로 설정 (전체 데이터 원할 경우)
-    "endDate": datetime.now().strftime("%Y-%m-%d"),  # 오늘 날짜까지
-    # 필요 시 아래 항목 추가 (관리자 페이지 Network 탭에서 확인 후 사용)
-    # "status": "ALL",
-    # "searchType": "ALL",
-    # "page": 1,
-    # "limit": 50000
-}
-
-response = requests.post(URL, headers=headers, json=payload, timeout=120)
-
-if response.status_code != 200:
-    print(f"❌ 다운로드 실패: {response.status_code}")
-    print("응답 내용:", response.text[:800])
+if dl_resp.status_code != 200:
+    print(f"❌ 다운로드 실패: {dl_resp.status_code}")
+    print("응답:", dl_resp.text[:500])
     exit(1)
 
-# 파일 저장
 with open(TEMP_FILE, "wb") as f:
-    f.write(response.content)
+    f.write(dl_resp.content)
 
 if os.path.exists(DATA_FILE):
     os.remove(DATA_FILE)
-
 os.rename(TEMP_FILE, DATA_FILE)
 
-print(f"✅ {DATA_FILE} 다운로드 및 교체 완료 (파일 크기: {os.path.getsize(DATA_FILE) / (1024*1024):.2f} MB)")
+size_mb = os.path.getsize(DATA_FILE) / (1024 * 1024)
+print(f"✅ {DATA_FILE} 저장 완료 ({size_mb:.2f} MB)")
 
-# ====================== Git Push ======================
-today = datetime.now().strftime("%Y-%m-%d %H:%M:%S")   # ← 날짜 변수 여기서 선언
+# ====================== STEP 3: Git Push ======================
+today = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-subprocess.run(["git", "config", "user.name", "Data Updater Bot"], check=True)
+subprocess.run(["git", "config", "user.name",  "Data Updater Bot"],       check=True)
 subprocess.run(["git", "config", "user.email", "bot@jjangse1.github.io"], check=True)
-
 subprocess.run(["git", "add", DATA_FILE], check=True)
 
-# 변경사항 확인
 result = subprocess.run(["git", "diff", "--cached", "--quiet"], capture_output=True)
 
-if result.returncode != 0:   # 변경사항 있음
+if result.returncode != 0:
     subprocess.run(["git", "commit", "-m", f"auto: data.xlsx 업데이트 ({today})"], check=True)
     subprocess.run(["git", "push"], check=True)
     print("✅ Git commit & push 완료")
