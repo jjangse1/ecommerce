@@ -1,11 +1,13 @@
 """
 fetch_gsc.py — Google Search Console 전체 데이터 수집
 수집 항목:
-  - daily   : 날짜별 클릭/노출/CTR/순위 (90일)
-  - queries : 인기 검색어 Top 20
-  - countries: 국가별 클릭/노출/CTR/순위 Top 15
-  - devices : 기기별 클릭/노출/CTR/순위
-  - pages   : 인기 페이지 Top 15
+  - daily         : 날짜별 클릭/노출/CTR/순위 (90일)
+  - queries       : 인기 검색어 Top 20
+  - countries     : 국가별 클릭/노출/CTR/순위 Top 15 (전체 기간 합계)
+  - devices       : 기기별 클릭/노출/CTR/순위 (전체 기간 합계)
+  - pages         : 인기 페이지 Top 15
+  - daily_country : 날짜×국가별 일별 데이터 → 대시보드 날짜 필터 연동용
+  - daily_device  : 날짜×기기별 일별 데이터 → 대시보드 날짜 필터 연동용
 모든 항목이 gsc-data.json 에 저장되어 index.html 이 자동으로 읽습니다.
 """
 
@@ -58,28 +60,7 @@ def query_gsc(dimensions, row_limit=100, extra=None):
         body.update(extra)
     return service.searchanalytics().query(siteUrl=SITE_URL, body=body).execute()
 
-# ════════════════════════════════════════════════════════════
-# 1. 날짜별 집계 (90일)
-# ════════════════════════════════════════════════════════════
-print("📡 [1/5] 날짜별 데이터 수집 중...")
-resp_daily = query_gsc(["date"], row_limit=90)
-daily_data = [parse_row(r, "date") for r in resp_daily.get("rows", [])]
-daily_data.sort(key=lambda r: r["date"])
-
-# ════════════════════════════════════════════════════════════
-# 2. 인기 검색어 Top 20
-# ════════════════════════════════════════════════════════════
-print("📡 [2/5] 검색어 데이터 수집 중...")
-resp_queries = query_gsc(["query"], row_limit=20)
-queries_data = [parse_row(r, "query") for r in resp_queries.get("rows", [])]
-queries_data.sort(key=lambda r: r["clicks"], reverse=True)
-
-# ════════════════════════════════════════════════════════════
-# 3. 국가별 Top 15
-# ════════════════════════════════════════════════════════════
-print("📡 [3/5] 국가별 데이터 수집 중...")
-
-# 국가 코드 → 한국어 이름 매핑
+# 국가 코드 → 한국어 이름 매핑 (공통 사용)
 COUNTRY_NAMES = {
     "kor":"한국","usa":"미국","jpn":"일본","chn":"중국","ind":"인도",
     "twn":"대만","sgp":"싱가포르","mys":"말레이시아","deu":"독일","gbr":"영국",
@@ -88,6 +69,29 @@ COUNTRY_NAMES = {
     "ita":"이탈리아","esp":"스페인","mex":"멕시코","tur":"터키","sau":"사우디아라비아",
     "are":"UAE","rus":"러시아","pol":"폴란드","swe":"스웨덴","che":"스위스",
 }
+
+DEVICE_NAMES = {"DESKTOP":"데스크톱","MOBILE":"모바일","TABLET":"태블릿"}
+
+# ════════════════════════════════════════════════════════════
+# 1. 날짜별 집계 (90일)
+# ════════════════════════════════════════════════════════════
+print("📡 [1/7] 날짜별 데이터 수집 중...")
+resp_daily = query_gsc(["date"], row_limit=90)
+daily_data = [parse_row(r, "date") for r in resp_daily.get("rows", [])]
+daily_data.sort(key=lambda r: r["date"])
+
+# ════════════════════════════════════════════════════════════
+# 2. 인기 검색어 Top 20
+# ════════════════════════════════════════════════════════════
+print("📡 [2/7] 검색어 데이터 수집 중...")
+resp_queries = query_gsc(["query"], row_limit=20)
+queries_data = [parse_row(r, "query") for r in resp_queries.get("rows", [])]
+queries_data.sort(key=lambda r: r["clicks"], reverse=True)
+
+# ════════════════════════════════════════════════════════════
+# 3. 국가별 Top 15 (전체 기간 합계)
+# ════════════════════════════════════════════════════════════
+print("📡 [3/7] 국가별 데이터 수집 중...")
 resp_countries = query_gsc(["country"], row_limit=15)
 countries_data = []
 for r in resp_countries.get("rows", []):
@@ -99,11 +103,9 @@ for r in resp_countries.get("rows", []):
 countries_data.sort(key=lambda r: r["clicks"], reverse=True)
 
 # ════════════════════════════════════════════════════════════
-# 4. 기기별
+# 4. 기기별 (전체 기간 합계)
 # ════════════════════════════════════════════════════════════
-print("📡 [4/5] 기기별 데이터 수집 중...")
-
-DEVICE_NAMES = {"DESKTOP":"데스크톱","MOBILE":"모바일","TABLET":"태블릿"}
+print("📡 [4/7] 기기별 데이터 수집 중...")
 resp_devices = query_gsc(["device"], row_limit=10)
 devices_data = []
 for r in resp_devices.get("rows", []):
@@ -116,25 +118,68 @@ devices_data.sort(key=lambda r: r["clicks"], reverse=True)
 # ════════════════════════════════════════════════════════════
 # 5. 인기 페이지 Top 15
 # ════════════════════════════════════════════════════════════
-print("📡 [5/5] 페이지별 데이터 수집 중...")
+print("📡 [5/7] 페이지별 데이터 수집 중...")
 resp_pages = query_gsc(["page"], row_limit=15)
 pages_data = [parse_row(r, "page") for r in resp_pages.get("rows", [])]
 pages_data.sort(key=lambda r: r["clicks"], reverse=True)
 
 # ════════════════════════════════════════════════════════════
+# 6. 날짜×국가 (daily_country) — 대시보드 날짜 필터 연동용
+#    90일 × 최대 15개국 = 최대 1,350행 → rowLimit 2000으로 여유있게
+# ════════════════════════════════════════════════════════════
+print("📡 [6/7] 날짜×국가 일별 데이터 수집 중...")
+resp_dc = query_gsc(["date", "country"], row_limit=2000)
+daily_country = []
+for r in resp_dc.get("rows", []):
+    date_val = r["keys"][0]
+    code     = r["keys"][1].lower()
+    daily_country.append({
+        "date":    date_val,
+        "country": COUNTRY_NAMES.get(code, code.upper()),
+        "code":    code,
+        "clicks":  int(r.get("clicks", 0)),
+        "impr":    int(r.get("impressions", 0)),
+        "ctr":     round(float(r.get("ctr", 0)), 4),
+        "pos":     round(float(r.get("position", 0)), 1),
+    })
+daily_country.sort(key=lambda r: (r["date"], r["country"]))
+
+# ════════════════════════════════════════════════════════════
+# 7. 날짜×기기 (daily_device) — 대시보드 날짜 필터 연동용
+#    90일 × 3기기 = 최대 270행
+# ════════════════════════════════════════════════════════════
+print("📡 [7/7] 날짜×기기 일별 데이터 수집 중...")
+resp_dd = query_gsc(["date", "device"], row_limit=500)
+daily_device = []
+for r in resp_dd.get("rows", []):
+    date_val = r["keys"][0]
+    raw      = r["keys"][1].upper()
+    daily_device.append({
+        "date":   date_val,
+        "device": DEVICE_NAMES.get(raw, raw),
+        "clicks": int(r.get("clicks", 0)),
+        "impr":   int(r.get("impressions", 0)),
+        "ctr":    round(float(r.get("ctr", 0)), 4),
+        "pos":    round(float(r.get("position", 0)), 1),
+    })
+daily_device.sort(key=lambda r: (r["date"], r["device"]))
+
+# ════════════════════════════════════════════════════════════
 # 저장
 # ════════════════════════════════════════════════════════════
 output = {
-    "updated":   datetime.utcnow().strftime("%Y-%m-%d"),
+    "updated": datetime.utcnow().strftime("%Y-%m-%d"),
     "period": {
         "start": start_date.strftime("%Y-%m-%d"),
         "end":   end_date.strftime("%Y-%m-%d"),
     },
-    "daily":     daily_data,
-    "queries":   queries_data,
-    "countries": countries_data,
-    "devices":   devices_data,
-    "pages":     pages_data,
+    "daily":         daily_data,
+    "queries":       queries_data,
+    "countries":     countries_data,
+    "devices":       devices_data,
+    "pages":         pages_data,
+    "daily_country": daily_country,   # ← 신규 추가
+    "daily_device":  daily_device,    # ← 신규 추가
 }
 
 with open("gsc-data.json", "w", encoding="utf-8") as f:
@@ -144,12 +189,14 @@ with open("gsc-data.json", "w", encoding="utf-8") as f:
 total_clicks = sum(r["clicks"] for r in daily_data)
 total_impr   = sum(r["impr"]   for r in daily_data)
 print(f"\n✅ GSC 데이터 수집 완료")
-print(f"   기간      : {start_date} ~ {end_date} ({len(daily_data)}일)")
-print(f"   총 클릭   : {total_clicks:,}  |  총 노출: {total_impr:,}")
+print(f"   기간           : {start_date} ~ {end_date} ({len(daily_data)}일)")
+print(f"   총 클릭        : {total_clicks:,}  |  총 노출: {total_impr:,}")
 if total_impr:
-    print(f"   평균 CTR  : {total_clicks/total_impr*100:.1f}%")
-print(f"   검색어    : {len(queries_data)}개")
-print(f"   국가      : {len(countries_data)}개")
-print(f"   기기      : {len(devices_data)}개")
-print(f"   페이지    : {len(pages_data)}개")
-print(f"   저장 완료 : gsc-data.json")
+    print(f"   평균 CTR       : {total_clicks/total_impr*100:.1f}%")
+print(f"   검색어         : {len(queries_data)}개")
+print(f"   국가           : {len(countries_data)}개")
+print(f"   기기           : {len(devices_data)}개")
+print(f"   페이지         : {len(pages_data)}개")
+print(f"   날짜×국가 행수 : {len(daily_country)}행")
+print(f"   날짜×기기 행수 : {len(daily_device)}행")
+print(f"   저장 완료      : gsc-data.json")
