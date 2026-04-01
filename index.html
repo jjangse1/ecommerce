@@ -741,6 +741,7 @@ function processWb(wb, filename, source){
   ALL_ROWS_RAW=rows;
   TOTAL_ROWS=rows.length;
   window._COND_COL=condCol; window._CAT_COL=catCol; window._BRAND_COL=brandCol;
+  window._DATE_COL=col; // 날짜 컬럼명 저장 (상품속성 날짜 필터용)
 
   // ── 상품 현황 KPI 집계 ──
   const statusCol = Object.keys(s).find(k=>/status/i.test(k));
@@ -940,7 +941,7 @@ function renderDashboard(dates,bizDays,from,to){
     buildPatternInsights(wdCounts,wdNames,hourCounts,avgPerBizDay,maxDay,maxDayKey);
     buildBnInsights(wdCounts,wdNames,avgPerBizDay);
     buildHolidayTable(holidaysInRange);
-    buildProductAttrCharts();
+    buildProductAttrCharts(from, to);
   },60);
 }
 
@@ -1094,17 +1095,31 @@ function buildProductSummaryKPI({total,active,soldOut,noPriceCount,noPricePct,to
   panel.style.display = 'block';
 }
 
-function buildProductAttrCharts(){
+function buildProductAttrCharts(from, to){
   const condCol  = window._COND_COL;
   const catCol   = window._CAT_COL;
   const brandCol = window._BRAND_COL;
-  const rows     = ALL_ROWS_RAW;
+  const dateCol  = window._DATE_COL;
   const section  = document.getElementById('productAttrSection');
 
-  if(!rows.length || (!condCol && !catCol && !brandCol)){
+  if(!ALL_ROWS_RAW.length || (!condCol && !catCol && !brandCol)){
     if(section) section.style.display='none';
     return;
   }
+
+  // 날짜 필터 적용 — from/to 있으면 해당 기간 행만 사용
+  let rows = ALL_ROWS_RAW;
+  if(from && to && dateCol){
+    rows = ALL_ROWS_RAW.filter(r=>{
+      let v = r[dateCol];
+      if(!v) return false;
+      if(typeof v==='number'){ const d=XLSX.SSF.parse_date_code(v); v=`${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`; }
+      else v = String(v).slice(0,10);
+      return v>=from && v<=to;
+    });
+  }
+  if(!rows.length) rows = ALL_ROWS_RAW; // fallback: 필터 결과 없으면 전체 사용
+
   if(section) section.style.display='block';
 
   // ── 집계 헬퍼 ──
@@ -1326,14 +1341,15 @@ const GSC_CHART = [
 window._GSC_CHART = GSC_CHART;
 
 // ── 초기값: 하드코딩 fallback (gsc-data.json 로드 전까지 사용) ──
-window._GSC_QUERIES   = [];
-window._GSC_COUNTRIES = [];
-window._GSC_DEVICES   = [];
-window._GSC_PAGES     = [];
+window._GSC_QUERIES       = [];
+window._GSC_COUNTRIES     = [];
+window._GSC_DEVICES       = [];
+window._GSC_PAGES         = [];
+window._GSC_DAILY_COUNTRY = [];  // 날짜×국가 (필터 연동)
+window._GSC_DAILY_DEVICE  = [];  // 날짜×기기 (필터 연동)
 
 // ════════════════════════════════════════════════════════════
-// gsc-data.json 자동 fetch — daily + queries + countries + devices + pages
-// fetch_gsc.py 가 매일 GitHub Actions 로 이 파일을 갱신합니다.
+// gsc-data.json 자동 fetch
 // ════════════════════════════════════════════════════════════
 (async function fetchGscJson(){
   const candidates = ['gsc-data.json', 'scripts/gsc-data.json', '../gsc-data.json'];
@@ -1344,67 +1360,39 @@ window._GSC_PAGES     = [];
       const json = await res.json();
       if(!json || !json.daily || !json.daily.length) continue;
 
-      // ── daily ──
       window._GSC_CHART = json.daily.map(d=>({
         date:d.date, clicks:d.clicks, impr:d.impr, ctr:d.ctr, pos:d.pos
       }));
       window._GSC_CHART.sort((a,b)=>a.date.localeCompare(b.date));
 
-      // ── queries ──
-      if(json.queries && json.queries.length){
-        window._GSC_QUERIES = json.queries.map(q=>({
-          query:q.query, clicks:q.clicks, impr:q.impr, ctr:q.ctr, pos:q.pos
-        }));
-      }
+      if(json.queries   ?.length) window._GSC_QUERIES   = json.queries.map(q=>({query:q.query,clicks:q.clicks,impr:q.impr,ctr:q.ctr,pos:q.pos}));
+      if(json.countries ?.length) window._GSC_COUNTRIES = json.countries.map(c=>({country:c.country,clicks:c.clicks,impr:c.impr,ctr:c.ctr,pos:c.pos}));
+      if(json.devices   ?.length) window._GSC_DEVICES   = json.devices.map(d=>({device:d.device,clicks:d.clicks,impr:d.impr,ctr:d.ctr,pos:d.pos}));
+      if(json.pages     ?.length) window._GSC_PAGES     = json.pages.map(p=>({page:p.page,clicks:p.clicks,impr:p.impr||0,ctr:p.ctr,pos:p.pos}));
 
-      // ── countries ──
-      if(json.countries && json.countries.length){
-        window._GSC_COUNTRIES = json.countries.map(c=>({
-          country:c.country, clicks:c.clicks, impr:c.impr, ctr:c.ctr, pos:c.pos
-        }));
-      }
+      // 날짜×국가 / 날짜×기기 (필터 연동용)
+      if(json.daily_country?.length) window._GSC_DAILY_COUNTRY = json.daily_country;
+      if(json.daily_device ?.length) window._GSC_DAILY_DEVICE  = json.daily_device;
 
-      // ── devices ──
-      if(json.devices && json.devices.length){
-        window._GSC_DEVICES = json.devices.map(d=>({
-          device:d.device, clicks:d.clicks, impr:d.impr, ctr:d.ctr, pos:d.pos
-        }));
-      }
-
-      // ── pages ──
-      if(json.pages && json.pages.length){
-        window._GSC_PAGES = json.pages.map(p=>({
-          page:p.page, clicks:p.clicks, impr:p.impr||0, ctr:p.ctr, pos:p.pos
-        }));
-      }
-
-      // ── 배지 & 노트 업데이트 ──
       const period = json.period
         ? `${json.period.start} ~ ${json.period.end}`
         : `${json.daily[0]?.date} ~ ${json.daily[json.daily.length-1]?.date}`;
       const badge = document.getElementById('gscDataBadge');
-      if(badge){
-        badge.textContent = `🔄 자동갱신 · ${json.updated||'최신'}`;
-        badge.style.display='inline-flex';
-      }
+      if(badge){ badge.textContent=`🔄 자동갱신 · ${json.updated||'최신'}`; badge.style.display='inline-flex'; }
       const note = document.getElementById('gscDataFallbackNote');
-      if(note) note.textContent =
-        `✅ gsc-data.json 로드됨 · ${json.daily.length}일 · ${period}`;
+      if(note) note.textContent = `✅ gsc-data.json 로드됨 · ${json.daily.length}일 · ${period}`;
 
-      // ── GSC 탭이 열려있으면 즉시 재렌더 ──
       const activeTab = document.querySelector('.tab.active');
       if(activeTab && activeTab.dataset.tab==='gsc'){
         const from=document.getElementById('dateFrom').value;
         const to=document.getElementById('dateTo').value;
         renderGSC(from,to);
       }
-      return; // 성공 → 루프 종료
-
-    } catch(e){ /* 다음 경로 시도 */ }
+      return;
+    } catch(e){ /* 다음 경로 */ }
   }
-  // 모든 경로 실패
   const note = document.getElementById('gscDataFallbackNote');
-  if(note) note.textContent = '⚠ gsc-data.json 미발견 — 데이터 없음 (fetch_gsc.py 실행 확인)';
+  if(note) note.textContent = '⚠ gsc-data.json 미발견 — fetch_gsc.py 실행 확인';
 })();
 
 let gscRendered = false;
@@ -1451,16 +1439,15 @@ function movingAvg(arr, n=7){
 }
 
 function renderGSC(from, to){
-  const GSC_CHART     = window._GSC_CHART   || [];
-  const GSC_QUERIES   = window._GSC_QUERIES  || [];
-  const GSC_COUNTRIES = window._GSC_COUNTRIES|| [];
-  const GSC_DEVICES   = window._GSC_DEVICES  || [];
-  const GSC_PAGES     = window._GSC_PAGES    || [];
+  const GSC_CHART         = window._GSC_CHART         || [];
+  const GSC_QUERIES       = window._GSC_QUERIES        || [];
+  const GSC_COUNTRIES     = window._GSC_COUNTRIES      || [];
+  const GSC_DEVICES       = window._GSC_DEVICES        || [];
+  const GSC_PAGES         = window._GSC_PAGES          || [];
+  const GSC_DAILY_COUNTRY = window._GSC_DAILY_COUNTRY  || [];
+  const GSC_DAILY_DEVICE  = window._GSC_DAILY_DEVICE   || [];
 
-  if(!GSC_CHART.length){
-    // 아직 JSON 미로드 상태 — 렌더 스킵 (fetch 완료 후 재호출됨)
-    return;
-  }
+  if(!GSC_CHART.length) return;
 
   const f = from || GSC_CHART[0].date;
   const t = to   || GSC_CHART[GSC_CHART.length-1].date;
@@ -1479,13 +1466,50 @@ function renderGSC(from, to){
   const validPos    = filtered.filter(d=>d.pos>0);
   const avgPos      = validPos.length ? validPos.reduce((a,d)=>a+d.pos,0)/validPos.length : 0;
 
+  // ── 날짜 필터 적용된 국가별 집계 ──
+  // daily_country 있으면 필터 연동, 없으면 전체 합계(GSC_COUNTRIES) fallback
+  function getFilteredCountries(){
+    if(!GSC_DAILY_COUNTRY.length) return GSC_COUNTRIES;
+    const filt = GSC_DAILY_COUNTRY.filter(r=>r.date>=f&&r.date<=t);
+    const m={};
+    filt.forEach(r=>{
+      if(!m[r.country]) m[r.country]={country:r.country,clicks:0,impr:0,ctrSum:0,posSum:0,cnt:0};
+      m[r.country].clicks+=r.clicks; m[r.country].impr+=r.impr;
+      if(r.pos>0){m[r.country].ctrSum+=r.ctr; m[r.country].posSum+=r.pos; m[r.country].cnt++;}
+    });
+    return Object.values(m).map(c=>({
+      country:c.country, clicks:c.clicks, impr:c.impr,
+      ctr: c.clicks>0?+(c.clicks/(c.impr||1)).toFixed(4):0,
+      pos: c.cnt>0?+(c.posSum/c.cnt).toFixed(1):0
+    })).sort((a,b)=>b.clicks-a.clicks).slice(0,8);
+  }
+
+  // ── 날짜 필터 적용된 기기별 집계 ──
+  function getFilteredDevices(){
+    if(!GSC_DAILY_DEVICE.length) return GSC_DEVICES;
+    const filt = GSC_DAILY_DEVICE.filter(r=>r.date>=f&&r.date<=t);
+    const m={};
+    filt.forEach(r=>{
+      if(!m[r.device]) m[r.device]={device:r.device,clicks:0,impr:0,posSum:0,cnt:0};
+      m[r.device].clicks+=r.clicks; m[r.device].impr+=r.impr;
+      if(r.pos>0){m[r.device].posSum+=r.pos; m[r.device].cnt++;}
+    });
+    return Object.values(m).map(d=>({
+      device:d.device, clicks:d.clicks, impr:d.impr,
+      ctr: d.clicks>0?+(d.clicks/(d.impr||1)).toFixed(4):0,
+      pos: d.cnt>0?+(d.posSum/d.cnt).toFixed(1):0
+    })).sort((a,b)=>b.clicks-a.clicks);
+  }
+
+  const filtCountries = getFilteredCountries();
+  const filtDevices   = getFilteredDevices();
+
   // ── KPI ──
   document.getElementById('gsc-clicks').textContent = totalClicks.toLocaleString();
   document.getElementById('gsc-impr').textContent   = totalImpr.toLocaleString();
   document.getElementById('gsc-ctr').textContent    = avgCtr.toFixed(1)+'%';
   document.getElementById('gsc-pos').textContent    = avgPos.toFixed(1);
 
-  // ── 기간 배지 업데이트 ──
   ['badge-query-period','badge-country-period','badge-device-period','badge-page-period'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.textContent=periodLabel;
   });
@@ -1582,15 +1606,14 @@ function renderGSC(from, to){
     }]
   });
 
-  // ── 4. 국가별 클릭+노출 (날짜 필터 연동 — 전체 데이터 기준) ──
+  // ── 4. 국가별 클릭+노출 (날짜 필터 연동) ──
   destroyChart('gscCountryChart');
   const ctx4=document.getElementById('gscCountryChart').getContext('2d');
   const cColors=['#2563EB','#059669','#D97706','#7C3AED','#DC2626','#0891B2','#65A30D','#9333EA'];
-  const cClicks=GSC_COUNTRIES.map(c=>c.clicks), cImpr=GSC_COUNTRIES.map(c=>c.impr);
-  const maxC=Math.max(...cClicks)||1;
+  const cClicks=filtCountries.map(c=>c.clicks), cImpr=filtCountries.map(c=>c.impr);
   charts['gscCountryChart']=new Chart(ctx4,{
     type:'bar',
-    data:{labels:GSC_COUNTRIES.map(c=>c.country),datasets:[
+    data:{labels:filtCountries.map(c=>c.country),datasets:[
       {label:'클릭수',data:cClicks,backgroundColor:cColors.map(c=>c+'bb'),borderColor:cColors,borderWidth:1.5,borderRadius:5,yAxisID:'y'},
       {label:'노출수',data:cImpr,backgroundColor:'#94A3B820',borderColor:'#94A3B8',borderWidth:1,borderRadius:3,yAxisID:'y1'}
     ]},
@@ -1618,14 +1641,14 @@ function renderGSC(from, to){
     }]
   });
 
-  // ── 5. 기기별 — 클릭+노출 나란히 바 ──
+  // ── 5. 기기별 — 클릭+노출 (날짜 필터 연동) ──
   destroyChart('gscDeviceChart');
   const ctx5=document.getElementById('gscDeviceChart').getContext('2d');
-  const devClicks=GSC_DEVICES.map(d=>d.clicks), devImpr=GSC_DEVICES.map(d=>d.impr);
+  const devClicks=filtDevices.map(d=>d.clicks), devImpr=filtDevices.map(d=>d.impr);
   const devColors=['#2563EB','#059669','#D97706'];
   charts['gscDeviceChart']=new Chart(ctx5,{
     type:'bar',
-    data:{labels:GSC_DEVICES.map(d=>d.device),datasets:[
+    data:{labels:filtDevices.map(d=>d.device),datasets:[
       {label:'클릭수',data:devClicks,backgroundColor:devColors.map(c=>c+'cc'),borderColor:devColors,borderWidth:1.5,borderRadius:5},
       {label:'노출수',data:devImpr,backgroundColor:devColors.map(c=>c+'22'),borderColor:devColors,borderWidth:1,borderRadius:3}
     ]},
@@ -1736,10 +1759,10 @@ function renderGSC(from, to){
     }]
   });
 
-  // ── 9. 국가별 CTR vs 게재순위 버블 ──
+  // ── 9. 국가별 CTR vs 게재순위 버블 (날짜 필터 연동) ──
   destroyChart('gscCountryMatrixChart');
   const ctx9=document.getElementById('gscCountryMatrixChart').getContext('2d');
-  const cMatData=GSC_COUNTRIES.map((c,i)=>({
+  const cMatData=filtCountries.map((c,i)=>({
     x: +c.pos.toFixed(2),
     y: +(c.ctr*100).toFixed(1),
     r: Math.max(5, Math.sqrt(c.clicks)*3.5),
@@ -1820,14 +1843,14 @@ function renderGSC(from, to){
     }]
   });
 
-  // ── 11. 기기별 CTR 비교 ──
+  // ── 11. 기기별 CTR 비교 (날짜 필터 연동) ──
   destroyChart('gscDeviceCtrChart');
   const ctx11=document.getElementById('gscDeviceCtrChart').getContext('2d');
-  const devCtr=GSC_DEVICES.map(d=>+(d.ctr*100).toFixed(1));
-  const devPos=GSC_DEVICES.map(d=>d.pos);
+  const devCtr=filtDevices.map(d=>+(d.ctr*100).toFixed(1));
+  const devPos=filtDevices.map(d=>d.pos);
   charts['gscDeviceCtrChart']=new Chart(ctx11,{
     type:'bar',
-    data:{labels:GSC_DEVICES.map(d=>d.device),datasets:[
+    data:{labels:filtDevices.map(d=>d.device),datasets:[
       {label:'CTR(%)',data:devCtr,backgroundColor:devColors.map(c=>c+'cc'),borderColor:devColors,borderWidth:1.5,borderRadius:5,yAxisID:'y'},
       {label:'평균순위',data:devPos,backgroundColor:devColors.map(c=>c+'33'),borderColor:devColors,borderWidth:1,borderRadius:3,yAxisID:'y1',type:'line',
        tension:0.3,pointRadius:6,pointHoverRadius:8}
@@ -1917,7 +1940,7 @@ function renderGSC(from, to){
       </table>`;
   }
 
-  // ── 인사이트 (선택 기간 기반 동적 계산 — 모두 실시간 데이터) ──
+  // ── 인사이트 (모두 실시간 — 날짜 필터 기반) ──
   const half=Math.floor(filtered.length/2);
   const recentC=filtered.slice(half).reduce((a,d)=>a+d.clicks,0);
   const prevC=filtered.slice(0,half).reduce((a,d)=>a+d.clicks,0);
@@ -1926,8 +1949,9 @@ function renderGSC(from, to){
   const bottomDow=dow[dowCounts.indexOf(Math.min(...dowCounts))];
   const highCtrPage=GSC_PAGES.length ? GSC_PAGES.reduce((a,b)=>b.ctr>a.ctr?b:a) : null;
   const opportunityQ=GSC_QUERIES.filter(q=>q.impr>10&&q.ctr<0.05);
-  const allDevC=GSC_DEVICES.reduce((a,d)=>a+d.clicks,0)||1;
-  const mobileShare=(GSC_DEVICES.find(d=>d.device.includes('모바일')||d.device==='MOBILE')?.clicks||0)/allDevC*100;
+  // 모바일 비중: 날짜 필터 적용된 filtDevices 사용
+  const allDevC=filtDevices.reduce((a,d)=>a+d.clicks,0)||1;
+  const mobileShare=(filtDevices.find(d=>d.device.includes('모바일'))?.clicks||0)/allDevC*100;
 
   const insights=[
     {icon:'📈',text:`선택 기간 총 클릭 <strong>${totalClicks.toLocaleString()}회</strong> · 노출 <strong>${totalImpr.toLocaleString()}회</strong>. 전반 대비 후반 클릭 <strong style="color:${growth>=0?'var(--accent3)':'var(--danger)'}">${growth>=0?'+':''}${growth.toFixed(1)}%</strong>.`},
