@@ -1347,6 +1347,8 @@ window._GSC_DEVICES       = [];
 window._GSC_PAGES         = [];
 window._GSC_DAILY_COUNTRY = [];  // 날짜×국가 (필터 연동)
 window._GSC_DAILY_DEVICE  = [];  // 날짜×기기 (필터 연동)
+window._GSC_DAILY_QUERY   = [];  // 날짜×검색어 (필터 연동)
+window._GSC_DAILY_PAGE    = [];  // 날짜×페이지 (필터 연동)
 
 // ════════════════════════════════════════════════════════════
 // gsc-data.json 자동 fetch
@@ -1755,7 +1757,7 @@ function renderGSC(from, to){
     }
   });
 
-  // ── 8. 검색어 기회 버블 (노출 vs CTR, 버블=클릭) — 날짜 필터 연동 ──
+  // ── 8. 검색어 기회 버블 (노출 vs CTR, 버블=클릭) ──
   destroyChart('gscBubbleChart');
   const ctx8=document.getElementById('gscBubbleChart').getContext('2d');
   const filtQueriesForBubble = getFilteredQueries();
