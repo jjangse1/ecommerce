@@ -464,7 +464,7 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
       <!-- Top queries -->
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title"><span class="dot" style="background:var(--accent3)"></span> 인기 검색어 Top 10</div>
+          <div class="panel-title"><span class="dot" style="background:var(--accent3)"></span> 인기 검색어 Top 15</div>
           <span class="panel-badge" id="badge-query-period"></span>
         </div>
         <div id="gscQueryTable"></div>
@@ -472,7 +472,7 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
       <!-- Top pages -->
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title"><span class="dot" style="background:var(--accent)"></span> 인기 페이지 Top 10</div>
+          <div class="panel-title"><span class="dot" style="background:var(--accent)"></span> 인기 페이지 Top 15</div>
           <span class="panel-badge" id="badge-page-period"></span>
         </div>
         <div id="gscPageTable"></div>
@@ -1507,7 +1507,7 @@ function renderGSC(from, to){
   // ── 날짜 필터 적용된 검색어 집계 ──
   function getFilteredQueries(){
     const dq = window._GSC_DAILY_QUERY || [];
-    if(!dq.length) return GSC_QUERIES;
+    if(!dq.length) return GSC_QUERIES.slice(0, 15);
     const filt = dq.filter(r => r.date >= f && r.date <= t);
     const m = {};
     filt.forEach(r => {
@@ -1522,13 +1522,13 @@ function renderGSC(from, to){
       impr:   q.impr,
       ctr:    q.impr > 0 ? +(q.clicks / q.impr).toFixed(4) : 0,
       pos:    q.cnt  > 0 ? +(q.posSum / q.cnt).toFixed(1)  : 0,
-    })).sort((a,b) => b.clicks - a.clicks).slice(0, 10);
+    })).sort((a,b) => b.clicks - a.clicks).slice(0, 15);
   }
 
   // ── 날짜 필터 적용된 페이지 집계 ──
   function getFilteredPages(){
     const dp = window._GSC_DAILY_PAGE || [];
-    if(!dp.length) return GSC_PAGES;
+    if(!dp.length) return GSC_PAGES.slice(0, 15);
     const filt = dp.filter(r => r.date >= f && r.date <= t);
     const m = {};
     filt.forEach(r => {
@@ -1543,7 +1543,7 @@ function renderGSC(from, to){
       impr:   p.impr,
       ctr:    p.impr > 0 ? +(p.clicks / p.impr).toFixed(4) : 0,
       pos:    p.cnt  > 0 ? +(p.posSum / p.cnt).toFixed(1)  : 0,
-    })).sort((a,b) => b.clicks - a.clicks).slice(0, 10);
+    })).sort((a,b) => b.clicks - a.clicks).slice(0, 15);
   }
 
   const filtCountries = getFilteredCountries();
@@ -1755,16 +1755,18 @@ function renderGSC(from, to){
     }
   });
 
-  // ── 8. 검색어 기회 버블 (노출 vs CTR, 버블=클릭) ──
+  // ── 8. 검색어 기회 버블 (노출 vs CTR, 버블=클릭) — 날짜 필터 연동 ──
   destroyChart('gscBubbleChart');
   const ctx8=document.getElementById('gscBubbleChart').getContext('2d');
-  const bubbleData=GSC_QUERIES.map((q,i)=>({
+  const filtQueriesForBubble = getFilteredQueries();
+  const bubbleData=filtQueriesForBubble.map((q,i)=>({
     x: q.impr,
     y: +(q.ctr*100).toFixed(1),
     r: Math.max(5, Math.sqrt(q.clicks+1)*4),
     label: q.query, clicks: q.clicks
   }));
-  const bColors=['#2563EB','#059669','#D97706','#7C3AED','#DC2626','#0891B2','#65A30D','#9333EA','#F59E0B','#6366F1'];
+  const bColors=['#2563EB','#059669','#D97706','#7C3AED','#DC2626','#0891B2','#65A30D','#9333EA',
+                 '#F59E0B','#6366F1','#14B8A6','#F97316','#8B5CF6','#EC4899','#84CC16'];
   charts['gscBubbleChart']=new Chart(ctx8,{
     type:'bubble',
     data:{datasets:bubbleData.map((d,i)=>({
@@ -1913,7 +1915,7 @@ function renderGSC(from, to){
     plugins:[makeLabelPlugin('#2563EB',devCtr,20,'%')]
   });
 
-  // ── 검색어 테이블 (Top 10) ──
+  // ── 검색어 테이블 (Top 15) ──
   if(!gscRendered){
     document.head.insertAdjacentHTML('beforeend',`<style>
       .gsc-table{width:100%;border-collapse:collapse;font-size:12px}
@@ -1951,7 +1953,7 @@ function renderGSC(from, to){
       </table>`;
   }
 
-  // ── 페이지 테이블 (Top 10) ──
+  // ── 페이지 테이블 (Top 15) ──
   const topPages = getFilteredPages();
   if(!topPages.length){
     document.getElementById('gscPageTable').innerHTML=`<div class="gsc-empty">🔄 페이지 데이터 로딩 중...<br><span style="font-size:11px">gsc-data.json fetch 확인</span></div>`;
