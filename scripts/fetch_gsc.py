@@ -180,6 +180,8 @@ output = {
     "pages":         pages_data,
     "daily_country": daily_country,   # ← 신규 추가
     "daily_device":  daily_device,    # ← 신규 추가
+    "daily_query":   daily_query,   # ← 추가
+    "daily_page":    daily_page,    # ← 추가
 }
 
 with open("gsc-data.json", "w", encoding="utf-8") as f:
