@@ -1613,7 +1613,8 @@ function renderGSC(from, to){
       plugins:{legend:{display:false},tooltip:{...topts,callbacks:{label:i=>` CTR: ${i.raw}%`}},zoom:zoomOpts()},
       scales:{
         x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:10},maxTicksLimit:15}},
-        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11},callback:v=>v+'%'},beginAtZero:true}
+        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11},callback:v=>v+'%'},
+          beginAtZero:true, max:100}
       }
     },
     plugins:[makeLabelPlugin('#D97706',ctrs,90,'%')]
@@ -1624,6 +1625,12 @@ function renderGSC(from, to){
   const ctx3=document.getElementById('gscPosChart').getContext('2d');
   const g3=ctx3.createLinearGradient(0,0,0,260);
   g3.addColorStop(0,'#7C3AED22'); g3.addColorStop(1,'#7C3AED00');
+  // 게재순위 이상치 제거: 상위 5% 제외한 최댓값으로 suggestedMax 계산
+  const validPoses = poses.filter(v=>v!==null&&v!==undefined&&v>0);
+  const sortedPoses = [...validPoses].sort((a,b)=>a-b);
+  const p95Pos = sortedPoses[Math.floor(sortedPoses.length*0.95)] || 20;
+  const posYMax = Math.ceil(p95Pos * 1.25); // 95퍼센타일의 125%로 여유 확보
+
   charts['gscPosChart']=new Chart(ctx3,{
     type:'line',
     data:{labels,datasets:[{label:'게재순위',data:poses,borderColor:'#7C3AED',borderWidth:2,
@@ -1633,19 +1640,22 @@ function renderGSC(from, to){
       plugins:{legend:{display:false},tooltip:{...topts,callbacks:{label:i=>` 순위: ${i.raw}위`}},zoom:zoomOpts()},
       scales:{
         x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:10},maxTicksLimit:15}},
-        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11},callback:v=>v+'위'},beginAtZero:false,
-          reverse:false}
+        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11},callback:v=>v+'위'},
+          beginAtZero:false, min:1, suggestedMax:posYMax}
       }
     },
     plugins:[{
       id:'posDL',
       afterDatasetsDraw(ch){
         if(poses.length > 90) return;
+        const yAxis = ch.scales.y;
         const ctx=ch.ctx, meta=ch.getDatasetMeta(0);
         ctx.save(); ctx.font="500 10px 'DM Mono',monospace";
         ctx.fillStyle='#7C3AED'; ctx.textAlign='center'; ctx.textBaseline='bottom';
         meta.data.forEach((pt,i)=>{
           const v=poses[i]; if(!v&&v!==0) return;
+          // y축 범위 초과 데이터는 레이블 생략
+          if(v > yAxis.max) return;
           ctx.fillText(v+'위', pt.x, pt.y-7);
         });
         ctx.restore();
@@ -1728,7 +1738,8 @@ function renderGSC(from, to){
       plugins:{legend:{display:false},tooltip:{...topts,callbacks:{label:i=>` 클릭: ${i.raw}회`}}},
       scales:{
         x:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:12}}},
-        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}
+        y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true,
+          suggestedMax: dowCounts.length ? Math.ceil(Math.max(...dowCounts) * 1.2) : undefined}
       }
     },
     plugins:[makeLabelPlugin('#2563EB',dowCounts,20)]
@@ -1917,7 +1928,7 @@ function renderGSC(from, to){
     plugins:[makeLabelPlugin('#2563EB',devCtr,20,'%')]
   });
 
-  // ── 검색어 테이블 (Top 15) ──
+  // ── 검색어 테이블 (Top 10) ──
   if(!gscRendered){
     document.head.insertAdjacentHTML('beforeend',`<style>
       .gsc-table{width:100%;border-collapse:collapse;font-size:12px}
@@ -1955,7 +1966,7 @@ function renderGSC(from, to){
       </table>`;
   }
 
-  // ── 페이지 테이블 (Top 15) ──
+  // ── 페이지 테이블 (Top 10) ──
   const topPages = getFilteredPages();
   if(!topPages.length){
     document.getElementById('gscPageTable').innerHTML=`<div class="gsc-empty">🔄 페이지 데이터 로딩 중...<br><span style="font-size:11px">gsc-data.json fetch 확인</span></div>`;
