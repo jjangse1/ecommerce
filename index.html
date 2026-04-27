@@ -614,12 +614,18 @@ function gradFill(ctx,color,h){
 function scales(){
   return {
     x:{ grid:{color:'#E2E0D8'}, ticks:{color:'#9494A0',font:{size:11,family:"'DM Mono',monospace"}} },
-    y:{ grid:{color:'#E2E0D8'}, ticks:{color:'#9494A0',font:{size:11,family:"'DM Mono',monospace"}}, beginAtZero:true,
-      suggestedMax:function(context){
-        const data=context.chart.data.datasets[0].data;
-        if(!data||!data.length) return undefined;
-        return Math.ceil(Math.max(...data)*1.12);
-      }
+    y:{ grid:{color:'#E2E0D8'}, ticks:{color:'#9494A0',font:{size:11,family:"'DM Mono',monospace"}}, beginAtZero:true }
+  };
+}
+// Chart.js afterDataLimits 플러그인: Y축 상단 12% 여백 확보 (긴 기간에도 값 표시 정상 동작)
+function makeYPaddingPlugin(){
+  return {
+    id:'yPad_'+Math.random().toString(36).slice(2,6),
+    afterDataLimits(chart){
+      const yScale=chart.scales.y;
+      if(!yScale) return;
+      const max=yScale.max;
+      if(max>0) yScale.max=Math.ceil(max*1.12);
     }
   };
 }
@@ -818,12 +824,17 @@ function getFilteredDates(){
   });
 }
 
+function parseLocalDate(str){
+  // "YYYY-MM-DD" → 로컬 타임 기준 Date (UTC 파싱으로 인한 하루 밀림 방지)
+  const [y,m,d]=str.split('-').map(Number);
+  return new Date(y,m-1,d);
+}
 function countBizDays(from,to){
   const exWeekend=document.getElementById('toggleWeekend').checked;
   const exHoliday=document.getElementById('toggleHoliday').checked;
   if(!from||!to) return 0;
-  let count=0, cur=new Date(from);
-  const end=new Date(to);
+  let count=0, cur=parseLocalDate(from);
+  const end=parseLocalDate(to);
   while(cur<=end){
     const skip=(exWeekend&&isWeekend(cur))||(exHoliday&&isHoliday(cur));
     if(!skip) count++;
@@ -861,6 +872,7 @@ document.getElementById('presetChips').addEventListener('click', e => {
   else if (p === 'thisY') from = `${now.getFullYear()}-01-01`;
   document.getElementById('dateFrom').value = from;
   document.getElementById('dateTo').value   = to;
+  applyFilters(); // ✅ 프리셋 선택 즉시 반영
 });
 
 document.getElementById('applyBtn').addEventListener('click',()=>{
@@ -959,7 +971,7 @@ function buildLineZoom(id,labels,values,color,h){
       tension:0.3,fill:true,backgroundColor:gradFill(ctx,color,h)}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{...tooltipPlugin(),zoom:zoomOpts()},scales:scales()},
-    plugins:[makeDLPlugin(color,values,60)]
+    plugins:[makeDLPlugin(color,values,60),makeYPaddingPlugin()]
   });
 }
 
@@ -972,7 +984,7 @@ function buildBarZoom(id,labels,values,color,h){
     data:{labels,datasets:[{label:'업로드',data:values,backgroundColor:color+'1A',borderColor:color,borderWidth:1.5,borderRadius:5}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{...tooltipPlugin(),zoom:zoomOpts()},scales:scales()},
-    plugins:[makeDLPlugin(color,values,40)]
+    plugins:[makeDLPlugin(color,values,40),makeYPaddingPlugin()]
   });
 }
 
