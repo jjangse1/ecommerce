@@ -1729,8 +1729,8 @@ function renderGSC(from, to){
     const allCodes = new Set(GSC_COUNTRIES.map(c=>c.code||c.country));
 
     // 날짜 목록 정렬 후 최근 14일 cutoff
-    const allDates = [...new Set(GSC_DAILY_COUNTRY.map(r=>r.date))].sort();
-    const cutoffDate = allDates.length >= 14 ? allDates[allDates.length-14] : allDates[0];
+    const today14 = new Date(); today14.setDate(today14.getDate()-13);
+    const cutoffDate = today14.toISOString().slice(0,10);
 
     // 최근 14일 집계
     const m14 = {};
