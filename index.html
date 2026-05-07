@@ -515,8 +515,8 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
     <!-- 최근 14일 신규 유입 국가 - 2컬럼 리스트 -->
     <div class="panel" style="margin-bottom:14px">
       <div class="panel-header">
-        <div class="panel-title"><span class="dot" style="background:#10B981"></span> 최근 14일 신규 유입 국가 <span style="font-size:11px;color:#94A3B8;font-weight:400">(전체 기간 미포함)</span></div>
-        <span class="panel-badge" id="badge-new-country">최근 14일</span>
+        <div class="panel-title"><span class="dot" style="background:#10B981"></span> 신규 유입 국가 <span style="font-size:11px;color:#94A3B8;font-weight:400" id="new-country-subtitle">(기간 후반부 첫 등장)</span></div>
+        <span class="panel-badge" id="badge-new-country">계산 중...</span>
       </div>
       <div id="newCountryWrap" style="padding:4px"></div>
     </div>
@@ -1507,7 +1507,8 @@ function renderGSC(from, to){
 
   // ── 날짜 필터 적용된 국가별 집계 ──
   // daily_country 있으면 필터 연동, 없으면 전체 합계(GSC_COUNTRIES) fallback
-  function getFilteredCountries(){
+  // 공통 집계: 날짜 필터 내 모든 국가
+  function _aggregateCountries(){
     if(!GSC_DAILY_COUNTRY.length) return GSC_COUNTRIES;
     const filt = GSC_DAILY_COUNTRY.filter(r=>r.date>=f&&r.date<=t);
     const m={};
@@ -1520,7 +1521,15 @@ function renderGSC(from, to){
       country:c.country, code:c.code||'', clicks:c.clicks, impr:c.impr,
       ctr: c.clicks>0?+(c.clicks/(c.impr||1)).toFixed(4):0,
       pos: c.cnt>0?+(c.posSum/c.cnt).toFixed(1):0
-    })).sort((a,b)=>b.clicks-a.clicks).slice(0,15);
+    }));
+  }
+  // 차트/테이블용: 클릭 상위 15개국
+  function getFilteredCountries(){
+    return _aggregateCountries().sort((a,b)=>b.clicks-a.clicks).slice(0,15);
+  }
+  // GeoChart용: 노출 1 이상 전체 국가 (클릭 0인 나라도 포함)
+  function getFilteredCountriesAll(){
+    return _aggregateCountries().filter(c=>c.impr>0).sort((a,b)=>b.clicks-a.clicks);
   }
 
   // ── 날짜 필터 적용된 기기별 집계 ──
@@ -1912,6 +1921,7 @@ function renderGSC(from, to){
       const ctx = canvas.getContext('2d');
 
       const maxClicks = Math.max(...countries.map(c=>c.clicks), 1);
+      const maxImpr   = Math.max(...countries.map(c=>c.impr),   1);
 
       // 버블 데이터 생성
       const bubbles = [];
@@ -1923,7 +1933,7 @@ function renderGSC(from, to){
         const [bx, by] = project(info.lat, info.lng, W, H);
         bubbles.push({
           x:bx, y:by,
-          r: c.clicks>0 ? Math.max(8, Math.round(Math.sqrt(c.clicks/maxClicks)*30)) : 5,
+          r: c.clicks>0 ? Math.max(8, Math.round(Math.sqrt(c.clicks/maxClicks)*30)) : Math.max(4, Math.round(Math.sqrt(c.impr/(maxImpr||1))*12)),
           label: c.country, clicks: c.clicks, impr: c.impr,
           cont, iso: info.iso
         });
@@ -1978,7 +1988,7 @@ function renderGSC(from, to){
       // 버블 (작은 것 먼저)
       bubbles.sort((a,b)=>a.clicks-b.clicks);
       bubbles.forEach(b=>{
-        const alpha = 0.5 + (b.clicks/maxClicks)*0.42;
+        const alpha = b.clicks>0 ? 0.5 + (b.clicks/maxClicks)*0.42 : 0.18 + (b.impr/maxImpr)*0.2;
         // 그림자
         ctx.shadowColor='rgba(0,0,0,0.15)'; ctx.shadowBlur=6;
         ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
@@ -2027,7 +2037,7 @@ function renderGSC(from, to){
           tooltip.style.left=Math.min(mx+14, W-160)+'px';
           tooltip.style.top=(my-52)+'px';
           const dotC = hit.cont.hex;
-          tooltip.innerHTML=`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotC};margin-right:5px"></span><b>${hit.label}</b><br><span style="color:#94A3B8;font-size:10px">${hit.cont.label}</span><br>클릭 <b style="color:#60A5FA">${hit.clicks}</b> · 노출 ${hit.impr}`;
+          tooltip.innerHTML=`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotC};margin-right:5px"></span><b>${hit.label}</b><br><span style="color:#94A3B8;font-size:10px">${hit.cont.label}</span><br>${hit.clicks>0?`클릭 <b style="color:#60A5FA">${hit.clicks.toLocaleString()}</b> · `:`<span style="color:#94A3B8;font-size:10px">클릭 없음 · </span>`}노출 <b style="color:#A7F3D0">${hit.impr.toLocaleString()}</b>`;
           canvas.style.cursor='pointer';
         } else {
           tooltip.style.display='none';
@@ -2041,21 +2051,46 @@ function renderGSC(from, to){
     function drawNewCountries(){
       const wrap = document.getElementById('newCountryWrap');
       if(!wrap || !GSC_DAILY_COUNTRY.length) return;
-      const allCodes = new Set(GSC_COUNTRIES.map(c=>c.code||c.country));
-      const today14 = new Date(); today14.setDate(today14.getDate()-13);
-      const cutoffDate = today14.toISOString().slice(0,10);
-      const m14 = {};
-      GSC_DAILY_COUNTRY.filter(r=>r.date >= cutoffDate).forEach(r=>{
-        const key = r.code || r.country;
-        if(!m14[key]) m14[key] = {country:r.country, code:key, clicks:0, impr:0};
-        m14[key].clicks += r.clicks;
-        m14[key].impr   += r.impr;
+
+      // 선택 기간(f ~ t)을 날짜 배열로 만들어 전반/후반 분리
+      const allDates = [];
+      let cur = new Date(f);
+      const end = new Date(t);
+      while(cur <= end){ allDates.push(cur.toISOString().slice(0,10)); cur.setDate(cur.getDate()+1); }
+
+      const totalDays = allDates.length;
+      const halfIdx   = Math.floor(totalDays / 2);
+      const firstHalf = new Set(allDates.slice(0, halfIdx));       // 전반
+      const secondHalf= new Set(allDates.slice(halfIdx));          // 후반
+
+      // 전반에 등장한 국가 코드 집합
+      const firstCodes = new Set();
+      GSC_DAILY_COUNTRY.forEach(r=>{
+        if(firstHalf.has(r.date)) firstCodes.add(r.code || r.country);
       });
-      const newC = Object.values(m14)
-        .filter(c => !allCodes.has(c.code) && !allCodes.has(c.country))
-        .sort((a,b) => b.clicks - a.clicks);
+
+      // 후반에만 등장한 국가 집계
+      const m2 = {};
+      GSC_DAILY_COUNTRY.forEach(r=>{
+        if(!secondHalf.has(r.date)) return;
+        const key = r.code || r.country;
+        if(firstCodes.has(key)) return;   // 전반에도 있었으면 제외
+        if(!m2[key]) m2[key] = {country:r.country, code:key, clicks:0, impr:0};
+        m2[key].clicks += r.clicks;
+        m2[key].impr   += r.impr;
+      });
+
+      const newC = Object.values(m2).sort((a,b) => b.clicks - a.clicks);
+
+      // 배지·서브타이틀 업데이트
+      const halfDate = allDates[halfIdx] || '';
+      const badge = document.getElementById('badge-new-country');
+      const subtitle = document.getElementById('new-country-subtitle');
+      if(badge) badge.textContent = `후반 ${secondHalf.size}일`;
+      if(subtitle) subtitle.textContent = `(${halfDate} 이후 첫 등장 · 전반 ${firstHalf.size}일 미포함)`;
+
       if(!newC.length){
-        wrap.innerHTML = '<p style="color:#94A3B8;font-size:12px;padding:8px">최근 14일 신규 유입 국가 없음</p>';
+        wrap.innerHTML = `<p style="color:#94A3B8;font-size:12px;padding:8px">후반(${halfDate} 이후)에 신규 유입된 국가 없음</p>`;
         return;
       }
       const flagBase = 'https://flagcdn.com/20x15/';
@@ -2088,18 +2123,24 @@ function renderGSC(from, to){
       const right = newC.slice(half).map(makeRow).join('');
       wrap.innerHTML = `
         <div style="font-size:11px;color:#64748B;margin-bottom:8px;padding:0 4px">
-          ${cutoffDate} 이후 첫 유입 · 총 <b style="color:#10B981">${newC.length}개국</b>
+          ${halfDate} 이후 첫 유입 · 총 <b style="color:#10B981">${newC.length}개국</b>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
           <div>${left}</div><div>${right}</div>
         </div>`;
     }
 
-    drawGeoChart(filtCountries);
+    drawGeoChart(getFilteredCountriesAll());
     drawNewCountries();
 
-    window._drawGeoChart = ()=>{ drawGeoChart(getFilteredCountries()); };
-    const gb=document.getElementById('badge-geo-period'); if(gb) gb.textContent=document.getElementById('badge-country-period')?.textContent||'';
+    window._drawGeoChart = ()=>{ drawGeoChart(getFilteredCountriesAll()); };
+    const gb=document.getElementById('badge-geo-period');
+    if(gb){
+      const allGeo = getFilteredCountriesAll();
+      const withClicks = allGeo.filter(c=>c.clicks>0).length;
+      const imprOnly   = allGeo.filter(c=>c.clicks===0).length;
+      gb.textContent = `총 ${allGeo.length}개국 (클릭 ${withClicks} · 노출만 ${imprOnly})`;
+    }
   })();
 
 
