@@ -500,6 +500,15 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
       </div>
     </div>
 
+    <!-- 최근 14일 신규 유입 국가 -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-header">
+        <div class="panel-title"><span class="dot" style="background:#10B981"></span> 최근 14일 신규 유입 국가 <span style="font-size:11px;color:#94A3B8;font-weight:400">(전체 기간 미포함 국가)</span></div>
+        <span class="panel-badge" id="badge-new-country">최근 14일</span>
+      </div>
+      <div id="newCountryWrap" style="padding:8px 4px 4px"></div>
+    </div>
+
     <div class="section-divider"><span>접속 패턴 · 마케팅 분석</span></div>
 
     <!-- 요일별 클릭 패턴 + 검색 시간대 -->
@@ -793,7 +802,8 @@ function processWb(wb, filename, source){
 
   // Date range defaults
   const minD=new Date(Math.min(...dates)), maxD=new Date(Math.max(...dates));
-  document.getElementById('dateFrom').value='2026-01-01';
+  const d14=new Date(now); d14.setDate(d14.getDate()-13);
+  document.getElementById('dateFrom').value=toYMD(d14);
   document.getElementById('dateTo').value=toYMD(now);
   document.getElementById('dateFrom').min=toYMD(minD);
   document.getElementById('dateTo').max=toYMD(now);
@@ -1498,7 +1508,7 @@ function renderGSC(from, to){
       country:c.country, clicks:c.clicks, impr:c.impr,
       ctr: c.clicks>0?+(c.clicks/(c.impr||1)).toFixed(4):0,
       pos: c.cnt>0?+(c.posSum/c.cnt).toFixed(1):0
-    })).sort((a,b)=>b.clicks-a.clicks).slice(0,8);
+    })).sort((a,b)=>b.clicks-a.clicks).slice(0,15);
   }
 
   // ── 날짜 필터 적용된 기기별 집계 ──
@@ -1678,7 +1688,7 @@ function renderGSC(from, to){
   // ── 4. 국가별 클릭+노출 (날짜 필터 연동) ──
   destroyChart('gscCountryChart');
   const ctx4=document.getElementById('gscCountryChart').getContext('2d');
-  const cColors=['#2563EB','#059669','#D97706','#7C3AED','#DC2626','#0891B2','#65A30D','#9333EA'];
+  const cColors=['#2563EB','#059669','#D97706','#7C3AED','#DC2626','#0891B2','#65A30D','#9333EA','#F59E0B','#10B981','#6366F1','#EF4444','#14B8A6','#F97316','#8B5CF6'];
   const cClicks=filtCountries.map(c=>c.clicks), cImpr=filtCountries.map(c=>c.impr);
   charts['gscCountryChart']=new Chart(ctx4,{
     type:'bar',
@@ -1709,6 +1719,74 @@ function renderGSC(from, to){
       }
     }]
   });
+
+  // ── 4-b. 최근 14일 신규 유입 국가 ──
+  (function(){
+    const wrap = document.getElementById('newCountryWrap');
+    if(!wrap || !GSC_DAILY_COUNTRY.length) return;
+
+    // 전체기간 국가 코드 집합
+    const allCodes = new Set(GSC_COUNTRIES.map(c=>c.code||c.country));
+
+    // 날짜 목록 정렬 후 최근 14일 cutoff
+    const allDates = [...new Set(GSC_DAILY_COUNTRY.map(r=>r.date))].sort();
+    const cutoffDate = allDates.length >= 14 ? allDates[allDates.length-14] : allDates[0];
+
+    // 최근 14일 집계
+    const m14 = {};
+    GSC_DAILY_COUNTRY.filter(r=>r.date >= cutoffDate).forEach(r=>{
+      const key = r.code || r.country;
+      if(!m14[key]) m14[key] = {country:r.country, code:key, clicks:0, impr:0};
+      m14[key].clicks += r.clicks;
+      m14[key].impr   += r.impr;
+    });
+
+    // 전체기간에 없던 신규 국가만 필터
+    const newC = Object.values(m14)
+      .filter(c => !allCodes.has(c.code) && !allCodes.has(c.country))
+      .sort((a,b) => b.clicks - a.clicks);
+
+    if(!newC.length){
+      wrap.innerHTML = '<p style="color:#94A3B8;font-size:12px;padding:4px 8px">최근 14일 신규 유입 국가 없음</p>';
+      return;
+    }
+
+    const flagBase = 'https://flagcdn.com/20x15/';
+    const codeMap = {
+      'kor':'kr','usa':'us','jpn':'jp','chn':'cn','twn':'tw','sgp':'sg','mys':'my',
+      'ind':'in','rus':'ru','hkg':'hk','mex':'mx','bra':'br','deu':'de','vnm':'vn',
+      'fra':'fr','gbr':'gb','irl':'ie','tha':'th','phl':'ph','idn':'id','aus':'au',
+      'can':'ca','ita':'it','esp':'es','pol':'pl','tur':'tr','nld':'nl','ukr':'ua',
+      'sau':'sa','zaf':'za','arg':'ar','chl':'cl','per':'pe','col':'co','nor':'no',
+      'fin':'fi','che':'ch','aut':'at','isr':'il','grc':'gr','cze':'cz','bgd':'bd',
+      'lka':'lk','nzl':'nz','aze':'az','geo':'ge','mac':'mo','ury':'uy','ecu':'ec',
+      'srb':'rs','hrv':'hr','mkd':'mk','alb':'al','nga':'ng','uga':'ug','egy':'eg',
+      'mmr':'mm','tjk':'tj','ncl':'nc'
+    };
+
+    const maxClicks = Math.max(...newC.map(c=>c.clicks), 1);
+    const chips = newC.map(c=>{
+      const iso = codeMap[c.code.toLowerCase()] || c.code.toLowerCase().slice(0,2);
+      const flagUrl = flagBase + iso + '.png';
+      const barW = c.clicks > 0 ? Math.max(4, Math.round(c.clicks/maxClicks*80)) : 0;
+      const badge = c.clicks > 0
+        ? `<span style="background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:600">${c.clicks}클릭</span>`
+        : `<span style="background:#F1F5F9;color:#94A3B8;border-radius:4px;padding:1px 6px;font-size:11px">노출만</span>`;
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:8px;background:#F8FAFC;margin:3px 0">
+        <img src="${flagUrl}" onerror="this.style.display='none'" style="width:20px;height:15px;border-radius:2px;flex-shrink:0">
+        <span style="font-size:12px;color:#374151;min-width:80px">${c.country}</span>
+        <div style="flex:1;background:#E2E8F0;border-radius:4px;height:6px">
+          <div style="width:${barW}%;background:#10B981;border-radius:4px;height:6px"></div>
+        </div>
+        ${badge}
+        <span style="font-size:10px;color:#94A3B8;min-width:40px">${c.impr}노출</span>
+      </div>`;
+    }).join('');
+
+    wrap.innerHTML = `<div style="font-size:11px;color:#64748B;margin-bottom:6px;padding:0 10px">
+      ${cutoffDate} 이후 첫 유입 · 총 <b style="color:#10B981">${newC.length}개국</b>
+    </div>${chips}`;
+  })();
 
   // ── 5. 기기별 — 클릭+노출 (날짜 필터 연동) ──
   destroyChart('gscDeviceChart');
