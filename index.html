@@ -1738,180 +1738,288 @@ function renderGSC(from, to){
   // ── 4-b. 버블 GeoMap + 신규유입국가 ──
   (function(){
 
-    // 3자리→ISO2 매핑
-    const codeMap = {
-      'kor':'KR','usa':'US','jpn':'JP','chn':'CN','twn':'TW','sgp':'SG','mys':'MY',
-      'ind':'IN','rus':'RU','hkg':'HK','mex':'MX','bra':'BR','deu':'DE','vnm':'VN',
-      'fra':'FR','gbr':'GB','irl':'IE','tha':'TH','phl':'PH','idn':'ID','aus':'AU',
-      'can':'CA','ita':'IT','esp':'ES','pol':'PL','tur':'TR','nld':'NL','ukr':'UA',
-      'sau':'SA','zaf':'ZA','arg':'AR','chl':'CL','per':'PE','col':'CO','nor':'NO',
-      'fin':'FI','che':'CH','aut':'AT','isr':'IL','grc':'GR','cze':'CZ','bgd':'BD',
-      'lka':'LK','nzl':'NZ','aze':'AZ','geo':'GE','mac':'MO','ury':'UY','ecu':'EC',
-      'srb':'RS','hrv':'HR','mkd':'MK','alb':'AL','nga':'NG','uga':'UG','egy':'EG',
-      'mmr':'MM','tjk':'TJ','ncl':'NC','est':'EE','prt':'PT','swe':'SE','dnk':'DK',
-      'bel':'BE','hun':'HU','rom':'RO','svk':'SK','svn':'SI','ltu':'LT','lva':'LV'
+    // ── 대륙별 색상 정의 ──
+    const CONTINENT_COLOR = {
+      'asia':       {fill:'rgba(37,99,235,{a})',  stroke:'#1D4ED8', label:'아시아',      hex:'#2563EB'},
+      'sea':        {fill:'rgba(6,182,212,{a})',   stroke:'#0891B2', label:'동남아시아',   hex:'#06B6D4'},
+      'mideast':    {fill:'rgba(245,158,11,{a})',  stroke:'#D97706', label:'중동',        hex:'#F59E0B'},
+      'centralasia':{fill:'rgba(168,85,247,{a})',  stroke:'#7C3AED', label:'중앙아시아',  hex:'#A855F7'},
+      'europe':     {fill:'rgba(16,185,129,{a})',  stroke:'#059669', label:'유럽',        hex:'#10B981'},
+      'namerica':   {fill:'rgba(239,68,68,{a})',   stroke:'#DC2626', label:'북아메리카',  hex:'#EF4444'},
+      'samerica':   {fill:'rgba(251,146,60,{a})',  stroke:'#EA580C', label:'남아메리카',  hex:'#FB923C'},
+      'africa':     {fill:'rgba(132,204,22,{a})',  stroke:'#65A30D', label:'아프리카',    hex:'#84CC16'},
+      'oceania':    {fill:'rgba(99,102,241,{a})',   stroke:'#4F46E5', label:'오세아니아',  hex:'#6366F1'},
     };
 
-    // 국가 위도/경도 (버블 좌표용)
-    const latlon = {
-      'KR':[37,127],'US':[38,-97],'JP':[36,138],'CN':[35,105],'TW':[24,121],
-      'SG':[1,104],'MY':[3,110],'IN':[20,78],'RU':[60,100],'HK':[22,114],
-      'MX':[23,-102],'BR':[-10,-55],'DE':[51,10],'VN':[16,108],'FR':[46,2],
-      'GB':[55,-3],'IE':[53,-8],'TH':[15,101],'PH':[13,122],'ID':[-2,118],
-      'AU':[-25,135],'CA':[56,-96],'IT':[43,12],'ES':[40,-4],'PL':[52,20],
-      'TR':[39,35],'NL':[52,5],'UA':[49,32],'SA':[24,45],'ZA':[-30,25],
-      'AR':[-34,-64],'CL':[-30,-71],'PE':[-10,-76],'CO':[4,-74],'NO':[62,10],
-      'FI':[62,26],'CH':[47,8],'AT':[47,14],'IL':[31,35],'GR':[39,22],
-      'CZ':[50,15],'BD':[23,90],'LK':[7,81],'NZ':[-41,174],'AZ':[40,48],
-      'GE':[42,44],'MO':[22,114],'UY':[-33,-56],'EC':[-2,-77],'RS':[44,21],
-      'HR':[45,16],'MK':[41,22],'AL':[41,20],'NG':[10,8],'UG':[1,32],
-      'EG':[27,30],'MM':[17,96],'TJ':[39,71],'NC':[-21,165],'EE':[59,25],
-      'PT':[39,-8],'SE':[62,15],'DK':[56,10],'BE':[50,4],'HU':[47,19],
-      'RO':[46,25],'SK':[48,19],'SI':[46,15],'LT':[56,24],'LV':[57,25]
+    // 3자리→{iso2, continent}
+    const countryInfo = {
+      // 동아시아
+      'kor':{iso:'KR',cont:'asia',lat:37,lng:127},
+      'jpn':{iso:'JP',cont:'asia',lat:36,lng:138},
+      'chn':{iso:'CN',cont:'asia',lat:35,lng:105},
+      'twn':{iso:'TW',cont:'asia',lat:24,lng:121},
+      'hkg':{iso:'HK',cont:'asia',lat:22,lng:114},
+      'mac':{iso:'MO',cont:'asia',lat:22,lng:114},
+      'mng':{iso:'MN',cont:'asia',lat:46,lng:105},
+      // 동남아시아
+      'sgp':{iso:'SG',cont:'sea',lat:1,  lng:104},
+      'mys':{iso:'MY',cont:'sea',lat:3,  lng:110},
+      'tha':{iso:'TH',cont:'sea',lat:15, lng:101},
+      'vnm':{iso:'VN',cont:'sea',lat:16, lng:108},
+      'phl':{iso:'PH',cont:'sea',lat:13, lng:122},
+      'idn':{iso:'ID',cont:'sea',lat:-2, lng:118},
+      'mmr':{iso:'MM',cont:'sea',lat:17, lng:96},
+      'khm':{iso:'KH',cont:'sea',lat:12, lng:105},
+      'lao':{iso:'LA',cont:'sea',lat:18, lng:103},
+      // 남아시아
+      'ind':{iso:'IN',cont:'asia',lat:20, lng:78},
+      'bgd':{iso:'BD',cont:'asia',lat:23, lng:90},
+      'lka':{iso:'LK',cont:'asia',lat:7,  lng:81},
+      'npl':{iso:'NP',cont:'asia',lat:28, lng:84},
+      'pak':{iso:'PK',cont:'asia',lat:30, lng:70},
+      // 중동
+      'sau':{iso:'SA',cont:'mideast',lat:24,lng:45},
+      'are':{iso:'AE',cont:'mideast',lat:24,lng:54},
+      'isr':{iso:'IL',cont:'mideast',lat:31,lng:35},
+      'jor':{iso:'JO',cont:'mideast',lat:31,lng:36},
+      'qat':{iso:'QA',cont:'mideast',lat:25,lng:51},
+      'omn':{iso:'OM',cont:'mideast',lat:22,lng:57},
+      'yem':{iso:'YE',cont:'mideast',lat:15,lng:48},
+      'syr':{iso:'SY',cont:'mideast',lat:35,lng:38},
+      // 중앙아시아
+      'rus':{iso:'RU',cont:'centralasia',lat:60,lng:90},
+      'kaz':{iso:'KZ',cont:'centralasia',lat:48,lng:68},
+      'uzb':{iso:'UZ',cont:'centralasia',lat:41,lng:64},
+      'aze':{iso:'AZ',cont:'centralasia',lat:40,lng:48},
+      'geo':{iso:'GE',cont:'centralasia',lat:42,lng:44},
+      'arm':{iso:'AM',cont:'centralasia',lat:40,lng:45},
+      'tjk':{iso:'TJ',cont:'centralasia',lat:39,lng:71},
+      'blr':{iso:'BY',cont:'centralasia',lat:53,lng:28},
+      'ukr':{iso:'UA',cont:'europe',lat:49,lng:32},
+      // 유럽
+      'deu':{iso:'DE',cont:'europe',lat:51,lng:10},
+      'fra':{iso:'FR',cont:'europe',lat:46,lng:2},
+      'gbr':{iso:'GB',cont:'europe',lat:55,lng:-3},
+      'irl':{iso:'IE',cont:'europe',lat:53,lng:-8},
+      'nld':{iso:'NL',cont:'europe',lat:52,lng:5},
+      'bel':{iso:'BE',cont:'europe',lat:50,lng:4},
+      'che':{iso:'CH',cont:'europe',lat:47,lng:8},
+      'aut':{iso:'AT',cont:'europe',lat:47,lng:14},
+      'esp':{iso:'ES',cont:'europe',lat:40,lng:-4},
+      'prt':{iso:'PT',cont:'europe',lat:39,lng:-8},
+      'ita':{iso:'IT',cont:'europe',lat:43,lng:12},
+      'pol':{iso:'PL',cont:'europe',lat:52,lng:20},
+      'swe':{iso:'SE',cont:'europe',lat:62,lng:15},
+      'nor':{iso:'NO',cont:'europe',lat:62,lng:10},
+      'dnk':{iso:'DK',cont:'europe',lat:56,lng:10},
+      'fin':{iso:'FI',cont:'europe',lat:62,lng:26},
+      'grc':{iso:'GR',cont:'europe',lat:39,lng:22},
+      'cze':{iso:'CZ',cont:'europe',lat:50,lng:15},
+      'svk':{iso:'SK',cont:'europe',lat:48,lng:19},
+      'hun':{iso:'HU',cont:'europe',lat:47,lng:19},
+      'rou':{iso:'RO',cont:'europe',lat:46,lng:25},
+      'bgr':{iso:'BG',cont:'europe',lat:43,lng:25},
+      'hrv':{iso:'HR',cont:'europe',lat:45,lng:16},
+      'srb':{iso:'RS',cont:'europe',lat:44,lng:21},
+      'mkd':{iso:'MK',cont:'europe',lat:41,lng:22},
+      'alb':{iso:'AL',cont:'europe',lat:41,lng:20},
+      'est':{iso:'EE',cont:'europe',lat:59,lng:25},
+      'lva':{iso:'LV',cont:'europe',lat:57,lng:25},
+      'ltu':{iso:'LT',cont:'europe',lat:56,lng:24},
+      'mda':{iso:'MD',cont:'europe',lat:47,lng:29},
+      'bih':{iso:'BA',cont:'europe',lat:44,lng:17},
+      'cyp':{iso:'CY',cont:'europe',lat:35,lng:33},
+      'mlt':{iso:'MT',cont:'europe',lat:36,lng:14},
+      'xkk':{iso:'XK',cont:'europe',lat:42,lng:21},
+      // 북아메리카
+      'usa':{iso:'US',cont:'namerica',lat:38,lng:-97},
+      'can':{iso:'CA',cont:'namerica',lat:56,lng:-96},
+      'mex':{iso:'MX',cont:'namerica',lat:23,lng:-102},
+      'gtm':{iso:'GT',cont:'namerica',lat:15,lng:-90},
+      'slv':{iso:'SV',cont:'namerica',lat:14,lng:-89},
+      'nic':{iso:'NI',cont:'namerica',lat:13,lng:-85},
+      'pan':{iso:'PA',cont:'namerica',lat:9, lng:-80},
+      'cri':{iso:'CR',cont:'namerica',lat:10,lng:-84},
+      'dom':{iso:'DO',cont:'namerica',lat:19,lng:-70},
+      'bhs':{iso:'BS',cont:'namerica',lat:25,lng:-77},
+      'jam':{iso:'JM',cont:'namerica',lat:18,lng:-77},
+      'brb':{iso:'BB',cont:'namerica',lat:13,lng:-59},
+      'gum':{iso:'GU',cont:'oceania',lat:13,lng:144},
+      // 남아메리카
+      'bra':{iso:'BR',cont:'samerica',lat:-10,lng:-55},
+      'arg':{iso:'AR',cont:'samerica',lat:-34,lng:-64},
+      'chl':{iso:'CL',cont:'samerica',lat:-30,lng:-71},
+      'col':{iso:'CO',cont:'samerica',lat:4,  lng:-74},
+      'per':{iso:'PE',cont:'samerica',lat:-10,lng:-76},
+      'ury':{iso:'UY',cont:'samerica',lat:-33,lng:-56},
+      'ecu':{iso:'EC',cont:'samerica',lat:-2, lng:-77},
+      'bol':{iso:'BO',cont:'samerica',lat:-17,lng:-65},
+      'ven':{iso:'VE',cont:'samerica',lat:8,  lng:-66},
+      'pry':{iso:'PY',cont:'samerica',lat:-23,lng:-58},
+      // 아프리카
+      'zaf':{iso:'ZA',cont:'africa',lat:-30,lng:25},
+      'nga':{iso:'NG',cont:'africa',lat:10, lng:8},
+      'egy':{iso:'EG',cont:'africa',lat:27, lng:30},
+      'eth':{iso:'ET',cont:'africa',lat:9,  lng:40},
+      'ken':{iso:'KE',cont:'africa',lat:-1, lng:37},
+      'uga':{iso:'UG',cont:'africa',lat:1,  lng:32},
+      'tza':{iso:'TZ',cont:'africa',lat:-6, lng:35},
+      'dza':{iso:'DZ',cont:'africa',lat:28, lng:3},
+      'mar':{iso:'MA',cont:'africa',lat:32, lng:-6},
+      'tun':{iso:'TN',cont:'africa',lat:34, lng:9},
+      'lby':{iso:'LY',cont:'africa',lat:27, lng:17},
+      'civ':{iso:'CI',cont:'africa',lat:7,  lng:-6},
+      'ago':{iso:'AO',cont:'africa',lat:-12,lng:18},
+      'nam':{iso:'NA',cont:'africa',lat:-22,lng:17},
+      'swz':{iso:'SZ',cont:'africa',lat:-27,lng:32},
+      'bdi':{iso:'BI',cont:'africa',lat:-3, lng:30},
+      // 오세아니아
+      'aus':{iso:'AU',cont:'oceania',lat:-25,lng:135},
+      'nzl':{iso:'NZ',cont:'oceania',lat:-41,lng:174},
+      'ncl':{iso:'NC',cont:'oceania',lat:-21,lng:165},
     };
 
-    // 메르카토르 투영 (lng,lat → x,y 0~1)
-    function project(lat, lng){
+    // 메르카토르 투영
+    function project(lat, lng, W, H){
       const x = (lng + 180) / 360;
       const sinLat = Math.sin(lat * Math.PI / 180);
       const y = 0.5 - Math.log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI);
-      return [x, Math.min(Math.max(y, 0), 1)];
+      return [x * W, Math.min(Math.max(y, 0), 1) * H];
     }
 
     // ── GeoChart 버블 렌더 ──
-    let geoChartInst = null;
     function drawGeoChart(countries){
       const canvas = document.getElementById('geoChart');
       if(!canvas) return;
-
-      // 캔버스 크기
-      const W = canvas.parentElement.clientWidth || 800;
+      const W = canvas.parentElement.clientWidth || 860;
       const H = 400;
-      canvas.width = W; canvas.height = H; // 항상 재설정 (크기 초기화)
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
 
       const maxClicks = Math.max(...countries.map(c=>c.clicks), 1);
 
-      // 데이터셋: 버블
+      // 버블 데이터 생성
       const bubbles = [];
       countries.forEach(c=>{
-        const iso2 = codeMap[(c.code||'').toLowerCase()] || null;
-        if(!iso2 || !latlon[iso2]) return;
-        const [lat,lng] = latlon[iso2];
-        const [px,py] = project(lat, lng);
+        const code3 = (c.code||'').toLowerCase();
+        const info = countryInfo[code3];
+        if(!info) return;
+        const cont = CONTINENT_COLOR[info.cont] || CONTINENT_COLOR['asia'];
+        const [bx, by] = project(info.lat, info.lng, W, H);
         bubbles.push({
-          x: px * W,
-          y: py * H,
-          r: c.clicks>0 ? Math.max(7, Math.round(Math.sqrt(c.clicks/maxClicks) * 28)) : 5,
-          label: c.country,
-          clicks: c.clicks,
-          impr: c.impr,
-          iso2
+          x:bx, y:by,
+          r: c.clicks>0 ? Math.max(8, Math.round(Math.sqrt(c.clicks/maxClicks)*30)) : 5,
+          label: c.country, clicks: c.clicks, impr: c.impr,
+          cont, iso: info.iso
         });
       });
 
-      if(geoChartInst){ geoChartInst.destroy(); geoChartInst=null; }
-
-      // 배경지도: 간단한 대륙 직사각형으로 표현 (SVG overlay 방식)
-      const ctx = canvas.getContext('2d');
-
       // 배경
-      ctx.fillStyle = '#EFF6FF';
+      ctx.fillStyle = '#F0F6FF';
       ctx.fillRect(0,0,W,H);
 
-      // 대륙 영역 (간단 직사각형)
-      const continents = [
-        // North America
-        {lat1:15,lng1:-170,lat2:72,lng2:-50},
-        // South America
-        {lat1:-55,lng1:-82,lat2:12,lng2:-34},
-        // Europe
-        {lat1:35,lng1:-25,lat2:71,lng2:45},
-        // Africa
-        {lat1:-35,lng1:-20,lat2:37,lng2:52},
-        // Asia
-        {lat1:1,lng1:26,lat2:77,lng2:180},
-        // Australia
-        {lat1:-45,lng1:110,lat2:-10,lng2:155},
-      ];
+      // 위선 경선
+      ctx.strokeStyle = '#DBEAFE'; ctx.lineWidth = 0.4;
+      for(let lng=-180;lng<=180;lng+=30){
+        const [px] = project(0,lng,W,H);
+        ctx.beginPath(); ctx.moveTo(px,0); ctx.lineTo(px,H); ctx.stroke();
+      }
+      for(let lat=-60;lat<=80;lat+=30){
+        const [,py] = project(lat,0,W,H);
+        ctx.beginPath(); ctx.moveTo(0,py); ctx.lineTo(W,py); ctx.stroke();
+      }
 
-      ctx.fillStyle = '#C7D7F0';
-      continents.forEach(({lat1,lng1,lat2,lng2})=>{
-        const [x1,y2] = project(lat1,lng1).map((v,i)=>i===0?v*W:v*H);
-        const [x2,y1] = project(lat2,lng2).map((v,i)=>i===0?v*W:v*H);
+      // 대륙 배경 블록 (연한 색으로)
+      const contRegions = [
+        {cont:'asia',      lat1:5, lng1:55,  lat2:55, lng2:145, rx:6},
+        {cont:'sea',       lat1:-10,lng1:95, lat2:22, lng2:140, rx:5},
+        {cont:'europe',    lat1:35, lng1:-25, lat2:72, lng2:45,  rx:6},
+        {cont:'centralasia',lat1:38,lng1:40, lat2:68, lng2:135, rx:5},
+        {cont:'mideast',   lat1:12, lng1:30,  lat2:38, lng2:62,  rx:5},
+        {cont:'namerica',  lat1:8,  lng1:-168,lat2:72, lng2:-52, rx:6},
+        {cont:'samerica',  lat1:-55,lng1:-82, lat2:12, lng2:-34, rx:6},
+        {cont:'africa',    lat1:-35,lng1:-20, lat2:38, lng2:52,  rx:6},
+        {cont:'oceania',   lat1:-48,lng1:110, lat2:-5, lng2:180, rx:5},
+      ];
+      contRegions.forEach(({cont,lat1,lng1,lat2,lng2,rx})=>{
+        const info = CONTINENT_COLOR[cont];
+        const [x1,y2] = project(lat1,lng1,W,H);
+        const [x2,y1] = project(lat2,lng2,W,H);
+        const rw=Math.abs(x2-x1), rh=Math.abs(y2-y1);
         ctx.beginPath();
-        ctx.roundRect(Math.min(x1,x2), Math.min(y1,y2), Math.abs(x2-x1), Math.abs(y2-y1), 4);
+        ctx.roundRect(Math.min(x1,x2),Math.min(y1,y2),rw,rh,rx);
+        ctx.fillStyle = info.fill.replace('{a}','0.10');
         ctx.fill();
+        ctx.strokeStyle = info.fill.replace('{a}','0.25');
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        // 대륙 레이블
+        ctx.fillStyle = info.fill.replace('{a}','0.7');
+        ctx.font = "bold 10px 'Pretendard',sans-serif";
+        ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText(info.label, (Math.min(x1,x2)+rw/2), Math.min(y1,y2)+4);
       });
 
-      // 격자선
-      ctx.strokeStyle = '#DBEAFE'; ctx.lineWidth = 0.5;
-      for(let lng=-180;lng<=180;lng+=30){
-        const [px] = project(0,lng); ctx.beginPath();
-        ctx.moveTo(px*W,0); ctx.lineTo(px*W,H); ctx.stroke();
-      }
-      for(let lat=-60;lat<=75;lat+=30){
-        const [,py] = project(lat,0); ctx.beginPath();
-        ctx.moveTo(0,py*H); ctx.lineTo(W,py*H); ctx.stroke();
-      }
-
-      // 버블
-      bubbles.sort((a,b)=>a.clicks-b.clicks); // 작은 거 먼저 (큰 게 위에)
+      // 버블 (작은 것 먼저)
+      bubbles.sort((a,b)=>a.clicks-b.clicks);
       bubbles.forEach(b=>{
-        const alpha = 0.55 + (b.clicks/maxClicks)*0.35;
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
-        ctx.fillStyle = `rgba(37,99,235,${alpha.toFixed(2)})`;
+        const alpha = 0.5 + (b.clicks/maxClicks)*0.42;
+        // 그림자
+        ctx.shadowColor='rgba(0,0,0,0.15)'; ctx.shadowBlur=6;
+        ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+        ctx.fillStyle = b.cont.fill.replace('{a}',alpha.toFixed(2));
         ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        // 클릭수 텍스트 (버블이 충분히 클 때)
-        if(b.r >= 12){
-          ctx.fillStyle = '#fff';
-          ctx.font = `bold ${Math.min(b.r*0.65,14)}px 'DM Mono',monospace`;
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.shadowBlur=0;
+        ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=1.5; ctx.stroke();
+        // 클릭수 텍스트
+        if(b.r>=11){
+          ctx.fillStyle='#fff';
+          ctx.font=`bold ${Math.min(Math.round(b.r*0.6),13)}px 'DM Mono',monospace`;
+          ctx.textAlign='center'; ctx.textBaseline='middle';
           ctx.fillText(b.clicks, b.x, b.y);
         }
       });
 
-      // 툴팁 인터랙션
+      // 범례 (우하단)
+      const usedConts = [...new Set(bubbles.map(b=>Object.keys(CONTINENT_COLOR).find(k=>CONTINENT_COLOR[k]===b.cont)))];
+      const legX = W - 10, legY = H - 12;
+      let lx = legX;
+      [...usedConts].reverse().forEach(k=>{
+        const info = CONTINENT_COLOR[k];
+        const label = info.label;
+        const tw = ctx.measureText(label).width + 18;
+        lx -= tw + 6;
+        ctx.beginPath(); ctx.arc(lx+6, legY, 5, 0, Math.PI*2);
+        ctx.fillStyle = info.hex; ctx.fill();
+        ctx.fillStyle='#374151'; ctx.font="10px 'Pretendard',sans-serif";
+        ctx.textAlign='left'; ctx.textBaseline='middle';
+        ctx.fillText(label, lx+14, legY);
+      });
+
+      // 툴팁
       const tooltip = document.getElementById('geoTooltip');
-      function onMove(e){
+      canvas.onmousemove = function(e){
         const rect = canvas.getBoundingClientRect();
-        const mx = (e.clientX != null ? e.clientX : (e.touches&&e.touches[0]?e.touches[0].clientX:0)) - rect.left;
-        const my = (e.clientY != null ? e.clientY : (e.touches&&e.touches[0]?e.touches[0].clientY:0)) - rect.top;
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
         let hit = null;
         for(const b of [...bubbles].reverse()){
           const dx=mx-b.x, dy=my-b.y;
-          if(Math.sqrt(dx*dx+dy*dy) <= b.r){ hit=b; break; }
+          if(Math.sqrt(dx*dx+dy*dy)<=b.r){ hit=b; break; }
         }
         if(hit){
           tooltip.style.display='block';
-          tooltip.style.left = (Math.min(mx+12, W-150))+'px';
-          tooltip.style.top  = (my-48)+'px';
-          tooltip.innerHTML = `<b style="font-size:13px">${hit.label}</b><br>클릭 <b style="color:#60A5FA">${hit.clicks}</b> · 노출 ${hit.impr}`;
+          tooltip.style.left=Math.min(mx+14, W-160)+'px';
+          tooltip.style.top=(my-52)+'px';
+          const dotC = hit.cont.hex;
+          tooltip.innerHTML=`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotC};margin-right:5px"></span><b>${hit.label}</b><br><span style="color:#94A3B8;font-size:10px">${hit.cont.label}</span><br>클릭 <b style="color:#60A5FA">${hit.clicks}</b> · 노출 ${hit.impr}`;
           canvas.style.cursor='pointer';
         } else {
           tooltip.style.display='none';
           canvas.style.cursor='default';
         }
-      }
-      canvas.onmousemove = onMove;
-      canvas.onmouseleave = ()=>{ tooltip.style.display='none'; };
-
-      // 범례
-      ctx.font = "11px 'Pretendard',sans-serif";
-      ctx.textAlign='left'; ctx.textBaseline='middle';
-      const legendY = H-18;
-      [[6,'소'],[ 15,'중'],[24,'대']].forEach(([r,label],i)=>{
-        const lx = 16 + i*70;
-        ctx.beginPath(); ctx.arc(lx+r, legendY, r, 0, Math.PI*2);
-        ctx.fillStyle='rgba(37,99,235,0.5)'; ctx.fill();
-        ctx.strokeStyle='rgba(255,255,255,0.8)'; ctx.lineWidth=1; ctx.stroke();
-        ctx.fillStyle='#374151'; ctx.fillText(label, lx+r*2+5, legendY);
-      });
-      ctx.fillStyle='#94A3B8'; ctx.font="10px 'Pretendard',sans-serif";
-      ctx.fillText('버블 크기 = 클릭수', W-120, legendY);
+      };
+      canvas.onmouseleave=()=>{ tooltip.style.display='none'; };
     }
 
     // ── 신규유입국가 2컬럼 리스트 ──
@@ -1938,44 +2046,44 @@ function renderGSC(from, to){
       const flagBase = 'https://flagcdn.com/20x15/';
       const maxClicks = Math.max(...newC.map(c=>c.clicks), 1);
       const makeRow = c => {
-        const iso2 = (codeMap[c.code.toLowerCase()]||'').toLowerCase() || c.code.toLowerCase().slice(0,2);
+        const code3 = (c.code||'').toLowerCase();
+        const info = countryInfo[code3];
+        const iso2 = info ? info.iso.toLowerCase() : code3.slice(0,2);
+        const contColor = info ? CONTINENT_COLOR[info.cont]?.hex||'#94A3B8' : '#94A3B8';
+        const contLabel = info ? CONTINENT_COLOR[info.cont]?.label||'' : '';
         const barW = c.clicks>0 ? Math.max(3, Math.round(c.clicks/maxClicks*100)) : 0;
         const badge = c.clicks>0
           ? `<span style="background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:600;white-space:nowrap">${c.clicks}클릭</span>`
           : `<span style="background:#F1F5F9;color:#94A3B8;border-radius:4px;padding:1px 5px;font-size:10px;white-space:nowrap">노출만</span>`;
         return `<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:7px;background:#F8FAFC;margin:2px 0">
           <img src="${flagBase}${iso2}.png" onerror="this.style.display='none'" style="width:18px;height:13px;border-radius:2px;flex-shrink:0">
-          <span style="font-size:11px;color:#374151;min-width:60px;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.country}</span>
-          <div style="flex:1;background:#E2E8F0;border-radius:3px;height:5px;min-width:20px">
-            <div style="width:${barW}%;background:#10B981;border-radius:3px;height:5px"></div>
+          <span style="font-size:11px;color:#374151;min-width:56px;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.country}</span>
+          <span style="font-size:9px;color:${contColor};background:${contColor}18;border-radius:3px;padding:0 4px;white-space:nowrap">${contLabel}</span>
+          <div style="flex:1;background:#E2E8F0;border-radius:3px;height:5px;min-width:16px">
+            <div style="width:${barW}%;background:${contColor};border-radius:3px;height:5px"></div>
           </div>
           ${badge}
-          <span style="font-size:10px;color:#CBD5E1;min-width:28px;text-align:right">${c.impr}노</span>
         </div>`;
       };
       const half = Math.ceil(newC.length/2);
-      const left  = newC.slice(0, half).map(makeRow).join('');
+      const left  = newC.slice(0,half).map(makeRow).join('');
       const right = newC.slice(half).map(makeRow).join('');
       wrap.innerHTML = `
         <div style="font-size:11px;color:#64748B;margin-bottom:8px;padding:0 4px">
           ${cutoffDate} 이후 첫 유입 · 총 <b style="color:#10B981">${newC.length}개국</b>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <div>${left}</div>
-          <div>${right}</div>
+          <div>${left}</div><div>${right}</div>
         </div>`;
     }
 
-    // 최초 렌더
     drawGeoChart(filtCountries);
     drawNewCountries();
 
-    // 날짜 필터 변경 시 재렌더
     window._drawGeoChart = ()=>{ drawGeoChart(getFilteredCountries()); };
-
-    // badge 갱신
     const gb=document.getElementById('badge-geo-period'); if(gb) gb.textContent=document.getElementById('badge-country-period')?.textContent||'';
   })();
+
 
   // ── 5. 기기별 — 클릭+노출 (날짜 필터 연동) ──
   destroyChart('gscDeviceChart');
