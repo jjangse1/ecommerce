@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>상품 업로드 트렌드 분석</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://www.gstatic.com/charts/loader.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
@@ -507,8 +506,9 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
         <div class="panel-title"><span class="dot" style="background:#10B981"></span> 전세계 유입 현황 <span style="font-size:11px;color:#94A3B8;font-weight:400">· 선택 기간 기준</span></div>
         <span class="panel-badge" id="badge-geo-period"></span>
       </div>
-      <div id="geoMapWrap" style="width:100%;height:380px;display:flex;align-items:center;justify-content:center">
-        <div id="geoChart" style="width:100%;height:100%"></div>
+      <div style="position:relative;width:100%;height:400px">
+        <canvas id="geoChart"></canvas>
+        <div id="geoTooltip" style="position:absolute;display:none;background:rgba(15,23,42,0.92);color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;pointer-events:none;z-index:10;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.2)"></div>
       </div>
     </div>
 
@@ -1735,9 +1735,10 @@ function renderGSC(from, to){
     }]
   });
 
-  // ── 4-b. GeoMap + 신규유입국가 ──
+  // ── 4-b. 버블 GeoMap + 신규유입국가 ──
   (function(){
 
+    // 3자리→ISO2 매핑
     const codeMap = {
       'kor':'KR','usa':'US','jpn':'JP','chn':'CN','twn':'TW','sgp':'SG','mys':'MY',
       'ind':'IN','rus':'RU','hkg':'HK','mex':'MX','bra':'BR','deu':'DE','vnm':'VN',
@@ -1748,35 +1749,169 @@ function renderGSC(from, to){
       'lka':'LK','nzl':'NZ','aze':'AZ','geo':'GE','mac':'MO','ury':'UY','ecu':'EC',
       'srb':'RS','hrv':'HR','mkd':'MK','alb':'AL','nga':'NG','uga':'UG','egy':'EG',
       'mmr':'MM','tjk':'TJ','ncl':'NC','est':'EE','prt':'PT','swe':'SE','dnk':'DK',
-      'bel':'BE','che':'CH','hun':'HU','rom':'RO','svk':'SK','svn':'SI','ltu':'LT',
-      'lva':'LV','est':'EE'
+      'bel':'BE','hun':'HU','rom':'RO','svk':'SK','svn':'SI','ltu':'LT','lva':'LV'
     };
 
-    // ── GeoChart ──
+    // 국가 위도/경도 (버블 좌표용)
+    const latlon = {
+      'KR':[37,127],'US':[38,-97],'JP':[36,138],'CN':[35,105],'TW':[24,121],
+      'SG':[1,104],'MY':[3,110],'IN':[20,78],'RU':[60,100],'HK':[22,114],
+      'MX':[23,-102],'BR':[-10,-55],'DE':[51,10],'VN':[16,108],'FR':[46,2],
+      'GB':[55,-3],'IE':[53,-8],'TH':[15,101],'PH':[13,122],'ID':[-2,118],
+      'AU':[-25,135],'CA':[56,-96],'IT':[43,12],'ES':[40,-4],'PL':[52,20],
+      'TR':[39,35],'NL':[52,5],'UA':[49,32],'SA':[24,45],'ZA':[-30,25],
+      'AR':[-34,-64],'CL':[-30,-71],'PE':[-10,-76],'CO':[4,-74],'NO':[62,10],
+      'FI':[62,26],'CH':[47,8],'AT':[47,14],'IL':[31,35],'GR':[39,22],
+      'CZ':[50,15],'BD':[23,90],'LK':[7,81],'NZ':[-41,174],'AZ':[40,48],
+      'GE':[42,44],'MO':[22,114],'UY':[-33,-56],'EC':[-2,-77],'RS':[44,21],
+      'HR':[45,16],'MK':[41,22],'AL':[41,20],'NG':[10,8],'UG':[1,32],
+      'EG':[27,30],'MM':[17,96],'TJ':[39,71],'NC':[-21,165],'EE':[59,25],
+      'PT':[39,-8],'SE':[62,15],'DK':[56,10],'BE':[50,4],'HU':[47,19],
+      'RO':[46,25],'SK':[48,19],'SI':[46,15],'LT':[56,24],'LV':[57,25]
+    };
+
+    // 메르카토르 투영 (lng,lat → x,y 0~1)
+    function project(lat, lng){
+      const x = (lng + 180) / 360;
+      const sinLat = Math.sin(lat * Math.PI / 180);
+      const y = 0.5 - Math.log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI);
+      return [x, Math.min(Math.max(y, 0), 1)];
+    }
+
+    // ── GeoChart 버블 렌더 ──
+    let geoChartInst = null;
     function drawGeoChart(countries){
-      if(!window.google || !window.google.visualization) return;
-      const el = document.getElementById('geoChart');
-      if(!el) return;
-      const data = new google.visualization.DataTable();
-      data.addColumn('string','국가');
-      data.addColumn('number','클릭수');
-      data.addColumn('number','노출수');
-      const rows = countries.map(c=>{
-        const iso = codeMap[c.code ? c.code.toLowerCase() : ''] || null;
-        return [iso || c.country, c.clicks, c.impr];
-      }).filter(r=>r[0]);
-      if(!rows.length){ el.innerHTML='<p style="color:#94A3B8;text-align:center;padding:60px">데이터 없음</p>'; return; }
-      data.addRows(rows);
-      const opt = {
-        backgroundColor:{fill:'#F8FAFC',stroke:'#E2E8F0',strokeWidth:1},
-        datalessRegionColor:'#EEF0F4',
-        colorAxis:{colors:['#BFDBFE','#2563EB']},
-        tooltip:{trigger:'focus'},
-        legend:'none',
-        width:'100%', height:'100%'
-      };
-      const chart = new google.visualization.GeoChart(el);
-      chart.draw(data, opt);
+      const canvas = document.getElementById('geoChart');
+      if(!canvas) return;
+
+      // 캔버스 크기
+      const W = canvas.parentElement.clientWidth || 800;
+      const H = 400;
+      canvas.width = W; canvas.height = H;
+
+      const maxClicks = Math.max(...countries.map(c=>c.clicks), 1);
+
+      // 데이터셋: 버블
+      const bubbles = [];
+      countries.forEach(c=>{
+        const iso2 = codeMap[(c.code||'').toLowerCase()] || null;
+        if(!iso2 || !latlon[iso2]) return;
+        const [lat,lng] = latlon[iso2];
+        const [px,py] = project(lat, lng);
+        bubbles.push({
+          x: px * W,
+          y: py * H,
+          r: Math.max(6, Math.round(Math.sqrt(c.clicks/maxClicks) * 30)),
+          label: c.country,
+          clicks: c.clicks,
+          impr: c.impr,
+          iso2
+        });
+      });
+
+      if(geoChartInst){ geoChartInst.destroy(); geoChartInst=null; }
+
+      // 배경지도: 간단한 대륙 직사각형으로 표현 (SVG overlay 방식)
+      const ctx = canvas.getContext('2d');
+
+      // 배경
+      ctx.fillStyle = '#EFF6FF';
+      ctx.fillRect(0,0,W,H);
+
+      // 대륙 영역 (간단 직사각형)
+      const continents = [
+        // North America
+        {lat1:15,lng1:-170,lat2:72,lng2:-50},
+        // South America
+        {lat1:-55,lng1:-82,lat2:12,lng2:-34},
+        // Europe
+        {lat1:35,lng1:-25,lat2:71,lng2:45},
+        // Africa
+        {lat1:-35,lng1:-20,lat2:37,lng2:52},
+        // Asia
+        {lat1:1,lng1:26,lat2:77,lng2:180},
+        // Australia
+        {lat1:-45,lng1:110,lat2:-10,lng2:155},
+      ];
+
+      ctx.fillStyle = '#C7D7F0';
+      continents.forEach(({lat1,lng1,lat2,lng2})=>{
+        const [x1,y2] = project(lat1,lng1).map((v,i)=>i===0?v*W:v*H);
+        const [x2,y1] = project(lat2,lng2).map((v,i)=>i===0?v*W:v*H);
+        ctx.beginPath();
+        ctx.roundRect(Math.min(x1,x2), Math.min(y1,y2), Math.abs(x2-x1), Math.abs(y2-y1), 4);
+        ctx.fill();
+      });
+
+      // 격자선
+      ctx.strokeStyle = '#DBEAFE'; ctx.lineWidth = 0.5;
+      for(let lng=-180;lng<=180;lng+=30){
+        const [px] = project(0,lng); ctx.beginPath();
+        ctx.moveTo(px*W,0); ctx.lineTo(px*W,H); ctx.stroke();
+      }
+      for(let lat=-60;lat<=75;lat+=30){
+        const [,py] = project(lat,0); ctx.beginPath();
+        ctx.moveTo(0,py*H); ctx.lineTo(W,py*H); ctx.stroke();
+      }
+
+      // 버블
+      bubbles.sort((a,b)=>a.clicks-b.clicks); // 작은 거 먼저 (큰 게 위에)
+      bubbles.forEach(b=>{
+        const alpha = 0.55 + (b.clicks/maxClicks)*0.35;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(37,99,235,${alpha.toFixed(2)})`;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        // 클릭수 텍스트 (버블이 충분히 클 때)
+        if(b.r >= 12){
+          ctx.fillStyle = '#fff';
+          ctx.font = `bold ${Math.min(b.r*0.65,14)}px 'DM Mono',monospace`;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(b.clicks, b.x, b.y);
+        }
+      });
+
+      // 툴팁 인터랙션
+      const tooltip = document.getElementById('geoTooltip');
+      function onMove(e){
+        const rect = canvas.getBoundingClientRect();
+        const mx = (e.clientX||e.touches?.[0]?.clientX||0) - rect.left;
+        const my = (e.clientY||e.touches?.[0]?.clientY||0) - rect.top;
+        let hit = null;
+        for(const b of [...bubbles].reverse()){
+          const dx=mx-b.x, dy=my-b.y;
+          if(Math.sqrt(dx*dx+dy*dy) <= b.r){ hit=b; break; }
+        }
+        if(hit){
+          tooltip.style.display='block';
+          tooltip.style.left = (Math.min(mx+12, W-150))+'px';
+          tooltip.style.top  = (my-48)+'px';
+          tooltip.innerHTML = `<b style="font-size:13px">${hit.label}</b><br>클릭 <b style="color:#60A5FA">${hit.clicks}</b> · 노출 ${hit.impr}`;
+          canvas.style.cursor='pointer';
+        } else {
+          tooltip.style.display='none';
+          canvas.style.cursor='default';
+        }
+      }
+      canvas.onmousemove = onMove;
+      canvas.onmouseleave = ()=>{ tooltip.style.display='none'; };
+
+      // 범례
+      ctx.font = "11px 'Pretendard',sans-serif";
+      ctx.textAlign='left'; ctx.textBaseline='middle';
+      const legendY = H-18;
+      [[6,'소'],[ 15,'중'],[24,'대']].forEach(([r,label],i)=>{
+        const lx = 16 + i*70;
+        ctx.beginPath(); ctx.arc(lx+r, legendY, r, 0, Math.PI*2);
+        ctx.fillStyle='rgba(37,99,235,0.5)'; ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,0.8)'; ctx.lineWidth=1; ctx.stroke();
+        ctx.fillStyle='#374151'; ctx.fillText(label, lx+r*2+5, legendY);
+      });
+      ctx.fillStyle='#94A3B8'; ctx.font="10px 'Pretendard',sans-serif";
+      ctx.fillText('버블 크기 = 클릭수', W-120, legendY);
     }
 
     // ── 신규유입국가 2컬럼 리스트 ──
@@ -1831,20 +1966,13 @@ function renderGSC(from, to){
         </div>`;
     }
 
-    // Google Charts 로드 후 실행
-    if(window.google){
-      google.charts.load('current',{packages:['geochart']});
-      google.charts.setOnLoadCallback(()=>{
-        drawGeoChart(filtCountries);
-        drawNewCountries();
-      });
-    } else {
-      // fallback: gstatic 없으면 리스트만 표시
-      drawNewCountries();
-    }
+    // 최초 렌더
+    drawGeoChart(filtCountries);
+    drawNewCountries();
 
-    // 날짜 필터 변경 시 GeoChart 재렌더링을 위해 전역 노출
-    window._drawGeoChart = ()=>{ if(window.google && google.visualization) drawGeoChart(getFilteredCountries()); };
+    // 날짜 필터 변경 시 재렌더
+    window._drawGeoChart = ()=>{ drawGeoChart(getFilteredCountries()); };
+
     // badge 갱신
     const gb=document.getElementById('badge-geo-period'); if(gb) gb.textContent=document.getElementById('badge-country-period')?.textContent||'';
   })();
