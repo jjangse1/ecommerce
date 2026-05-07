@@ -1708,27 +1708,42 @@ function renderGSC(from, to){
   charts['gscCountryChart']=new Chart(ctx4,{
     type:'bar',
     data:{labels:filtCountries.map(c=>c.country),datasets:[
-      {label:'클릭수',data:cClicks,backgroundColor:cColors.map(c=>c+'bb'),borderColor:cColors,borderWidth:1.5,borderRadius:5,yAxisID:'y'},
-      {label:'노출수',data:cImpr,backgroundColor:'#94A3B820',borderColor:'#94A3B8',borderWidth:1,borderRadius:3,yAxisID:'y1'}
+      {label:'클릭수',data:cClicks,backgroundColor:cColors.map(c=>c+'bb'),borderColor:cColors,borderWidth:1.5,borderRadius:4,yAxisID:'y',barThickness:10},
+      {label:'노출수',data:cImpr,backgroundColor:'#94A3B822',borderColor:'#94A3B8',borderWidth:1,borderRadius:3,yAxisID:'y1',barThickness:6}
     ]},
     options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
       plugins:{legend:{display:true,position:'top',labels:{font:{size:10},color:'#5C5C60',boxWidth:10}},
-        tooltip:{...topts}},
+        tooltip:{...topts,callbacks:{
+          label:i=>{
+            if(i.datasetIndex===0) return ` 클릭: ${i.raw.toLocaleString()}회`;
+            return ` 노출: ${i.raw.toLocaleString()}회`;
+          }
+        }}},
       scales:{
         x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true},
-        y:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:12,family:"'Pretendard',sans-serif"}}},
+        y:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:11,family:"'Pretendard',sans-serif"}}},
         y1:{display:false,beginAtZero:true}
       }
     },
     plugins:[{
       id:'ctrLabels',
       afterDatasetsDraw(ch){
-        const ctx=ch.ctx, meta=ch.getDatasetMeta(0);
-        ctx.save(); ctx.font="500 10px 'DM Mono',monospace"; ctx.textAlign='left'; ctx.textBaseline='middle';
-        meta.data.forEach((pt,i)=>{
+        const ctx=ch.ctx;
+        const meta0=ch.getDatasetMeta(0);
+        const meta1=ch.getDatasetMeta(1);
+        ctx.save();
+        // 클릭수 레이블 (막대 오른쪽)
+        ctx.font="600 10px 'DM Mono',monospace"; ctx.textAlign='left'; ctx.textBaseline='middle';
+        meta0.data.forEach((pt,i)=>{
           const v=cClicks[i]; if(!v) return;
-          ctx.fillStyle=cColors[i]||'#2563EB';
-          ctx.fillText(v, pt.x+5, pt.y);
+          ctx.fillStyle=cColors[i%cColors.length]||'#2563EB';
+          ctx.fillText(v.toLocaleString(), pt.x+4, pt.y-5);
+        });
+        // 노출수 레이블 (회색, 작게)
+        ctx.font="400 9px 'DM Mono',monospace"; ctx.fillStyle='#94A3B8';
+        meta1.data.forEach((pt,i)=>{
+          const v=cImpr[i]; if(!v) return;
+          ctx.fillText(v.toLocaleString(), pt.x+4, pt.y+5);
         });
         ctx.restore();
       }
@@ -2052,17 +2067,20 @@ function renderGSC(from, to){
         const contColor = info ? CONTINENT_COLOR[info.cont]?.hex||'#94A3B8' : '#94A3B8';
         const contLabel = info ? CONTINENT_COLOR[info.cont]?.label||'' : '';
         const barW = c.clicks>0 ? Math.max(3, Math.round(c.clicks/maxClicks*100)) : 0;
-        const badge = c.clicks>0
-          ? `<span style="background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:600;white-space:nowrap">${c.clicks}클릭</span>`
-          : `<span style="background:#F1F5F9;color:#94A3B8;border-radius:4px;padding:1px 5px;font-size:10px;white-space:nowrap">노출만</span>`;
-        return `<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:7px;background:#F8FAFC;margin:2px 0">
+        const clickBadge = c.clicks>0
+          ? `<span style="background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:600;white-space:nowrap">클릭 ${c.clicks.toLocaleString()}</span>`
+          : `<span style="background:#F1F5F9;color:#94A3B8;border-radius:4px;padding:1px 5px;font-size:10px;white-space:nowrap">클릭 0</span>`;
+        const imprBadge = c.impr>0
+          ? `<span style="background:#F0FDF4;color:#059669;border-radius:4px;padding:1px 5px;font-size:10px;white-space:nowrap">노출 ${c.impr.toLocaleString()}</span>`
+          : '';
+        return `<div style="display:flex;align-items:center;gap:5px;padding:5px 8px;border-radius:7px;background:#F8FAFC;margin:2px 0;flex-wrap:nowrap">
           <img src="${flagBase}${iso2}.png" onerror="this.style.display='none'" style="width:18px;height:13px;border-radius:2px;flex-shrink:0">
-          <span style="font-size:11px;color:#374151;min-width:56px;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.country}</span>
-          <span style="font-size:9px;color:${contColor};background:${contColor}18;border-radius:3px;padding:0 4px;white-space:nowrap">${contLabel}</span>
-          <div style="flex:1;background:#E2E8F0;border-radius:3px;height:5px;min-width:16px">
-            <div style="width:${barW}%;background:${contColor};border-radius:3px;height:5px"></div>
+          <span style="font-size:11px;color:#374151;min-width:52px;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.country}</span>
+          <span style="font-size:9px;color:${contColor};background:${contColor}18;border-radius:3px;padding:0 3px;white-space:nowrap;flex-shrink:0">${contLabel}</span>
+          <div style="flex:1;background:#E2E8F0;border-radius:3px;height:4px;min-width:12px;max-width:40px">
+            <div style="width:${barW}%;background:${contColor};border-radius:3px;height:4px"></div>
           </div>
-          ${badge}
+          ${clickBadge}${imprBadge}
         </div>`;
       };
       const half = Math.ceil(newC.length/2);
