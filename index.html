@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>상품 업로드 트렌드 분석</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/charts/loader.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
@@ -500,13 +501,24 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
       </div>
     </div>
 
-    <!-- 최근 14일 신규 유입 국가 -->
-    <div class="panel" style="margin-bottom:16px">
+    <!-- 최근 14일 신규 유입 국가 - GEO MAP -->
+    <div class="panel" style="margin-bottom:14px">
       <div class="panel-header">
-        <div class="panel-title"><span class="dot" style="background:#10B981"></span> 최근 14일 신규 유입 국가 <span style="font-size:11px;color:#94A3B8;font-weight:400">(전체 기간 미포함 국가)</span></div>
+        <div class="panel-title"><span class="dot" style="background:#10B981"></span> 전세계 유입 현황 <span style="font-size:11px;color:#94A3B8;font-weight:400">· 선택 기간 기준</span></div>
+        <span class="panel-badge" id="badge-geo-period"></span>
+      </div>
+      <div id="geoMapWrap" style="width:100%;height:380px;display:flex;align-items:center;justify-content:center">
+        <div id="geoChart" style="width:100%;height:100%"></div>
+      </div>
+    </div>
+
+    <!-- 최근 14일 신규 유입 국가 - 2컬럼 리스트 -->
+    <div class="panel" style="margin-bottom:14px">
+      <div class="panel-header">
+        <div class="panel-title"><span class="dot" style="background:#10B981"></span> 최근 14일 신규 유입 국가 <span style="font-size:11px;color:#94A3B8;font-weight:400">(전체 기간 미포함)</span></div>
         <span class="panel-badge" id="badge-new-country">최근 14일</span>
       </div>
-      <div id="newCountryWrap" style="padding:8px 4px 4px"></div>
+      <div id="newCountryWrap" style="padding:4px"></div>
     </div>
 
     <div class="section-divider"><span>접속 패턴 · 마케팅 분석</span></div>
@@ -1685,6 +1697,9 @@ function renderGSC(from, to){
     }]
   });
 
+  // ── 4-a. GeoChart 갱신 ──
+  if(window._drawGeoChart) window._drawGeoChart();
+
   // ── 4. 국가별 클릭+노출 (날짜 필터 연동) ──
   destroyChart('gscCountryChart');
   const ctx4=document.getElementById('gscCountryChart').getContext('2d');
@@ -1720,72 +1735,118 @@ function renderGSC(from, to){
     }]
   });
 
-  // ── 4-b. 최근 14일 신규 유입 국가 ──
+  // ── 4-b. GeoMap + 신규유입국가 ──
   (function(){
-    const wrap = document.getElementById('newCountryWrap');
-    if(!wrap || !GSC_DAILY_COUNTRY.length) return;
 
-    // 전체기간 국가 코드 집합
-    const allCodes = new Set(GSC_COUNTRIES.map(c=>c.code||c.country));
-
-    // 날짜 목록 정렬 후 최근 14일 cutoff
-    const today14 = new Date(); today14.setDate(today14.getDate()-13);
-    const cutoffDate = today14.toISOString().slice(0,10);
-
-    // 최근 14일 집계
-    const m14 = {};
-    GSC_DAILY_COUNTRY.filter(r=>r.date >= cutoffDate).forEach(r=>{
-      const key = r.code || r.country;
-      if(!m14[key]) m14[key] = {country:r.country, code:key, clicks:0, impr:0};
-      m14[key].clicks += r.clicks;
-      m14[key].impr   += r.impr;
-    });
-
-    // 전체기간에 없던 신규 국가만 필터
-    const newC = Object.values(m14)
-      .filter(c => !allCodes.has(c.code) && !allCodes.has(c.country))
-      .sort((a,b) => b.clicks - a.clicks);
-
-    if(!newC.length){
-      wrap.innerHTML = '<p style="color:#94A3B8;font-size:12px;padding:4px 8px">최근 14일 신규 유입 국가 없음</p>';
-      return;
-    }
-
-    const flagBase = 'https://flagcdn.com/20x15/';
     const codeMap = {
-      'kor':'kr','usa':'us','jpn':'jp','chn':'cn','twn':'tw','sgp':'sg','mys':'my',
-      'ind':'in','rus':'ru','hkg':'hk','mex':'mx','bra':'br','deu':'de','vnm':'vn',
-      'fra':'fr','gbr':'gb','irl':'ie','tha':'th','phl':'ph','idn':'id','aus':'au',
-      'can':'ca','ita':'it','esp':'es','pol':'pl','tur':'tr','nld':'nl','ukr':'ua',
-      'sau':'sa','zaf':'za','arg':'ar','chl':'cl','per':'pe','col':'co','nor':'no',
-      'fin':'fi','che':'ch','aut':'at','isr':'il','grc':'gr','cze':'cz','bgd':'bd',
-      'lka':'lk','nzl':'nz','aze':'az','geo':'ge','mac':'mo','ury':'uy','ecu':'ec',
-      'srb':'rs','hrv':'hr','mkd':'mk','alb':'al','nga':'ng','uga':'ug','egy':'eg',
-      'mmr':'mm','tjk':'tj','ncl':'nc'
+      'kor':'KR','usa':'US','jpn':'JP','chn':'CN','twn':'TW','sgp':'SG','mys':'MY',
+      'ind':'IN','rus':'RU','hkg':'HK','mex':'MX','bra':'BR','deu':'DE','vnm':'VN',
+      'fra':'FR','gbr':'GB','irl':'IE','tha':'TH','phl':'PH','idn':'ID','aus':'AU',
+      'can':'CA','ita':'IT','esp':'ES','pol':'PL','tur':'TR','nld':'NL','ukr':'UA',
+      'sau':'SA','zaf':'ZA','arg':'AR','chl':'CL','per':'PE','col':'CO','nor':'NO',
+      'fin':'FI','che':'CH','aut':'AT','isr':'IL','grc':'GR','cze':'CZ','bgd':'BD',
+      'lka':'LK','nzl':'NZ','aze':'AZ','geo':'GE','mac':'MO','ury':'UY','ecu':'EC',
+      'srb':'RS','hrv':'HR','mkd':'MK','alb':'AL','nga':'NG','uga':'UG','egy':'EG',
+      'mmr':'MM','tjk':'TJ','ncl':'NC','est':'EE','prt':'PT','swe':'SE','dnk':'DK',
+      'bel':'BE','che':'CH','hun':'HU','rom':'RO','svk':'SK','svn':'SI','ltu':'LT',
+      'lva':'LV','est':'EE'
     };
 
-    const maxClicks = Math.max(...newC.map(c=>c.clicks), 1);
-    const chips = newC.map(c=>{
-      const iso = codeMap[c.code.toLowerCase()] || c.code.toLowerCase().slice(0,2);
-      const flagUrl = flagBase + iso + '.png';
-      const barW = c.clicks > 0 ? Math.max(4, Math.round(c.clicks/maxClicks*80)) : 0;
-      const badge = c.clicks > 0
-        ? `<span style="background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:600">${c.clicks}클릭</span>`
-        : `<span style="background:#F1F5F9;color:#94A3B8;border-radius:4px;padding:1px 6px;font-size:11px">노출만</span>`;
-      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:8px;background:#F8FAFC;margin:3px 0">
-        <img src="${flagUrl}" onerror="this.style.display='none'" style="width:20px;height:15px;border-radius:2px;flex-shrink:0">
-        <span style="font-size:12px;color:#374151;min-width:80px">${c.country}</span>
-        <div style="flex:1;background:#E2E8F0;border-radius:4px;height:6px">
-          <div style="width:${barW}%;background:#10B981;border-radius:4px;height:6px"></div>
-        </div>
-        ${badge}
-        <span style="font-size:10px;color:#94A3B8;min-width:40px">${c.impr}노출</span>
-      </div>`;
-    }).join('');
+    // ── GeoChart ──
+    function drawGeoChart(countries){
+      if(!window.google || !window.google.visualization) return;
+      const el = document.getElementById('geoChart');
+      if(!el) return;
+      const data = new google.visualization.DataTable();
+      data.addColumn('string','국가');
+      data.addColumn('number','클릭수');
+      data.addColumn('number','노출수');
+      const rows = countries.map(c=>{
+        const iso = codeMap[c.code ? c.code.toLowerCase() : ''] || null;
+        return [iso || c.country, c.clicks, c.impr];
+      }).filter(r=>r[0]);
+      if(!rows.length){ el.innerHTML='<p style="color:#94A3B8;text-align:center;padding:60px">데이터 없음</p>'; return; }
+      data.addRows(rows);
+      const opt = {
+        backgroundColor:{fill:'#F8FAFC',stroke:'#E2E8F0',strokeWidth:1},
+        datalessRegionColor:'#EEF0F4',
+        colorAxis:{colors:['#BFDBFE','#2563EB']},
+        tooltip:{trigger:'focus'},
+        legend:'none',
+        width:'100%', height:'100%'
+      };
+      const chart = new google.visualization.GeoChart(el);
+      chart.draw(data, opt);
+    }
 
-    wrap.innerHTML = `<div style="font-size:11px;color:#64748B;margin-bottom:6px;padding:0 10px">
-      ${cutoffDate} 이후 첫 유입 · 총 <b style="color:#10B981">${newC.length}개국</b>
-    </div>${chips}`;
+    // ── 신규유입국가 2컬럼 리스트 ──
+    function drawNewCountries(){
+      const wrap = document.getElementById('newCountryWrap');
+      if(!wrap || !GSC_DAILY_COUNTRY.length) return;
+      const allCodes = new Set(GSC_COUNTRIES.map(c=>c.code||c.country));
+      const today14 = new Date(); today14.setDate(today14.getDate()-13);
+      const cutoffDate = today14.toISOString().slice(0,10);
+      const m14 = {};
+      GSC_DAILY_COUNTRY.filter(r=>r.date >= cutoffDate).forEach(r=>{
+        const key = r.code || r.country;
+        if(!m14[key]) m14[key] = {country:r.country, code:key, clicks:0, impr:0};
+        m14[key].clicks += r.clicks;
+        m14[key].impr   += r.impr;
+      });
+      const newC = Object.values(m14)
+        .filter(c => !allCodes.has(c.code) && !allCodes.has(c.country))
+        .sort((a,b) => b.clicks - a.clicks);
+      if(!newC.length){
+        wrap.innerHTML = '<p style="color:#94A3B8;font-size:12px;padding:8px">최근 14일 신규 유입 국가 없음</p>';
+        return;
+      }
+      const flagBase = 'https://flagcdn.com/20x15/';
+      const maxClicks = Math.max(...newC.map(c=>c.clicks), 1);
+      const makeRow = c => {
+        const iso2 = (codeMap[c.code.toLowerCase()]||'').toLowerCase() || c.code.toLowerCase().slice(0,2);
+        const barW = c.clicks>0 ? Math.max(3, Math.round(c.clicks/maxClicks*100)) : 0;
+        const badge = c.clicks>0
+          ? `<span style="background:#EFF6FF;color:#2563EB;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:600;white-space:nowrap">${c.clicks}클릭</span>`
+          : `<span style="background:#F1F5F9;color:#94A3B8;border-radius:4px;padding:1px 5px;font-size:10px;white-space:nowrap">노출만</span>`;
+        return `<div style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:7px;background:#F8FAFC;margin:2px 0">
+          <img src="${flagBase}${iso2}.png" onerror="this.style.display='none'" style="width:18px;height:13px;border-radius:2px;flex-shrink:0">
+          <span style="font-size:11px;color:#374151;min-width:60px;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.country}</span>
+          <div style="flex:1;background:#E2E8F0;border-radius:3px;height:5px;min-width:20px">
+            <div style="width:${barW}%;background:#10B981;border-radius:3px;height:5px"></div>
+          </div>
+          ${badge}
+          <span style="font-size:10px;color:#CBD5E1;min-width:28px;text-align:right">${c.impr}노</span>
+        </div>`;
+      };
+      const half = Math.ceil(newC.length/2);
+      const left  = newC.slice(0, half).map(makeRow).join('');
+      const right = newC.slice(half).map(makeRow).join('');
+      wrap.innerHTML = `
+        <div style="font-size:11px;color:#64748B;margin-bottom:8px;padding:0 4px">
+          ${cutoffDate} 이후 첫 유입 · 총 <b style="color:#10B981">${newC.length}개국</b>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div>${left}</div>
+          <div>${right}</div>
+        </div>`;
+    }
+
+    // Google Charts 로드 후 실행
+    if(window.google){
+      google.charts.load('current',{packages:['geochart']});
+      google.charts.setOnLoadCallback(()=>{
+        drawGeoChart(filtCountries);
+        drawNewCountries();
+      });
+    } else {
+      // fallback: gstatic 없으면 리스트만 표시
+      drawNewCountries();
+    }
+
+    // 날짜 필터 변경 시 GeoChart 재렌더링을 위해 전역 노출
+    window._drawGeoChart = ()=>{ if(window.google && google.visualization) drawGeoChart(getFilteredCountries()); };
+    // badge 갱신
+    const gb=document.getElementById('badge-geo-period'); if(gb) gb.textContent=document.getElementById('badge-country-period')?.textContent||'';
   })();
 
   // ── 5. 기기별 — 클릭+노출 (날짜 필터 연동) ──
