@@ -1402,7 +1402,7 @@ window._GSC_DAILY_PAGE    = [];  // 날짜×페이지 (필터 연동)
       window._GSC_CHART.sort((a,b)=>a.date.localeCompare(b.date));
 
       if(json.queries   ?.length) window._GSC_QUERIES   = json.queries.map(q=>({query:q.query,clicks:q.clicks,impr:q.impr,ctr:q.ctr,pos:q.pos}));
-      if(json.countries ?.length) window._GSC_COUNTRIES = json.countries.map(c=>({country:c.country,clicks:c.clicks,impr:c.impr,ctr:c.ctr,pos:c.pos}));
+      if(json.countries ?.length) window._GSC_COUNTRIES = json.countries.map(c=>({country:c.country,code:c.code||'',clicks:c.clicks,impr:c.impr,ctr:c.ctr,pos:c.pos}));
       if(json.devices   ?.length) window._GSC_DEVICES   = json.devices.map(d=>({device:d.device,clicks:d.clicks,impr:d.impr,ctr:d.ctr,pos:d.pos}));
       if(json.pages     ?.length) window._GSC_PAGES     = json.pages.map(p=>({page:p.page,clicks:p.clicks,impr:p.impr||0,ctr:p.ctr,pos:p.pos}));
 
@@ -1512,12 +1512,12 @@ function renderGSC(from, to){
     const filt = GSC_DAILY_COUNTRY.filter(r=>r.date>=f&&r.date<=t);
     const m={};
     filt.forEach(r=>{
-      if(!m[r.country]) m[r.country]={country:r.country,clicks:0,impr:0,ctrSum:0,posSum:0,cnt:0};
+      if(!m[r.country]) m[r.country]={country:r.country,code:r.code||'',clicks:0,impr:0,ctrSum:0,posSum:0,cnt:0};
       m[r.country].clicks+=r.clicks; m[r.country].impr+=r.impr;
       if(r.pos>0){m[r.country].ctrSum+=r.ctr; m[r.country].posSum+=r.pos; m[r.country].cnt++;}
     });
     return Object.values(m).map(c=>({
-      country:c.country, clicks:c.clicks, impr:c.impr,
+      country:c.country, code:c.code||'', clicks:c.clicks, impr:c.impr,
       ctr: c.clicks>0?+(c.clicks/(c.impr||1)).toFixed(4):0,
       pos: c.cnt>0?+(c.posSum/c.cnt).toFixed(1):0
     })).sort((a,b)=>b.clicks-a.clicks).slice(0,15);
@@ -1787,7 +1787,7 @@ function renderGSC(from, to){
       // 캔버스 크기
       const W = canvas.parentElement.clientWidth || 800;
       const H = 400;
-      canvas.width = W; canvas.height = H;
+      canvas.width = W; canvas.height = H; // 항상 재설정 (크기 초기화)
 
       const maxClicks = Math.max(...countries.map(c=>c.clicks), 1);
 
@@ -1801,7 +1801,7 @@ function renderGSC(from, to){
         bubbles.push({
           x: px * W,
           y: py * H,
-          r: Math.max(6, Math.round(Math.sqrt(c.clicks/maxClicks) * 30)),
+          r: c.clicks>0 ? Math.max(7, Math.round(Math.sqrt(c.clicks/maxClicks) * 28)) : 5,
           label: c.country,
           clicks: c.clicks,
           impr: c.impr,
@@ -1878,8 +1878,8 @@ function renderGSC(from, to){
       const tooltip = document.getElementById('geoTooltip');
       function onMove(e){
         const rect = canvas.getBoundingClientRect();
-        const mx = (e.clientX||e.touches?.[0]?.clientX||0) - rect.left;
-        const my = (e.clientY||e.touches?.[0]?.clientY||0) - rect.top;
+        const mx = (e.clientX != null ? e.clientX : (e.touches&&e.touches[0]?e.touches[0].clientX:0)) - rect.left;
+        const my = (e.clientY != null ? e.clientY : (e.touches&&e.touches[0]?e.touches[0].clientY:0)) - rect.top;
         let hit = null;
         for(const b of [...bubbles].reverse()){
           const dx=mx-b.x, dy=my-b.y;
