@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Repository 체크아웃
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0     # Git 히스토리를 전부 가져와 충돌 가능성을 줄입니다.
 
       - name: Python 3.11 설정
         uses: actions/setup-python@v5
@@ -35,9 +37,11 @@ jobs:
           git config user.name  "GSC Auto Updater"
           git config user.email "bot@github.com"
           git add gsc-data.json
+          
           if git diff --staged --quiet; then
             echo "변경 없음 — 스킵"
           else
             git commit -m "chore: GSC 자동 업데이트 ($(date +'%Y-%m-%d'))"
-            git push
+            # 일반 git push 대신 --force를 사용하여 원격과의 꼬임을 강제로 해결합니다.
+            git push --force origin main
           fi
