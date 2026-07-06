@@ -1,17 +1,10 @@
 {
-  "updated": "2026-07-05",
+  "updated": "2026-07-06",
   "period": {
-    "start": "2026-04-05",
-    "end": "2026-07-03"
+    "start": "2026-04-06",
+    "end": "2026-07-04"
   },
   "daily": [
-    {
-      "date": "2026-04-05",
-      "clicks": 4,
-      "impr": 70,
-      "ctr": 0.0571,
-      "pos": 5.9
-    },
     {
       "date": "2026-04-06",
       "clicks": 9,
@@ -634,6 +627,13 @@
       "impr": 31,
       "ctr": 0.0323,
       "pos": 6.2
+    },
+    {
+      "date": "2026-07-04",
+      "clicks": 1,
+      "impr": 73,
+      "ctr": 0.0137,
+      "pos": 11.1
     }
   ],
   "queries": [
@@ -666,13 +666,6 @@
       "pos": 3.5
     },
     {
-      "query": "4020-01061",
-      "clicks": 2,
-      "impr": 26,
-      "ctr": 0.0769,
-      "pos": 6.4
-    },
-    {
       "query": "novellus c1",
       "clicks": 2,
       "impr": 10,
@@ -682,9 +675,9 @@
     {
       "query": "0010-20000",
       "clicks": 1,
-      "impr": 70,
-      "ctr": 0.0143,
-      "pos": 7.6
+      "impr": 71,
+      "ctr": 0.0141,
+      "pos": 7.7
     },
     {
       "query": "0010-20524",
@@ -696,9 +689,9 @@
     {
       "query": "0010-21844",
       "clicks": 1,
-      "impr": 9,
-      "ctr": 0.1111,
-      "pos": 8.2
+      "impr": 10,
+      "ctr": 0.1,
+      "pos": 9.0
     },
     {
       "query": "0010-36408",
@@ -717,9 +710,9 @@
     {
       "query": "0021-06092",
       "clicks": 1,
-      "impr": 8,
-      "ctr": 0.125,
-      "pos": 7.4
+      "impr": 10,
+      "ctr": 0.1,
+      "pos": 6.7
     },
     {
       "query": "0040-18219",
@@ -738,8 +731,8 @@
     {
       "query": "0100-09042",
       "clicks": 1,
-      "impr": 32,
-      "ctr": 0.0312,
+      "impr": 33,
+      "ctr": 0.0303,
       "pos": 6.5
     },
     {
@@ -755,6 +748,13 @@
       "impr": 21,
       "ctr": 0.0476,
       "pos": 9.3
+    },
+    {
+      "query": "4020-01061",
+      "clicks": 1,
+      "impr": 25,
+      "ctr": 0.04,
+      "pos": 6.2
     },
     {
       "query": "a4978-62012",
@@ -781,8 +781,8 @@
   "countries": [
     {
       "country": "한국",
-      "clicks": 376,
-      "impr": 4001,
+      "clicks": 373,
+      "impr": 3966,
       "ctr": 0.094,
       "pos": 4.9,
       "code": "kor"
@@ -790,33 +790,33 @@
     {
       "country": "대만",
       "clicks": 123,
-      "impr": 1607,
-      "ctr": 0.0765,
+      "impr": 1605,
+      "ctr": 0.0766,
       "pos": 5.3,
       "code": "twn"
     },
     {
       "country": "미국",
       "clicks": 114,
-      "impr": 2078,
-      "ctr": 0.0549,
-      "pos": 7.4,
+      "impr": 2118,
+      "ctr": 0.0538,
+      "pos": 7.5,
       "code": "usa"
     },
     {
       "country": "일본",
-      "clicks": 41,
-      "impr": 430,
-      "ctr": 0.0953,
-      "pos": 5.6,
+      "clicks": 40,
+      "impr": 423,
+      "ctr": 0.0946,
+      "pos": 5.7,
       "code": "jpn"
     },
     {
       "country": "중국",
       "clicks": 31,
-      "impr": 321,
-      "ctr": 0.0966,
-      "pos": 5.3,
+      "impr": 322,
+      "ctr": 0.0963,
+      "pos": 5.5,
       "code": "chn"
     },
     {
@@ -830,40 +830,40 @@
     {
       "country": "싱가포르",
       "clicks": 25,
-      "impr": 389,
-      "ctr": 0.0643,
+      "impr": 386,
+      "ctr": 0.0648,
       "pos": 5.5,
       "code": "sgp"
     },
     {
       "country": "홍콩",
       "clicks": 9,
-      "impr": 127,
-      "ctr": 0.0709,
+      "impr": 126,
+      "ctr": 0.0714,
       "pos": 5.5,
       "code": "hkg"
     },
     {
       "country": "말레이시아",
       "clicks": 9,
-      "impr": 179,
-      "ctr": 0.0503,
+      "impr": 178,
+      "ctr": 0.0506,
       "pos": 4.6,
       "code": "mys"
     },
     {
       "country": "독일",
       "clicks": 7,
-      "impr": 107,
-      "ctr": 0.0654,
+      "impr": 106,
+      "ctr": 0.066,
       "pos": 6.8,
       "code": "deu"
     },
     {
       "country": "프랑스",
       "clicks": 6,
-      "impr": 103,
-      "ctr": 0.0583,
+      "impr": 102,
+      "ctr": 0.0588,
       "pos": 5.6,
       "code": "fra"
     },
@@ -886,32 +886,32 @@
     {
       "country": "멕시코",
       "clicks": 3,
-      "impr": 46,
-      "ctr": 0.0652,
+      "impr": 47,
+      "ctr": 0.0638,
       "pos": 5.7,
       "code": "mex"
     },
     {
       "country": "캐나다",
       "clicks": 2,
-      "impr": 78,
-      "ctr": 0.0256,
-      "pos": 6.5,
+      "impr": 77,
+      "ctr": 0.026,
+      "pos": 6.1,
       "code": "can"
     }
   ],
   "devices": [
     {
       "device": "데스크톱",
-      "clicks": 695,
+      "clicks": 692,
       "impr": 9386,
-      "ctr": 0.074,
-      "pos": 5.9
+      "ctr": 0.0737,
+      "pos": 6.0
     },
     {
       "device": "모바일",
       "clicks": 95,
-      "impr": 2050,
+      "impr": 2053,
       "ctr": 0.0463,
       "pos": 6.6
     },
@@ -1031,105 +1031,6 @@
     }
   ],
   "daily_country": [
-    {
-      "date": "2026-04-05",
-      "country": "ISR",
-      "code": "isr",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 3.0
-    },
-    {
-      "date": "2026-04-05",
-      "country": "대만",
-      "code": "twn",
-      "clicks": 0,
-      "impr": 3,
-      "ctr": 0.0,
-      "pos": 5.3
-    },
-    {
-      "date": "2026-04-05",
-      "country": "독일",
-      "code": "deu",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 4.0
-    },
-    {
-      "date": "2026-04-05",
-      "country": "말레이시아",
-      "code": "mys",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 6.0
-    },
-    {
-      "date": "2026-04-05",
-      "country": "미국",
-      "code": "usa",
-      "clicks": 0,
-      "impr": 13,
-      "ctr": 0.0,
-      "pos": 5.6
-    },
-    {
-      "date": "2026-04-05",
-      "country": "싱가포르",
-      "code": "sgp",
-      "clicks": 0,
-      "impr": 4,
-      "ctr": 0.0,
-      "pos": 2.5
-    },
-    {
-      "date": "2026-04-05",
-      "country": "일본",
-      "code": "jpn",
-      "clicks": 1,
-      "impr": 7,
-      "ctr": 0.1429,
-      "pos": 4.6
-    },
-    {
-      "date": "2026-04-05",
-      "country": "캐나다",
-      "code": "can",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 40.0
-    },
-    {
-      "date": "2026-04-05",
-      "country": "프랑스",
-      "code": "fra",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 3.0
-    },
-    {
-      "date": "2026-04-05",
-      "country": "한국",
-      "code": "kor",
-      "clicks": 3,
-      "impr": 37,
-      "ctr": 0.0811,
-      "pos": 6.1
-    },
-    {
-      "date": "2026-04-05",
-      "country": "홍콩",
-      "code": "hkg",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 3.0
-    },
     {
       "date": "2026-04-06",
       "country": "BEL",
@@ -17104,25 +17005,108 @@
       "impr": 8,
       "ctr": 0.125,
       "pos": 5.5
-    }
-  ],
-  "daily_device": [
+    },
     {
-      "date": "2026-04-05",
-      "device": "데스크톱",
-      "clicks": 4,
-      "impr": 64,
-      "ctr": 0.0625,
+      "date": "2026-07-04",
+      "country": "GIN",
+      "code": "gin",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 9.0
+    },
+    {
+      "date": "2026-07-04",
+      "country": "LBY",
+      "code": "lby",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 7.0
+    },
+    {
+      "date": "2026-07-04",
+      "country": "NGA",
+      "code": "nga",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 15.0
+    },
+    {
+      "date": "2026-07-04",
+      "country": "ROU",
+      "code": "rou",
+      "clicks": 1,
+      "impr": 4,
+      "ctr": 0.25,
+      "pos": 5.2
+    },
+    {
+      "date": "2026-07-04",
+      "country": "대만",
+      "code": "twn",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 12.0
+    },
+    {
+      "date": "2026-07-04",
+      "country": "멕시코",
+      "code": "mex",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
       "pos": 6.0
     },
     {
-      "date": "2026-04-05",
-      "device": "모바일",
+      "date": "2026-07-04",
+      "country": "미국",
+      "code": "usa",
+      "clicks": 0,
+      "impr": 53,
+      "ctr": 0.0,
+      "pos": 10.8
+    },
+    {
+      "date": "2026-07-04",
+      "country": "싱가포르",
+      "code": "sgp",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 5.0
+    },
+    {
+      "date": "2026-07-04",
+      "country": "영국",
+      "code": "gbr",
       "clicks": 0,
       "impr": 6,
       "ctr": 0.0,
-      "pos": 5.3
+      "pos": 12.8
     },
+    {
+      "date": "2026-07-04",
+      "country": "중국",
+      "code": "chn",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 65.0
+    },
+    {
+      "date": "2026-07-04",
+      "country": "한국",
+      "code": "kor",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 4.0
+    }
+  ],
+  "daily_device": [
     {
       "date": "2026-04-06",
       "device": "데스크톱",
@@ -18866,33 +18850,25 @@
       "impr": 8,
       "ctr": 0.125,
       "pos": 7.8
+    },
+    {
+      "date": "2026-07-04",
+      "device": "데스크톱",
+      "clicks": 1,
+      "impr": 64,
+      "ctr": 0.0156,
+      "pos": 11.4
+    },
+    {
+      "date": "2026-07-04",
+      "device": "모바일",
+      "clicks": 0,
+      "impr": 9,
+      "ctr": 0.0,
+      "pos": 8.7
     }
   ],
   "daily_query": [
-    {
-      "date": "2026-04-05",
-      "query": "201000000",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 40.0
-    },
-    {
-      "date": "2026-04-05",
-      "query": "4020-01061",
-      "clicks": 1,
-      "impr": 2,
-      "ctr": 0.5,
-      "pos": 7.5
-    },
-    {
-      "date": "2026-04-05",
-      "query": "lithius proz",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 10.0
-    },
     {
       "date": "2026-04-06",
       "query": "0190-21303",
@@ -25004,377 +24980,105 @@
       "impr": 1,
       "ctr": 0.0,
       "pos": 10.0
+    },
+    {
+      "date": "2026-07-04",
+      "query": "0010-10970",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 6.0
+    },
+    {
+      "date": "2026-07-04",
+      "query": "0010-20000",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 11.0
+    },
+    {
+      "date": "2026-07-04",
+      "query": "0010-20498",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 14.5
+    },
+    {
+      "date": "2026-07-04",
+      "query": "0010-21844",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 16.0
+    },
+    {
+      "date": "2026-07-04",
+      "query": "0021-06092",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 4.0
+    },
+    {
+      "date": "2026-07-04",
+      "query": "0040-33998",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 14.0
+    },
+    {
+      "date": "2026-07-04",
+      "query": "0100-09042",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 9.0
+    },
+    {
+      "date": "2026-07-04",
+      "query": "0190-35076",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 15.5
+    },
+    {
+      "date": "2026-07-04",
+      "query": "4020-01061",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 5.0
+    },
+    {
+      "date": "2026-07-04",
+      "query": "buvc",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 9.0
+    },
+    {
+      "date": "2026-07-04",
+      "query": "seriplex",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 65.0
+    },
+    {
+      "date": "2026-07-04",
+      "query": "٠٠٠٢٠١٠١",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 7.0
     }
   ],
   "daily_page": [
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/041912d3-f1c5-4a10-b9b2-ceec737e0979",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 4.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/0a32e110-d8f9-4219-acff-50005b9fd3f3",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 5.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/13785d8a-4bef-4ec3-a2c5-c74e75a33ca5",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 2.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/1bf1cae9-79d2-4195-893c-87d74a1d1462",
-      "clicks": 1,
-      "impr": 4,
-      "ctr": 0.25,
-      "pos": 2.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/23729229-061d-4dce-9b69-0d883260ca8b",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 7.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/26566f89-7c77-4bfa-97ed-ed6fc911a9da",
-      "clicks": 0,
-      "impr": 2,
-      "ctr": 0.0,
-      "pos": 9.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/33fb5ad9-a26a-416a-a296-404099140d54",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 8.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/34676c4c-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 2,
-      "ctr": 0.0,
-      "pos": 4.5
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3467730c-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 1,
-      "impr": 1,
-      "ctr": 1.0,
-      "pos": 2.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3467853c-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 4,
-      "ctr": 0.0,
-      "pos": 7.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/34679384-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 1,
-      "impr": 2,
-      "ctr": 0.5,
-      "pos": 7.5
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3467a895-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 7.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3467e78c-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 2,
-      "ctr": 0.0,
-      "pos": 2.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3467e7a6-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 2,
-      "ctr": 0.0,
-      "pos": 10.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3467fa23-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 6.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/34680284-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 9.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3468049c-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 9.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/34680de3-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 7.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/346820d5-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 5.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/346830a4-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 8.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/346842a0-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 6.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/34685dd6-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 3.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/34686abc-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 2,
-      "ctr": 0.0,
-      "pos": 3.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3468c8d9-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 2.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3468cd3c-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 6.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3468e9f4-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 4.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/362b9796-c071-4e6a-85ec-86ad6cd7876b",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 5.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3932649e-be1b-4ea9-9c0a-28aa13f442aa",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 4.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/3b240666-5fb4-40c2-97fc-01fb6cd844ad",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 9.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/40fd49a7-b4d3-495d-910b-8e02ddf3ad1c",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 10.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/5ba9b422-539a-48f7-bad1-e62b06391232",
-      "clicks": 0,
-      "impr": 8,
-      "ctr": 0.0,
-      "pos": 5.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/6cfd9dc8-eb2c-4d7e-b75c-5a8e442f7ca8",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 3.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/6ec967cc-ccb9-44d1-a9b9-587f8eee1961",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 2.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/78249079-a990-4eaf-9cd7-170168724d07",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 4.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/855b9812-f203-416b-95ad-1e5192d11db4",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 5.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/8ce65990-7bb7-42fe-b3e3-473f9296fd9b",
-      "clicks": 0,
-      "impr": 2,
-      "ctr": 0.0,
-      "pos": 5.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/9437f6f9-1643-451c-8532-04745b4b333e",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 5.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/973bca4a-0a64-446a-89ca-f10a5e2335e6",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 8.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/98b7f860-0ca1-4c25-85bc-3275c5a58de2",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 6.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/9f968330-1e52-4ef0-90b9-a20f74d31776",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 3.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/ac246690-6cf4-4f4e-a1ad-a8d071f0e9da",
-      "clicks": 0,
-      "impr": 2,
-      "ctr": 0.0,
-      "pos": 7.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/b9abcd3c-2eaa-436e-9c95-153386e5acd8",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 5.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/c99ad656-97a5-4aac-a76f-9daea53991a3",
-      "clicks": 1,
-      "impr": 4,
-      "ctr": 0.25,
-      "pos": 7.5
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/d0f152b9-1a1f-45af-b3aa-3d8069af229b",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 4.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/ebc23454-1d22-4872-b152-4862d18a8218",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 1.0
-    },
-    {
-      "date": "2026-04-05",
-      "page": "https://myhubon.com/products/detail/fb67351d-e9f0-449c-9a99-f403085156ff",
-      "clicks": 0,
-      "impr": 1,
-      "ctr": 0.0,
-      "pos": 40.0
-    },
     {
       "date": "2026-04-06",
       "page": "https://myhubon.com/",
@@ -62641,11 +62345,139 @@
     },
     {
       "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/893a7c06-9705-42b7-a4ce-692cf73bc25f",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 4.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/89c9daf5-b3a1-470c-ba47-8b907061a809",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 4.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/8a92be3f-f322-45b6-9761-19ff7a32ce5c",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 10.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/8c2e0ab0-e6bf-4ba2-80aa-a5967457e6b4",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 4.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/8ce65990-7bb7-42fe-b3e3-473f9296fd9b",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 3.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/903c59ee-4284-4b44-8089-0950600c3712",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 3.0
+    },
+    {
+      "date": "2026-05-26",
       "page": "https://myhubon.com/products/detail/90c68404-32f0-4a00-90ef-311c916b0df1",
       "clicks": 1,
       "impr": 1,
       "ctr": 1.0,
       "pos": 1.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/93673583-8132-43bc-966a-af08c658086e",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 2.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/95610985-ac8b-40bc-a388-ecc1b071fc54",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 1.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/96e18520-7b56-48b7-9f37-b9f16be6fcee",
+      "clicks": 0,
+      "impr": 4,
+      "ctr": 0.0,
+      "pos": 12.5
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/98b66473-e185-49c2-b02c-e4e865779dbb",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 6.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/9b130959-7107-443d-a2ae-c2aca764fb1f",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 1.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/9b302955-3343-458c-8ef8-7660c7e3afe7",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 6.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/9b87a657-a59e-4473-8f4e-89253f9e87dd",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 3.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/9c3ec8ee-bc4f-48f9-99cc-c9dcc80969c1",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 6.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/9d404fcb-f479-4d1b-bc06-2ebce8b8a631",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 10.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/9e78bbde-959c-4191-9119-926268597f1d",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 4.0
     },
     {
       "date": "2026-05-26",
@@ -62657,6 +62489,22 @@
     },
     {
       "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/a3199d8d-7094-49bf-98ea-c71e390db221",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 17.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/a496cd35-a33c-4d43-88cb-239a034b4d7c",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 10.0
+    },
+    {
+      "date": "2026-05-26",
       "page": "https://myhubon.com/products/detail/a76a10ec-ea66-46f1-91aa-aeee10e7423c",
       "clicks": 1,
       "impr": 1,
@@ -62665,11 +62513,227 @@
     },
     {
       "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/a7b00e36-9639-4e72-975c-9f44d272f84f",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 5.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/a7f5afaf-5202-428e-b5a3-7745a50f70f2",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 6.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/a96a43a8-ece8-4222-9547-b8ca2e334137",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 6.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/aa573399-9d75-4333-a131-2f7b9cb190ac",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 10.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/abe383e6-4047-4a0e-91b8-88a5259f6dbd",
+      "clicks": 0,
+      "impr": 3,
+      "ctr": 0.0,
+      "pos": 6.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/ad92c535-5935-49bc-aee8-c876d03343d9",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 3.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/afc8cc54-2ac9-4bf8-9b0c-f41794ef59f6",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 6.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/b1a6ca37-ef54-4dc8-bed2-e452458f496b",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 5.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/b70a0ead-a6d6-4aa3-bfcf-454d5b41bc32",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 4.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/b7301d6d-d9a5-4647-83e5-190a50287bba",
+      "clicks": 0,
+      "impr": 4,
+      "ctr": 0.0,
+      "pos": 3.5
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/bcaf4ca2-ead4-4c4f-b3d6-c45de3d30e59",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 5.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/bdf17ae4-70b5-4ba9-a2c4-ad9020afe9b9",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 2.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/c0e6b133-cac7-46e7-8daf-66722f86906b",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 7.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/c2c1e7a4-33c2-4eb6-8fa7-928dc10055ae",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 1.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/c4504590-6e0e-4219-b3ec-42a4b4d37525",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 10.0
+    },
+    {
+      "date": "2026-05-26",
       "page": "https://myhubon.com/products/detail/c8a50907-6640-4781-a44d-4c53e2a15a31",
       "clicks": 1,
       "impr": 3,
       "ctr": 0.3333,
       "pos": 1.3
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/c92bc8d9-78cb-4602-a89a-f462d480cada",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 3.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/cc5fac02-40bf-4beb-9105-87135265d0a0",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 4.5
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/ccafd2e4-d0d2-47e5-a57c-e500c6db9fca",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 6.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/ccd06082-be06-4133-8a9b-3069f9e9f8fa",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 10.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/cf295ec9-d54c-400b-911f-af0668ee4f98",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 3.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/d0e0c9a9-d865-4412-b472-0e5fdd23344e",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 9.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/d0f152b9-1a1f-45af-b3aa-3d8069af229b",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 1.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/d527c7d3-ffb7-45f8-807a-83b7019f5437",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 6.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/d7d5fdc4-1206-49b5-895f-151a99045b13",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 9.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/d9f1473a-ab2b-447b-98bb-d7687d2b3633",
+      "clicks": 0,
+      "impr": 2,
+      "ctr": 0.0,
+      "pos": 3.0
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/da2230aa-5895-432b-b53d-fbfa0d4a1d58",
+      "clicks": 0,
+      "impr": 5,
+      "ctr": 0.0,
+      "pos": 3.6
+    },
+    {
+      "date": "2026-05-26",
+      "page": "https://myhubon.com/products/detail/dbc979fb-676c-448c-893e-d37367870277",
+      "clicks": 0,
+      "impr": 1,
+      "ctr": 0.0,
+      "pos": 7.0
     },
     {
       "date": "2026-05-27",
@@ -65006,6 +65070,14 @@
       "impr": 1,
       "ctr": 1.0,
       "pos": 7.0
+    },
+    {
+      "date": "2026-07-04",
+      "page": "https://myhubon.com/products/detail/0806be45-956a-453e-93b7-a19b11de85fb",
+      "clicks": 1,
+      "impr": 4,
+      "ctr": 0.25,
+      "pos": 5.2
     }
   ]
 }
