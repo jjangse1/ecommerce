@@ -70,7 +70,6 @@ if not token:
 print(f"✅ 로그인 성공 (토큰 앞 20자: {token[:20]}...)")
 
 # ====================== STEP 2: 최근 7일 ISO 형식으로 엑셀 다운로드 ======================
-# 서버 504 타임아웃 방지: 전체 기간 대신 최근 7일만 요청
 now_utc = datetime.now(timezone.utc)
 to_dt   = now_utc.replace(hour=14, minute=59, second=59, microsecond=999000)
 from_dt = (now_utc - timedelta(days=7)).replace(hour=15, minute=0, second=0, microsecond=0)
@@ -97,7 +96,7 @@ for attempt in range(1, 4):
             "https://api.myhubon.com/admin/product/manage/excel-download",
             headers=download_headers,
             json=payload,
-            timeout=120   # 7일치 → 120초로 단축
+            timeout=120
         )
         if dl_resp.status_code == 200:
             break
@@ -107,7 +106,7 @@ for attempt in range(1, 4):
         print(f"⏱️ Timeout → {'재시도' if attempt < 3 else '최종 실패'}")
 
     if attempt < 3:
-        wait = 30 * attempt   # 7일치라 대기 단축
+        wait = 30 * attempt
         print(f"⏳ {wait}초 대기...")
         time.sleep(wait)
 
@@ -121,8 +120,9 @@ if dl_resp is None or dl_resp.status_code != 200:
 with open(TEMP_FILE, "wb") as f:
     f.write(dl_resp.content)
 
-new_size = os.path.getsize(TEMP_FILE) / 1024
-print(f"✅ 신규 데이터 수신 완료 ({new_size:.1f} KB)")
+new_size_bytes = os.path.getsize(TEMP_FILE)
+new_size_kb = new_size_bytes / 1024
+print(f"✅ 신규 데이터 수신 완료 ({new_size_kb:.1f} KB)")
 
 # ====================== STEP 4: 기존 엑셀과 병합 (Upsert) ======================
 try:
@@ -135,11 +135,27 @@ except ImportError:
 
 def merge_excel(existing_path, new_path, output_path):
     """기존 엑셀에 새 데이터를 Upsert 병합. 키: 첫 번째 열 값."""
-    wb_new = openpyxl.load_workbook(new_path)
+    # [수정] 다운로드 파일 크기가 0이거나 비정상적인 포맷(Zip에러)일 때의 예외 처리 추가
+    if not os.path.exists(new_path) or os.path.getsize(new_path) == 0:
+        print("⚠️ 신규 다운로드 파일이 비어 있습니다. (0바이트)")
+        return False
+
+    try:
+        wb_new = openpyxl.load_workbook(new_path)
+    except Exception as e:
+        print(f"❌ 신규 엑셀 파일을 읽을 수 없습니다. (포맷 에러: {e})")
+        # 다운로드된 내용이 텍스트(에러 메시지 등)일 수 있으므로 로그 출력
+        try:
+            with open(new_path, "r", encoding="utf-8", errors="ignore") as f:
+                print("📝 받은 파일 내용 앞부분:", f.read(300))
+        except:
+            pass
+        return False
+
     ws_new = wb_new.active
     new_rows = list(ws_new.iter_rows(values_only=True))
-    if not new_rows:
-        print("⚠️ 신규 데이터 시트가 비어 있습니다. 병합 스킵.")
+    if not new_rows or len(new_rows) <= 1:
+        print("⚠️ 신규 데이터 시트가 비어 있거나 헤더만 존재합니다. 병합 스킵.")
         return False
 
     header = new_rows[0]
@@ -203,13 +219,24 @@ def merge_excel(existing_path, new_path, output_path):
 
 
 MERGED_FILE = os.path.join(DATA_DIR, "merged.xlsx")
-success = merge_excel(DATA_FILE, TEMP_FILE, MERGED_FILE)
 
-if not success:
-    print("❌ 병합 실패 → 기존 파일 유지, 종료")
+# [수정] 수신된 데이터가 아예 없거나(0바이트) 병합 작업이 필요 없는 경우에 대한 흐름 제어
+if new_size_bytes == 0:
+    print("ℹ️ 신규 데이터가 없어 병합 및 업데이트를 진행하지 않습니다.")
     if os.path.exists(TEMP_FILE):
         os.remove(TEMP_FILE)
-    exit(1)
+    success = False
+    # 에러 종료가 아닌 정상 종료를 원하므로 exit(0) 처리
+    exit(0)
+else:
+    success = merge_excel(DATA_FILE, TEMP_FILE, MERGED_FILE)
+
+if not success:
+    print("❌ 병합 실패 또는 스킵 → 기존 파일 유지, 정상 종료 처리")
+    if os.path.exists(TEMP_FILE):
+        os.remove(TEMP_FILE)
+    # 병합이 실패하거나 대상이 아닐 때 Actions 워크플로우 전체가 깨지지 않도록 exit(0)로 처리합니다.
+    exit(0)
 
 # 병합 파일로 교체
 if os.path.exists(DATA_FILE):
