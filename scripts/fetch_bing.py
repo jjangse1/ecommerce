@@ -61,6 +61,28 @@ def bing_post(endpoint, payload):
         return {}
     return resp.json()
 
+# ── 응답에서 결과 리스트 안전하게 추출 ──────────────────────
+# Bing WMT API는 엔드포인트에 따라 응답 형태가 제각각임:
+#   {"d": {"Results": [...]}}  ← 일부 엔드포인트
+#   {"d": [...]}               ← 다른 엔드포인트 (Results 래핑 없음)
+#   {"Results": [...]}         ← "d" 자체가 없는 경우
+#   [...]                      ← 최상위가 바로 리스트인 경우
+# 위 모든 경우를 dict.get()으로만 처리하면 list에 .get()을 호출하다 죽으므로
+# isinstance로 먼저 타입을 분기한다.
+def extract_rows(data):
+    if isinstance(data, list):
+        return data
+    if not isinstance(data, dict):
+        return []
+    if "d" in data:
+        d_val = data["d"]
+        if isinstance(d_val, list):
+            return d_val
+        if isinstance(d_val, dict):
+            return d_val.get("Results", [])
+        return []
+    return data.get("Results", [])
+
 # ════════════════════════════════════════════════════════════
 # 1. 날짜별 트래픽 (GetRankAndTrafficStats)
 #    Bing은 날짜별로 1건씩 반환
@@ -74,7 +96,7 @@ while cur <= end_date:
         "startDate": fmt(cur),
         "endDate":   fmt(cur),
     })
-    rows = data.get("d", {}).get("Results", []) if "d" in data else data.get("Results", [])
+    rows = extract_rows(data)
     for r in rows:
         try:
             daily_data.append({
@@ -98,7 +120,7 @@ if not daily_data:
         "endDate":   fmt(end_date),
         "granularity": "Day",
     })
-    rows = data.get("d", {}).get("Results", []) if "d" in data else data.get("Results", [])
+    rows = extract_rows(data)
     for r in rows:
         try:
             daily_data.append({
@@ -123,7 +145,7 @@ data = bing_get("GetKeywordStats", {
     "startDate": fmt(start_date),
     "endDate":   fmt(end_date),
 })
-raw_queries = data.get("d", {}).get("Results", []) if "d" in data else data.get("Results", [])
+raw_queries = extract_rows(data)
 queries_data = []
 for r in raw_queries[:20]:
     try:
@@ -147,7 +169,7 @@ data = bing_get("GetPageStats", {
     "startDate": fmt(start_date),
     "endDate":   fmt(end_date),
 })
-raw_pages = data.get("d", {}).get("Results", []) if "d" in data else data.get("Results", [])
+raw_pages = extract_rows(data)
 pages_data = []
 for r in raw_pages[:15]:
     try:
@@ -178,7 +200,7 @@ data = bing_get("GetCountryStats", {
     "startDate": fmt(start_date),
     "endDate":   fmt(end_date),
 })
-raw_countries = data.get("d", {}).get("Results", []) if "d" in data else data.get("Results", [])
+raw_countries = extract_rows(data)
 countries_data = []
 for r in raw_countries[:10]:
     try:
@@ -210,7 +232,7 @@ for code in top_codes:
         "countryCode": code,
         "granularity": "Day",
     })
-    rows = data.get("d", {}).get("Results", []) if "d" in data else data.get("Results", [])
+    rows = extract_rows(data)
     for r in rows:
         try:
             daily_country.append({
