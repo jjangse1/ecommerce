@@ -15,6 +15,7 @@ fetch_gsc.py — Google Search Console 전체 데이터 수집
 
 import os
 import json
+import requests
 from datetime import datetime, timedelta
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -28,9 +29,37 @@ SITE_URL      = "https://myhubon.com/"
 if not all([CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN]):
     raise ValueError("GitHub Secrets에 GSC_CLIENT_ID / GSC_CLIENT_SECRET / GSC_REFRESH_TOKEN 이 없습니다.")
 
-# ── 인증 ────────────────────────────────────────────────────
+# ════════════════════════════════════════════════════════════
+# 토큰 자동갱신: 매 실행마다 fresh access_token 발급 → 401 완전 차단
+# Refresh Token 자체가 revoke됐다면 로컬에서 refresh_token.py 실행
+# ════════════════════════════════════════════════════════════
+def get_fresh_access_token():
+    resp = requests.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "client_id":     CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "refresh_token": REFRESH_TOKEN,
+            "grant_type":    "refresh_token",
+        },
+        timeout=30,
+    )
+    if resp.status_code != 200:
+        raise RuntimeError(
+            f"❌ 토큰 갱신 실패 ({resp.status_code}): {resp.text}\n"
+            "→ Refresh Token이 revoke됐을 가능성이 있습니다.\n"
+            "→ 로컬에서 refresh_token.py를 실행해 새 토큰을 발급받고\n"
+            "  GitHub Secrets의 GSC_REFRESH_TOKEN 값을 업데이트하세요."
+        )
+    token_data = resp.json()
+    print(f"✅ Access Token 갱신 성공 (유효: {token_data.get('expires_in', 3600)}초)")
+    return token_data["access_token"]
+
+# ── 인증 (매번 fresh access token 발급) ────────────────────
+print("🔑 Access Token 갱신 중...")
+access_token = get_fresh_access_token()
 creds = Credentials(
-    token=None,
+    token=access_token,
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
     refresh_token=REFRESH_TOKEN,
