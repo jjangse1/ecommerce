@@ -23,7 +23,7 @@ jobs:
           python-version: '3.11'
 
       - name: 패키지 설치
-        run: pip install google-api-python-client google-auth
+        run: pip install google-api-python-client google-auth requests
 
       - name: GSC 데이터 수집
         env:
