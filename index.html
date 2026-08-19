@@ -580,6 +580,9 @@ h1 span{color:var(--text-muted);font-weight:400;font-size:11px;display:block;mar
       <div class="insight-list" id="gscInsights"></div>
     </div>
 
+    <!-- Bing 비교 섹션 (bing-data.json 로드 시 자동 표시) -->
+    <div id="bingCompareSection"></div>
+
   </div>
 
 </div><!-- /dashboard -->
@@ -1432,6 +1435,46 @@ window._GSC_DAILY_PAGE    = [];  // 날짜×페이지 (필터 연동)
   }
   const note = document.getElementById('gscDataFallbackNote');
   if(note) note.textContent = '⚠ gsc-data.json 미발견 — fetch_gsc.py 실행 확인';
+})();
+
+// ════════════════════════════════════════════════════════════
+// Bing Webmaster 데이터 초기값 & 자동 fetch
+// ════════════════════════════════════════════════════════════
+window._BING_DAILY     = [];
+window._BING_QUERIES   = [];
+window._BING_PAGES     = [];
+window._BING_COUNTRIES = [];
+window._BING_LOADED    = false;
+
+(async function fetchBingJson(){
+  const candidates = ['bing-data.json', 'scripts/bing-data.json', '../bing-data.json'];
+  for(const path of candidates){
+    try{
+      const res = await fetch(path);
+      if(!res.ok) continue;
+      const json = await res.json();
+      if(!json || !json.daily) continue;
+      window._BING_DAILY     = json.daily     || [];
+      window._BING_QUERIES   = json.queries   || [];
+      window._BING_PAGES     = json.pages     || [];
+      window._BING_COUNTRIES = json.countries || [];
+      window._BING_LOADED    = true;
+      const badge = document.getElementById('bingDataBadge');
+      if(badge){ badge.textContent=`🔷 Bing 갱신 · ${json.updated||'최신'}`; badge.style.display='inline-flex'; }
+      const note  = document.getElementById('bingDataNote');
+      if(note) note.textContent=`✅ bing-data.json 로드됨 · ${json.daily.length}일 · ${json.period?.start||''} ~ ${json.period?.end||''}`;
+      // GSC 탭 열려있으면 Bing 섹션 재렌더
+      const activeTab=document.querySelector('.tab.active');
+      if(activeTab && activeTab.dataset.tab==='gsc'){
+        const from=document.getElementById('dateFrom').value;
+        const to=document.getElementById('dateTo').value;
+        renderBingSection(from,to);
+      }
+      return;
+    } catch(e){ /* 다음 경로 */ }
+  }
+  const note=document.getElementById('bingDataNote');
+  if(note) note.textContent='⚠ bing-data.json 없음 — GitHub Actions에서 fetch_bing.py 실행 확인';
 })();
 
 let gscRendered = false;
@@ -2475,6 +2518,211 @@ function renderGSC(from, to){
   ];
   document.getElementById('gscInsights').innerHTML=
     insights.map(i=>`<div class="insight-item"><div class="insight-icon">${i.icon}</div><div class="insight-text">${i.text}</div></div>`).join('');
+
+  // Bing 비교 섹션 렌더
+  renderBingSection(f, t);
+}
+
+// ════════════════════════════════════════════════════════════
+// renderBingSection — GSC 탭 하단 Bing 비교 섹션
+// ════════════════════════════════════════════════════════════
+function renderBingSection(from, to){
+  const section=document.getElementById('bingCompareSection');
+  if(!section) return;
+
+  const BING=window._BING_DAILY||[];
+  if(!BING.length){
+    section.innerHTML=`
+      <div class="section-divider"><span>🔷 Bing Webmaster — 검색엔진 비교</span></div>
+      <div style="padding:28px;text-align:center;color:var(--text-muted);font-size:13px;background:var(--surface);border-radius:12px;border:1px dashed var(--border)">
+        <div style="font-size:28px;margin-bottom:8px">🔷</div>
+        <div style="font-weight:600;margin-bottom:6px">Bing 데이터 미로드</div>
+        <div id="bingDataNote" style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text-muted)">
+          bing-data.json 을 찾는 중... (fetch_bing.py 실행 후 GitHub Actions 확인)</div>
+      </div>`;
+    return;
+  }
+
+  const GSC=window._GSC_CHART||[];
+  const f=from||BING[0]?.date;
+  const t=to||BING[BING.length-1]?.date;
+
+  const bFilt=BING.filter(d=>d.date>=f&&d.date<=t);
+  const gFilt=GSC.filter(d=>d.date>=f&&d.date<=t);
+
+  const bClicks=bFilt.reduce((a,d)=>a+d.clicks,0);
+  const bImpr  =bFilt.reduce((a,d)=>a+d.impr,0);
+  const bPos   =bFilt.filter(d=>d.pos>0);
+  const bAvgPos=bPos.length?bPos.reduce((a,d)=>a+d.pos,0)/bPos.length:0;
+  const bAvgCtr=bImpr>0?(bClicks/bImpr*100):0;
+
+  const gClicks=gFilt.reduce((a,d)=>a+d.clicks,0);
+  const gImpr  =gFilt.reduce((a,d)=>a+d.impr,0);
+  const gPos   =gFilt.filter(d=>d.pos>0);
+  const gAvgPos=gPos.length?gPos.reduce((a,d)=>a+d.pos,0)/gPos.length:0;
+  const gAvgCtr=gImpr>0?(gClicks/gImpr*100):0;
+
+  const allDates=[...new Set([...gFilt.map(d=>d.date),...bFilt.map(d=>d.date)])].sort();
+  const gMap=Object.fromEntries(gFilt.map(d=>[d.date,d]));
+  const bMap=Object.fromEntries(bFilt.map(d=>[d.date,d]));
+
+  const kpiCards=[
+    {label:'클릭수',   gVal:gClicks.toLocaleString(), bVal:bClicks.toLocaleString(), gBetter:gClicks>=bClicks},
+    {label:'노출수',   gVal:gImpr.toLocaleString(),   bVal:bImpr.toLocaleString(),   gBetter:gImpr>=bImpr},
+    {label:'평균 CTR', gVal:gAvgCtr.toFixed(2)+'%',  bVal:bAvgCtr.toFixed(2)+'%',  gBetter:gAvgCtr>=bAvgCtr},
+    {label:'평균 순위',gVal:gAvgPos.toFixed(1)+'위',  bVal:bAvgPos.toFixed(1)+'위',  gBetter:gAvgPos<=bAvgPos},
+  ];
+
+  const topts={backgroundColor:'#fff',borderColor:'#E2E0D8',borderWidth:1,titleColor:'#18181A',bodyColor:'#5C5C60',padding:10};
+
+  section.innerHTML=`
+    <div class="section-divider"><span>🔷 Bing Webmaster — 검색엔진 비교</span></div>
+    <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:10px;gap:8px">
+      <span id="bingDataBadge" style="${window._BING_LOADED?'display:inline-flex':'display:none'};font-size:10px;padding:3px 10px;border-radius:20px;background:#EFF4FF;border:1px solid #C0CDFD;color:var(--accent);font-family:'DM Mono',monospace;font-weight:500">${window._BING_LOADED?'🔷 Bing 로드됨':''}</span>
+      <span id="bingDataNote" style="font-size:10px;color:var(--text-muted);font-family:'DM Mono',monospace"></span>
+    </div>
+
+    <!-- KPI 비교 카드 -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px">
+      ${kpiCards.map(c=>`
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px">
+          <div style="font-size:10px;color:var(--text-muted);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;font-family:'DM Mono',monospace">${c.label}</div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;text-align:center;padding:6px;border-radius:8px;background:${c.gBetter?'#ECFDF5':'var(--surface2)'}">
+              <div style="font-size:9px;color:#059669;font-weight:700;margin-bottom:2px">🔵 Google</div>
+              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:${c.gBetter?'var(--accent3)':'var(--text-dim)'}">${c.gVal}</div>
+            </div>
+            <div style="flex:1;text-align:center;padding:6px;border-radius:8px;background:${!c.gBetter?'#EFF4FF':'var(--surface2)'}">
+              <div style="font-size:9px;color:#2563EB;font-weight:700;margin-bottom:2px">🔷 Bing</div>
+              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:${!c.gBetter?'var(--accent)':'var(--text-dim)'}">${c.bVal}</div>
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <!-- 일별 클릭/노출 비교 -->
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title"><span class="dot" style="background:var(--accent)"></span> Google vs Bing — 일별 클릭</div></div>
+        <div class="chart-wrap chart-h220"><canvas id="bingClickChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title"><span class="dot" style="background:var(--warn)"></span> Google vs Bing — 일별 노출</div></div>
+        <div class="chart-wrap chart-h220"><canvas id="bingImprChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 검색어 / 페이지 -->
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title"><span class="dot" style="background:#7C3AED"></span> Bing 인기 검색어 Top 10</div></div>
+        <div id="bingQueryTable"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title"><span class="dot" style="background:#059669"></span> Bing 인기 페이지 Top 10</div></div>
+        <div id="bingPageTable"></div>
+      </div>
+    </div>
+
+    <!-- 국가별 비교 -->
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title"><span class="dot" style="background:var(--danger)"></span> Google vs Bing — 국가별 클릭 비교</div></div>
+      <div class="chart-wrap chart-h260"><canvas id="bingCountryChart"></canvas></div>
+    </div>`;
+
+  // ── 일별 클릭 ──
+  destroyChart('bingClickChart');
+  charts['bingClickChart']=new Chart(document.getElementById('bingClickChart').getContext('2d'),{
+    type:'line',
+    data:{labels:allDates,datasets:[
+      {label:'Google',data:allDates.map(d=>gMap[d]?.clicks||0),borderColor:'#2563EB',backgroundColor:'#2563EB15',borderWidth:2,pointRadius:allDates.length>60?0:3,tension:0.3,fill:true},
+      {label:'Bing',  data:allDates.map(d=>bMap[d]?.clicks||0),borderColor:'#F97316',backgroundColor:'#F9731615',borderWidth:2,pointRadius:allDates.length>60?0:3,tension:0.3,fill:true},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:11},color:'#5C5C60'}},tooltip:{...topts}},
+      scales:{x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:10},maxTicksLimit:15}},
+              y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}}},
+  });
+
+  // ── 일별 노출 ──
+  destroyChart('bingImprChart');
+  charts['bingImprChart']=new Chart(document.getElementById('bingImprChart').getContext('2d'),{
+    type:'line',
+    data:{labels:allDates,datasets:[
+      {label:'Google',data:allDates.map(d=>gMap[d]?.impr||0),borderColor:'#059669',backgroundColor:'#05966915',borderWidth:2,pointRadius:allDates.length>60?0:3,tension:0.3,fill:true},
+      {label:'Bing',  data:allDates.map(d=>bMap[d]?.impr||0),borderColor:'#D97706',backgroundColor:'#D9770615',borderWidth:2,pointRadius:allDates.length>60?0:3,tension:0.3,fill:true},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:11},color:'#5C5C60'}},tooltip:{...topts}},
+      scales:{x:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:10},maxTicksLimit:15}},
+              y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}}},
+  });
+
+  // ── Bing 검색어 테이블 ──
+  const bQ=(window._BING_QUERIES||[]).slice(0,10);
+  const mQ=Math.max(...bQ.map(q=>q.clicks),1);
+  document.getElementById('bingQueryTable').innerHTML=bQ.length
+    ?`<table class="gsc-table"><thead><tr><th>#</th><th>검색어</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead><tbody>
+      ${bQ.map((q,i)=>`<tr>
+        <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
+        <td style="font-weight:500;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.query}</td>
+        <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(q.clicks/mQ*60).toFixed(0)}px;background:#F97316"></div>
+            <span style="font-family:'DM Mono',monospace;color:#F97316;font-weight:600">${q.clicks}</span></div></td>
+        <td style="font-family:'DM Mono',monospace">${q.impr}</td>
+        <td style="font-family:'DM Mono',monospace"><strong>${(q.ctr*100).toFixed(1)}%</strong></td>
+        <td><span class="pos-badge" style="background:#FFF7ED;color:#F97316;border:1px solid #FED7AA">${q.pos}</span></td>
+      </tr>`).join('')}</tbody></table>`
+    :`<div class="gsc-empty">Bing 검색어 데이터 없음</div>`;
+
+  // ── Bing 페이지 테이블 ──
+  const bP=(window._BING_PAGES||[]).slice(0,10);
+  const mP=Math.max(...bP.map(p=>p.clicks),1);
+  document.getElementById('bingPageTable').innerHTML=bP.length
+    ?`<table class="gsc-table"><thead><tr><th>#</th><th>페이지</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead><tbody>
+      ${bP.map((p,i)=>{
+        const url=p.page.startsWith('http')?p.page:'https://myhubon.com'+p.page;
+        const short=(p.page.replace('https://myhubon.com','')||'/').slice(0,26);
+        return`<tr>
+          <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
+          <td style="font-size:11px;max-width:150px"><a href="${url}" target="_blank" rel="noopener"
+             style="color:#F97316;text-decoration:none;display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace"
+             title="${url}"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${short}</span><span style="font-size:9px;opacity:.6">↗</span></a></td>
+          <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(p.clicks/mP*60).toFixed(0)}px;background:#F97316"></div>
+              <span style="font-family:'DM Mono',monospace;color:#F97316;font-weight:600">${p.clicks}</span></div></td>
+          <td style="font-family:'DM Mono',monospace;color:var(--text-dim)">${p.impr||'-'}</td>
+          <td style="font-family:'DM Mono',monospace"><strong>${(p.ctr*100).toFixed(1)}%</strong></td>
+          <td><span class="pos-badge" style="background:#FFF7ED;color:#F97316;border:1px solid #FED7AA">${p.pos}</span></td>
+        </tr>`;}).join('')}</tbody></table>`
+    :`<div class="gsc-empty">Bing 페이지 데이터 없음</div>`;
+
+  // ── 국가별 Google vs Bing ──
+  destroyChart('bingCountryChart');
+  const gC=window._GSC_COUNTRIES||[], bC=window._BING_COUNTRIES||[];
+  const cNames=[...new Set([...gC.map(c=>c.country),...bC.map(c=>c.country)])].slice(0,10);
+  const gcM=Object.fromEntries(gC.map(c=>[c.country,c.clicks]));
+  const bcM=Object.fromEntries(bC.map(c=>[c.country,c.clicks]));
+  charts['bingCountryChart']=new Chart(document.getElementById('bingCountryChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:cNames,datasets:[
+      {label:'Google',data:cNames.map(n=>gcM[n]||0),backgroundColor:'#2563EBcc',borderColor:'#2563EB',borderWidth:1.5,borderRadius:4},
+      {label:'Bing',  data:cNames.map(n=>bcM[n]||0),backgroundColor:'#F97316cc',borderColor:'#F97316',borderWidth:1.5,borderRadius:4},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{font:{size:11},color:'#5C5C60'}},tooltip:{...topts}},
+      scales:{x:{grid:{display:false},ticks:{color:'#5C5C60',font:{size:11}}},
+              y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}}},
+    plugins:[{id:'bcDL',afterDatasetsDraw(ch){
+      const ctx=ch.ctx; ctx.save();
+      [0,1].forEach(di=>{
+        const meta=ch.getDatasetMeta(di);
+        const vals=di===0?cNames.map(n=>gcM[n]||0):cNames.map(n=>bcM[n]||0);
+        ctx.font="500 9px 'DM Mono',monospace"; ctx.fillStyle=di===0?'#2563EB':'#F97316';
+        ctx.textAlign='center'; ctx.textBaseline='bottom';
+        meta.data.forEach((bar,i)=>{const v=vals[i];if(!v)return;ctx.fillText(v,bar.x,bar.y-3);});
+      });
+      ctx.restore();
+    }}]
+  });
 }
 
 // ═══════════════════════════════════════════════════
