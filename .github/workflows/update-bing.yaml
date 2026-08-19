@@ -1,0 +1,41 @@
+name: Update Bing Webmaster Data
+
+on:
+  schedule:
+    - cron: '20 10 * * *'   # 매일 UTC 10:20 = KST 19:20 (GSC 워크플로우 10분 뒤)
+  workflow_dispatch:         # 수동 실행 가능
+
+jobs:
+  fetch-bing:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Repository 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 3.11 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 패키지 설치
+        run: pip install requests
+
+      - name: Bing 데이터 수집
+        env:
+          BING_API_KEY: ${{ secrets.BING_API_KEY }}
+        run: python scripts/fetch_bing.py
+
+      - name: 변경사항 커밋 & 푸시
+        run: |
+          git config user.name  "Bing Auto Updater"
+          git config user.email "bot@github.com"
+          git add bing-data.json
+          if git diff --staged --quiet; then
+            echo "변경 없음 — 스킵"
+          else
+            git commit -m "chore: Bing 자동 업데이트 ($(date +'%Y-%m-%d'))"
+            git push
+          fi
