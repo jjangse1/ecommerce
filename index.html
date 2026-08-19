@@ -1444,6 +1444,9 @@ window._BING_DAILY     = [];
 window._BING_QUERIES   = [];
 window._BING_PAGES     = [];
 window._BING_COUNTRIES = [];
+window._BING_COUNTRY_SUPPORTED = true;
+window._BING_QUERY_PAGE_DRILL  = {};   // 검색어 → 페이지 목록
+window._BING_PAGE_QUERY_DRILL  = {};   // 페이지 → 검색어 목록
 window._BING_LOADED    = false;
 
 (async function fetchBingJson(){
@@ -1458,6 +1461,9 @@ window._BING_LOADED    = false;
       window._BING_QUERIES   = json.queries   || [];
       window._BING_PAGES     = json.pages     || [];
       window._BING_COUNTRIES = json.countries || [];
+      window._BING_COUNTRY_SUPPORTED = json.country_supported !== false;
+      window._BING_QUERY_PAGE_DRILL  = json.query_page_drilldown || {};
+      window._BING_PAGE_QUERY_DRILL  = json.page_query_drilldown || {};
       window._BING_LOADED    = true;
       const badge = document.getElementById('bingDataBadge');
       if(badge){ badge.textContent=`🔷 Bing 갱신 · ${json.updated||'최신'}`; badge.style.display='inline-flex'; }
@@ -2526,6 +2532,14 @@ function renderGSC(from, to){
 // ════════════════════════════════════════════════════════════
 // renderBingSection — GSC 탭 하단 Bing 비교 섹션
 // ════════════════════════════════════════════════════════════
+function escapeHtml(s){
+  return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function toggleBingDrillRow(rowId){
+  const row=document.getElementById(rowId);
+  if(!row) return;
+  row.style.display = row.style.display==='none' ? '' : 'none';
+}
 function renderBingSection(from, to){
   const section=document.getElementById('bingCompareSection');
   if(!section) return;
@@ -2627,7 +2641,13 @@ function renderBingSection(from, to){
     <!-- 국가별 비교 -->
     <div class="panel">
       <div class="panel-header"><div class="panel-title"><span class="dot" style="background:var(--danger)"></span> Google vs Bing — 국가별 클릭 비교</div></div>
-      <div class="chart-wrap chart-h260"><canvas id="bingCountryChart"></canvas></div>
+      ${window._BING_COUNTRY_SUPPORTED
+        ? `<div class="chart-wrap chart-h260"><canvas id="bingCountryChart"></canvas></div>`
+        : `<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:12px;background:var(--surface2);border-radius:10px">
+             <div style="font-size:20px;margin-bottom:6px">🔷</div>
+             Bing Webmaster API는 국가별 트래픽 통계를 제공하지 않습니다.<br>
+             <span style="font-size:11px">(Bing 공식 API에 해당 엔드포인트 없음 — Google 데이터만 아래 참고)</span>
+           </div>`}
     </div>`;
 
   // ── 일별 클릭 ──
@@ -2658,23 +2678,41 @@ function renderBingSection(from, to){
               y:{grid:{color:'#E2E0D8'},ticks:{color:'#9494A0',font:{size:11}},beginAtZero:true}}},
   });
 
-  // ── Bing 검색어 테이블 ──
+  // ── Bing 검색어 테이블 (클릭 시 → 연결된 페이지 드릴다운) ──
   const bQ=(window._BING_QUERIES||[]).slice(0,10);
   const mQ=Math.max(...bQ.map(q=>q.clicks),1);
   document.getElementById('bingQueryTable').innerHTML=bQ.length
     ?`<table class="gsc-table"><thead><tr><th>#</th><th>검색어</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead><tbody>
-      ${bQ.map((q,i)=>`<tr>
+      ${bQ.map((q,i)=>{
+        const drill=window._BING_QUERY_PAGE_DRILL[q.query]||[];
+        const rowId=`bqDrill${i}`;
+        const hasDrill=drill.length>0;
+        return `<tr${hasDrill?` style="cursor:pointer" onclick="toggleBingDrillRow('${rowId}')"`:''}>
         <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
-        <td style="font-weight:500;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.query}</td>
+        <td style="font-weight:500;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(q.query)}${hasDrill?' <span style="opacity:.45;font-size:9px">▾</span>':''}</td>
         <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(q.clicks/mQ*60).toFixed(0)}px;background:#F97316"></div>
             <span style="font-family:'DM Mono',monospace;color:#F97316;font-weight:600">${q.clicks}</span></div></td>
         <td style="font-family:'DM Mono',monospace">${q.impr}</td>
         <td style="font-family:'DM Mono',monospace"><strong>${(q.ctr*100).toFixed(1)}%</strong></td>
         <td><span class="pos-badge" style="background:#FFF7ED;color:#F97316;border:1px solid #FED7AA">${q.pos}</span></td>
-      </tr>`).join('')}</tbody></table>`
+      </tr>${hasDrill?`<tr id="${rowId}" style="display:none;background:var(--surface2)">
+        <td></td>
+        <td colspan="5" style="padding:6px 10px 10px 22px">
+          <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;font-weight:600">🔗 이 검색어로 유입된 페이지</div>
+          ${drill.map(d=>{
+            const url=d.page.startsWith('http')?d.page:'https://myhubon.com'+d.page;
+            const short=(d.page.replace('https://myhubon.com','')||'/').slice(0,34);
+            return `<div style="display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:2px 0;font-family:'DM Mono',monospace">
+              <a href="${url}" target="_blank" rel="noopener" style="color:#F97316;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%" title="${url}">${escapeHtml(short)}</a>
+              <span style="color:var(--text-dim);white-space:nowrap">클릭 ${d.clicks} · 노출 ${d.impr}</span>
+            </div>`;
+          }).join('')}
+        </td>
+      </tr>`:''}`;
+      }).join('')}</tbody></table>`
     :`<div class="gsc-empty">Bing 검색어 데이터 없음</div>`;
 
-  // ── Bing 페이지 테이블 ──
+  // ── Bing 페이지 테이블 (클릭 시 → 연결된 검색어 드릴다운) ──
   const bP=(window._BING_PAGES||[]).slice(0,10);
   const mP=Math.max(...bP.map(p=>p.clicks),1);
   document.getElementById('bingPageTable').innerHTML=bP.length
@@ -2682,21 +2720,37 @@ function renderBingSection(from, to){
       ${bP.map((p,i)=>{
         const url=p.page.startsWith('http')?p.page:'https://myhubon.com'+p.page;
         const short=(p.page.replace('https://myhubon.com','')||'/').slice(0,26);
-        return`<tr>
+        const drill=window._BING_PAGE_QUERY_DRILL[p.page]||[];
+        const rowId=`bpDrill${i}`;
+        const hasDrill=drill.length>0;
+        return`<tr${hasDrill?` style="cursor:pointer" onclick="toggleBingDrillRow('${rowId}')"`:''}>
           <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
-          <td style="font-size:11px;max-width:150px"><a href="${url}" target="_blank" rel="noopener"
-             style="color:#F97316;text-decoration:none;display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace"
-             title="${url}"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${short}</span><span style="font-size:9px;opacity:.6">↗</span></a></td>
+          <td style="font-size:11px;max-width:150px">
+            <a href="${url}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+               style="color:#F97316;text-decoration:none;display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace"
+               title="${url}"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(short)}</span><span style="font-size:9px;opacity:.6">↗</span></a>${hasDrill?' <span style="opacity:.45;font-size:9px">▾</span>':''}</td>
           <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(p.clicks/mP*60).toFixed(0)}px;background:#F97316"></div>
               <span style="font-family:'DM Mono',monospace;color:#F97316;font-weight:600">${p.clicks}</span></div></td>
           <td style="font-family:'DM Mono',monospace;color:var(--text-dim)">${p.impr||'-'}</td>
           <td style="font-family:'DM Mono',monospace"><strong>${(p.ctr*100).toFixed(1)}%</strong></td>
           <td><span class="pos-badge" style="background:#FFF7ED;color:#F97316;border:1px solid #FED7AA">${p.pos}</span></td>
-        </tr>`;}).join('')}</tbody></table>`
+        </tr>${hasDrill?`<tr id="${rowId}" style="display:none;background:var(--surface2)">
+          <td></td>
+          <td colspan="5" style="padding:6px 10px 10px 22px">
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;font-weight:600">🔍 이 페이지로 유입된 검색어</div>
+            ${drill.map(d=>`<div style="display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:2px 0;font-family:'DM Mono',monospace">
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${escapeHtml(d.query)}</span>
+              <span style="color:var(--text-dim);white-space:nowrap">클릭 ${d.clicks} · 노출 ${d.impr}</span>
+            </div>`).join('')}
+          </td>
+        </tr>`:''}`;}).join('')}</tbody></table>`
     :`<div class="gsc-empty">Bing 페이지 데이터 없음</div>`;
 
-  // ── 국가별 Google vs Bing ──
+  // ── 국가별 Google vs Bing (Bing이 국가별 API를 지원할 때만 렌더) ──
   destroyChart('bingCountryChart');
+  if(!window._BING_COUNTRY_SUPPORTED || !document.getElementById('bingCountryChart')){
+    return;
+  }
   const gC=window._GSC_COUNTRIES||[], bC=window._BING_COUNTRIES||[];
   const cNames=[...new Set([...gC.map(c=>c.country),...bC.map(c=>c.country)])].slice(0,10);
   const gcM=Object.fromEntries(gC.map(c=>[c.country,c.clicks]));
