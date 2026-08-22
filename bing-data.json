@@ -1,17 +1,10 @@
 {
-  "updated": "2026-08-21",
+  "updated": "2026-08-22",
   "period": {
-    "start": "2026-05-22",
-    "end": "2026-08-19"
+    "start": "2026-05-23",
+    "end": "2026-08-20"
   },
   "daily": [
-    {
-      "date": "2026-05-22",
-      "clicks": 5,
-      "impr": 69,
-      "ctr": 0.0725,
-      "pos": 4.8
-    },
     {
       "date": "2026-05-23",
       "clicks": 4,
@@ -630,9 +623,16 @@
     },
     {
       "date": "2026-08-19",
-      "clicks": 0,
-      "impr": 0,
-      "ctr": 0,
+      "clicks": 27,
+      "impr": 186,
+      "ctr": 0.1452,
+      "pos": 0
+    },
+    {
+      "date": "2026-08-20",
+      "clicks": 30,
+      "impr": 305,
+      "ctr": 0.0984,
       "pos": 0
     }
   ],
@@ -659,13 +659,6 @@
       "pos": 1.0
     },
     {
-      "query": "3700-05174",
-      "clicks": 11,
-      "impr": 12,
-      "ctr": 0.9167,
-      "pos": 1.0
-    },
-    {
       "query": "0200-06840",
       "clicks": 10,
       "impr": 10,
@@ -685,6 +678,13 @@
       "impr": 19,
       "ctr": 0.4737,
       "pos": 2.3
+    },
+    {
+      "query": "3700-05174",
+      "clicks": 9,
+      "impr": 11,
+      "ctr": 0.8182,
+      "pos": 1.0
     },
     {
       "query": "0200-89032",
@@ -722,20 +722,6 @@
       "pos": 1.0
     },
     {
-      "query": "716-069688-022",
-      "clicks": 7,
-      "impr": 9,
-      "ctr": 0.7778,
-      "pos": 1.3
-    },
-    {
-      "query": "3870-04135",
-      "clicks": 7,
-      "impr": 12,
-      "ctr": 0.5833,
-      "pos": 1.8
-    },
-    {
       "query": "0200-06842",
       "clicks": 7,
       "impr": 14,
@@ -748,13 +734,6 @@
       "impr": 5,
       "ctr": 1.4,
       "pos": 2.4
-    },
-    {
-      "query": "0021-09731",
-      "clicks": 6,
-      "impr": 10,
-      "ctr": 0.6,
-      "pos": 1.0
     },
     {
       "query": "1120-01077",
@@ -776,6 +755,27 @@
       "impr": 4,
       "ctr": 1.5,
       "pos": 1.0
+    },
+    {
+      "query": "0021-26828",
+      "clicks": 6,
+      "impr": 21,
+      "ctr": 0.2857,
+      "pos": 1.0
+    },
+    {
+      "query": "0021-09731",
+      "clicks": 5,
+      "impr": 6,
+      "ctr": 0.8333,
+      "pos": 1.0
+    },
+    {
+      "query": "0190-23901",
+      "clicks": 5,
+      "impr": 17,
+      "ctr": 0.2941,
+      "pos": 3.2
     }
   ],
   "pages": [
@@ -801,18 +801,18 @@
       "pos": 1.0
     },
     {
-      "page": "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f",
-      "clicks": 13,
-      "impr": 21,
-      "ctr": 0.619,
-      "pos": 2.2
-    },
-    {
       "page": "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29",
       "clicks": 11,
       "impr": 30,
       "ctr": 0.3667,
       "pos": 3.6
+    },
+    {
+      "page": "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f",
+      "clicks": 11,
+      "impr": 20,
+      "ctr": 0.55,
+      "pos": 2.3
     },
     {
       "page": "https://myhubon.com/products/detail/1968e115-0dc6-432f-891a-783bed71f31f",
@@ -843,13 +843,6 @@
       "pos": 1.2
     },
     {
-      "page": "https://myhubon.com/products/detail/ae0d47cd-5a8f-45d1-b15e-926eb8485ab9",
-      "clicks": 8,
-      "impr": 13,
-      "ctr": 0.6154,
-      "pos": 1.8
-    },
-    {
       "page": "https://myhubon.com/products/detail/6c1980be-ec6c-4f7a-8454-aee9b2a08e52",
       "clicks": 8,
       "impr": 16,
@@ -871,18 +864,25 @@
       "pos": 1.0
     },
     {
-      "page": "https://myhubon.com/products/detail/32decbc9-8f30-4542-ae7f-cfc0cbba4c9a",
-      "clicks": 7,
-      "impr": 16,
-      "ctr": 0.4375,
-      "pos": 3.2
-    },
-    {
       "page": "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece",
       "clicks": 7,
       "impr": 7,
       "ctr": 1.0,
       "pos": 1.9
+    },
+    {
+      "page": "https://myhubon.com/products/detail/e2e6ea49-023a-4426-b519-153b735a1310",
+      "clicks": 7,
+      "impr": 5,
+      "ctr": 1.4,
+      "pos": 2.4
+    },
+    {
+      "page": "https://myhubon.com/products/detail/34679e28-d1b9-11f0-bcad-d8c497e4b3fb",
+      "clicks": 6,
+      "impr": 11,
+      "ctr": 0.5455,
+      "pos": 2.0
     }
   ],
   "countries": [],
@@ -916,15 +916,6 @@
         "pos": 1.0
       }
     ],
-    "3700-05174": [
-      {
-        "page": "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f",
-        "clicks": 3,
-        "impr": 2,
-        "ctr": 1.5,
-        "pos": 1.0
-      }
-    ],
     "0200-06840": [
       {
         "page": "https://myhubon.com/products/detail/84215239-b0c6-4ce7-b1c3-722ca086e788",
@@ -950,6 +941,15 @@
         "impr": 14,
         "ctr": 0.5,
         "pos": 2.4
+      }
+    ],
+    "3700-05174": [
+      {
+        "page": "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f",
+        "clicks": 1,
+        "impr": 1,
+        "ctr": 1.0,
+        "pos": 1.0
       }
     ],
     "0200-89032": [
@@ -1002,45 +1002,27 @@
         "pos": 7.0
       },
       {
-        "page": "https://dev.myhubon.com/signin",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 5.0
-      },
-      {
         "page": "https://seller.myhubon.com/",
         "clicks": 0,
         "impr": 2,
         "ctr": 0.0,
         "pos": 4.0
+      },
+      {
+        "page": "https://dev.myhubon.com/signin",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 5.0
       }
     ],
     "0021-52244": [
       {
         "page": "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf",
-        "clicks": 5,
-        "impr": 7,
-        "ctr": 0.7143,
+        "clicks": 8,
+        "impr": 11,
+        "ctr": 0.7273,
         "pos": 1.0
-      }
-    ],
-    "716-069688-022": [
-      {
-        "page": "https://myhubon.com/products/detail/32decbc9-8f30-4542-ae7f-cfc0cbba4c9a",
-        "clicks": 5,
-        "impr": 7,
-        "ctr": 0.7143,
-        "pos": 1.4
-      }
-    ],
-    "3870-04135": [
-      {
-        "page": "https://myhubon.com/products/detail/ae0d47cd-5a8f-45d1-b15e-926eb8485ab9",
-        "clicks": 3,
-        "impr": 5,
-        "ctr": 0.6,
-        "pos": 1.6
       }
     ],
     "0200-06842": [
@@ -1068,15 +1050,6 @@
         "pos": 2.5
       }
     ],
-    "0021-09731": [
-      {
-        "page": "https://myhubon.com/products/detail/93006094-f9f0-433f-b087-bab81fdb6909",
-        "clicks": 4,
-        "impr": 8,
-        "ctr": 0.5,
-        "pos": 1.0
-      }
-    ],
     "1120-01077": [
       {
         "page": "https://myhubon.com/products/detail/34679e28-d1b9-11f0-bcad-d8c497e4b3fb",
@@ -1098,10 +1071,37 @@
     "0150-18387": [
       {
         "page": "https://myhubon.com/products/detail/360c3318-7e26-4c9d-a3cf-ad3374d398f1",
-        "clicks": 4,
-        "impr": 3,
-        "ctr": 1.3333,
+        "clicks": 6,
+        "impr": 4,
+        "ctr": 1.5,
         "pos": 1.0
+      }
+    ],
+    "0021-26828": [
+      {
+        "page": "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb",
+        "clicks": 2,
+        "impr": 8,
+        "ctr": 0.25,
+        "pos": 1.0
+      }
+    ],
+    "0021-09731": [
+      {
+        "page": "https://myhubon.com/products/detail/93006094-f9f0-433f-b087-bab81fdb6909",
+        "clicks": 3,
+        "impr": 4,
+        "ctr": 0.75,
+        "pos": 1.0
+      }
+    ],
+    "0190-23901": [
+      {
+        "page": "https://myhubon.com/products/detail/f5827787-fb14-41c1-b2c4-af12ffa3e6b2",
+        "clicks": 2,
+        "impr": 10,
+        "ctr": 0.2,
+        "pos": 3.9
       }
     ]
   },
@@ -1147,36 +1147,6 @@
         "pos": 1.0
       }
     ],
-    "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f": [
-      {
-        "query": "3700-05174",
-        "clicks": 11,
-        "impr": 12,
-        "ctr": 0.9167,
-        "pos": 1.0
-      },
-      {
-        "query": "duro blk",
-        "clicks": 1,
-        "impr": 2,
-        "ctr": 0.5,
-        "pos": 4.0
-      },
-      {
-        "query": "oring id .612 csd .103 ep 80 duro blk",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 10.0
-      },
-      {
-        "query": "o-ring oring id.612 csd.103viton 75 duro blk",
-        "clicks": 0,
-        "impr": 4,
-        "ctr": 0.0,
-        "pos": 1.0
-      }
-    ],
     "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29": [
       {
         "query": "719-003481-385",
@@ -1214,13 +1184,43 @@
         "pos": 9.2
       }
     ],
+    "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f": [
+      {
+        "query": "3700-05174",
+        "clicks": 9,
+        "impr": 11,
+        "ctr": 0.8182,
+        "pos": 1.0
+      },
+      {
+        "query": "duro blk",
+        "clicks": 1,
+        "impr": 2,
+        "ctr": 0.5,
+        "pos": 4.0
+      },
+      {
+        "query": "oring id .612 csd .103 ep 80 duro blk",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 10.0
+      },
+      {
+        "query": "o-ring oring id.612 csd.103viton 75 duro blk",
+        "clicks": 0,
+        "impr": 4,
+        "ctr": 0.0,
+        "pos": 1.0
+      }
+    ],
     "https://myhubon.com/products/detail/1968e115-0dc6-432f-891a-783bed71f31f": [
       {
         "query": "0200-89032",
-        "clicks": 8,
-        "impr": 12,
-        "ctr": 0.6667,
-        "pos": 1.6
+        "clicks": 9,
+        "impr": 14,
+        "ctr": 0.6429,
+        "pos": 1.5
       },
       {
         "query": "tip,shaft susceptor support e2 chamber",
@@ -1254,10 +1254,10 @@
     "https://myhubon.com/products/detail/84215239-b0c6-4ce7-b1c3-722ca086e788": [
       {
         "query": "0200-06840",
-        "clicks": 1,
-        "impr": 2,
-        "ctr": 0.5,
-        "pos": 1.0
+        "clicks": 10,
+        "impr": 10,
+        "ctr": 1.0,
+        "pos": 1.6
       }
     ],
     "https://myhubon.com/products/detail/346761be-d1b9-11f0-bcad-d8c497e4b3fb": [
@@ -1285,22 +1285,6 @@
         "pos": 1.2
       }
     ],
-    "https://myhubon.com/products/detail/ae0d47cd-5a8f-45d1-b15e-926eb8485ab9": [
-      {
-        "query": "3870-04135",
-        "clicks": 3,
-        "impr": 5,
-        "ctr": 0.6,
-        "pos": 1.6
-      },
-      {
-        "query": "3870-04135 amat",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 1.0
-      }
-    ],
     "https://myhubon.com/products/detail/6c1980be-ec6c-4f7a-8454-aee9b2a08e52": [
       {
         "query": "0190-25374",
@@ -1313,9 +1297,9 @@
     "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb": [
       {
         "query": "0021-26828",
-        "clicks": 2,
-        "impr": 8,
-        "ctr": 0.25,
+        "clicks": 7,
+        "impr": 22,
+        "ctr": 0.3182,
         "pos": 1.0
       },
       {
@@ -1342,43 +1326,6 @@
         "pos": 1.0
       }
     ],
-    "https://myhubon.com/products/detail/32decbc9-8f30-4542-ae7f-cfc0cbba4c9a": [
-      {
-        "query": "716-069688-022",
-        "clicks": 7,
-        "impr": 10,
-        "ctr": 0.7,
-        "pos": 1.5
-      },
-      {
-        "query": "716 069688 022硅电极",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 1.0
-      },
-      {
-        "query": "716-069688-957 ebay",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 8.0
-      },
-      {
-        "query": "716-069688-822=",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 6.0
-      },
-      {
-        "query": "talon electrode",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 9.0
-      }
-    ],
     "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece": [
       {
         "query": "0200-15111",
@@ -1392,6 +1339,24 @@
         "clicks": 3,
         "impr": 2,
         "ctr": 1.5,
+        "pos": 2.0
+      }
+    ],
+    "https://myhubon.com/products/detail/e2e6ea49-023a-4426-b519-153b735a1310": [
+      {
+        "query": "vj3243t-5mz-m5-x45",
+        "clicks": 5,
+        "impr": 4,
+        "ctr": 1.25,
+        "pos": 2.5
+      }
+    ],
+    "https://myhubon.com/products/detail/34679e28-d1b9-11f0-bcad-d8c497e4b3fb": [
+      {
+        "query": "1120-01077",
+        "clicks": 3,
+        "impr": 4,
+        "ctr": 0.75,
         "pos": 2.0
       }
     ]
