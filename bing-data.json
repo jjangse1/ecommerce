@@ -1,17 +1,10 @@
 {
-  "updated": "2026-08-22",
+  "updated": "2026-08-23",
   "period": {
-    "start": "2026-05-23",
-    "end": "2026-08-20"
+    "start": "2026-05-24",
+    "end": "2026-08-21"
   },
   "daily": [
-    {
-      "date": "2026-05-23",
-      "clicks": 4,
-      "impr": 22,
-      "ctr": 0.1818,
-      "pos": 0
-    },
     {
       "date": "2026-05-24",
       "clicks": 16,
@@ -634,6 +627,13 @@
       "impr": 305,
       "ctr": 0.0984,
       "pos": 0
+    },
+    {
+      "date": "2026-08-21",
+      "clicks": 22,
+      "impr": 125,
+      "ctr": 0.176,
+      "pos": 4.5
     }
   ],
   "queries": [
@@ -660,10 +660,10 @@
     },
     {
       "query": "0200-06840",
-      "clicks": 10,
-      "impr": 10,
+      "clicks": 11,
+      "impr": 11,
       "ctr": 1.0,
-      "pos": 1.6
+      "pos": 1.5
     },
     {
       "query": "0200-05664",
@@ -671,6 +671,20 @@
       "impr": 14,
       "ctr": 0.7143,
       "pos": 1.7
+    },
+    {
+      "query": "myhubon",
+      "clicks": 10,
+      "impr": 118,
+      "ctr": 0.0847,
+      "pos": 21.4
+    },
+    {
+      "query": "0021-52244",
+      "clicks": 10,
+      "impr": 14,
+      "ctr": 0.7143,
+      "pos": 1.0
     },
     {
       "query": "0190-25374",
@@ -696,9 +710,16 @@
     {
       "query": "0021-27234",
       "clicks": 9,
-      "impr": 12,
-      "ctr": 0.75,
+      "impr": 13,
+      "ctr": 0.6923,
       "pos": 1.2
+    },
+    {
+      "query": "0150-18387",
+      "clicks": 9,
+      "impr": 5,
+      "ctr": 1.8,
+      "pos": 1.0
     },
     {
       "query": "719-003481-385",
@@ -706,20 +727,6 @@
       "impr": 16,
       "ctr": 0.5,
       "pos": 1.1
-    },
-    {
-      "query": "myhubon",
-      "clicks": 8,
-      "impr": 77,
-      "ctr": 0.1039,
-      "pos": 30.1
-    },
-    {
-      "query": "0021-52244",
-      "clicks": 8,
-      "impr": 11,
-      "ctr": 0.7273,
-      "pos": 1.0
     },
     {
       "query": "0200-06842",
@@ -750,13 +757,6 @@
       "pos": 2.1
     },
     {
-      "query": "0150-18387",
-      "clicks": 6,
-      "impr": 4,
-      "ctr": 1.5,
-      "pos": 1.0
-    },
-    {
       "query": "0021-26828",
       "clicks": 6,
       "impr": 21,
@@ -764,18 +764,18 @@
       "pos": 1.0
     },
     {
+      "query": "0040-63457",
+      "clicks": 6,
+      "impr": 11,
+      "ctr": 0.5455,
+      "pos": 2.7
+    },
+    {
       "query": "0021-09731",
       "clicks": 5,
       "impr": 6,
       "ctr": 0.8333,
       "pos": 1.0
-    },
-    {
-      "query": "0190-23901",
-      "clicks": 5,
-      "impr": 17,
-      "ctr": 0.2941,
-      "pos": 3.2
     }
   ],
   "pages": [
@@ -934,51 +934,6 @@
         "pos": 2.0
       }
     ],
-    "0190-25374": [
-      {
-        "page": "https://myhubon.com/products/detail/6c1980be-ec6c-4f7a-8454-aee9b2a08e52",
-        "clicks": 7,
-        "impr": 14,
-        "ctr": 0.5,
-        "pos": 2.4
-      }
-    ],
-    "3700-05174": [
-      {
-        "page": "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 1.0
-      }
-    ],
-    "0200-89032": [
-      {
-        "page": "https://myhubon.com/products/detail/1968e115-0dc6-432f-891a-783bed71f31f",
-        "clicks": 8,
-        "impr": 13,
-        "ctr": 0.6154,
-        "pos": 1.5
-      }
-    ],
-    "0021-27234": [
-      {
-        "page": "https://myhubon.com/products/detail/34685dbc-d1b9-11f0-bcad-d8c497e4b3fb",
-        "clicks": 9,
-        "impr": 12,
-        "ctr": 0.75,
-        "pos": 1.2
-      }
-    ],
-    "719-003481-385": [
-      {
-        "page": "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29",
-        "clicks": 7,
-        "impr": 14,
-        "ctr": 0.5,
-        "pos": 1.1
-      }
-    ],
     "myhubon": [
       {
         "page": "https://myhubon.com/signin",
@@ -1025,6 +980,60 @@
         "pos": 1.0
       }
     ],
+    "0190-25374": [
+      {
+        "page": "https://myhubon.com/products/detail/6c1980be-ec6c-4f7a-8454-aee9b2a08e52",
+        "clicks": 7,
+        "impr": 14,
+        "ctr": 0.5,
+        "pos": 2.4
+      }
+    ],
+    "3700-05174": [
+      {
+        "page": "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f",
+        "clicks": 1,
+        "impr": 1,
+        "ctr": 1.0,
+        "pos": 1.0
+      }
+    ],
+    "0200-89032": [
+      {
+        "page": "https://myhubon.com/products/detail/1968e115-0dc6-432f-891a-783bed71f31f",
+        "clicks": 8,
+        "impr": 13,
+        "ctr": 0.6154,
+        "pos": 1.5
+      }
+    ],
+    "0021-27234": [
+      {
+        "page": "https://myhubon.com/products/detail/34685dbc-d1b9-11f0-bcad-d8c497e4b3fb",
+        "clicks": 9,
+        "impr": 12,
+        "ctr": 0.75,
+        "pos": 1.2
+      }
+    ],
+    "0150-18387": [
+      {
+        "page": "https://myhubon.com/products/detail/360c3318-7e26-4c9d-a3cf-ad3374d398f1",
+        "clicks": 6,
+        "impr": 4,
+        "ctr": 1.5,
+        "pos": 1.0
+      }
+    ],
+    "719-003481-385": [
+      {
+        "page": "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29",
+        "clicks": 7,
+        "impr": 14,
+        "ctr": 0.5,
+        "pos": 1.1
+      }
+    ],
     "0200-06842": [
       {
         "page": "https://myhubon.com/products/detail/46f1edf4-dc50-4247-b204-ba0583d99fc6",
@@ -1068,22 +1077,22 @@
         "pos": 2.0
       }
     ],
-    "0150-18387": [
-      {
-        "page": "https://myhubon.com/products/detail/360c3318-7e26-4c9d-a3cf-ad3374d398f1",
-        "clicks": 6,
-        "impr": 4,
-        "ctr": 1.5,
-        "pos": 1.0
-      }
-    ],
     "0021-26828": [
       {
         "page": "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb",
-        "clicks": 2,
-        "impr": 8,
-        "ctr": 0.25,
+        "clicks": 6,
+        "impr": 21,
+        "ctr": 0.2857,
         "pos": 1.0
+      }
+    ],
+    "0040-63457": [
+      {
+        "page": "https://myhubon.com/products/detail/7b386a73-40fc-43c9-83cc-59432da89102",
+        "clicks": 4,
+        "impr": 8,
+        "ctr": 0.5,
+        "pos": 3.1
       }
     ],
     "0021-09731": [
@@ -1093,15 +1102,6 @@
         "impr": 4,
         "ctr": 0.75,
         "pos": 1.0
-      }
-    ],
-    "0190-23901": [
-      {
-        "page": "https://myhubon.com/products/detail/f5827787-fb14-41c1-b2c4-af12ffa3e6b2",
-        "clicks": 2,
-        "impr": 10,
-        "ctr": 0.2,
-        "pos": 3.9
       }
     ]
   },
