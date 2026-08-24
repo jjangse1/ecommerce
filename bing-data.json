@@ -1,17 +1,10 @@
 {
-  "updated": "2026-08-23",
+  "updated": "2026-08-24",
   "period": {
-    "start": "2026-05-24",
-    "end": "2026-08-21"
+    "start": "2026-05-25",
+    "end": "2026-08-22"
   },
   "daily": [
-    {
-      "date": "2026-05-24",
-      "clicks": 16,
-      "impr": 114,
-      "ctr": 0.1404,
-      "pos": 0
-    },
     {
       "date": "2026-05-25",
       "clicks": 12,
@@ -634,6 +627,13 @@
       "impr": 125,
       "ctr": 0.176,
       "pos": 4.5
+    },
+    {
+      "date": "2026-08-22",
+      "clicks": 4,
+      "impr": 32,
+      "ctr": 0.125,
+      "pos": 0
     }
   ],
   "queries": [
@@ -801,11 +801,25 @@
       "pos": 1.0
     },
     {
+      "page": "https://myhubon.com/products/detail/1968e115-0dc6-432f-891a-783bed71f31f",
+      "clicks": 12,
+      "impr": 19,
+      "ctr": 0.6316,
+      "pos": 2.1
+    },
+    {
+      "page": "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf",
+      "clicks": 12,
+      "impr": 16,
+      "ctr": 0.75,
+      "pos": 1.0
+    },
+    {
       "page": "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29",
       "clicks": 11,
-      "impr": 30,
-      "ctr": 0.3667,
-      "pos": 3.6
+      "impr": 32,
+      "ctr": 0.3438,
+      "pos": 4.8
     },
     {
       "page": "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f",
@@ -813,13 +827,6 @@
       "impr": 20,
       "ctr": 0.55,
       "pos": 2.3
-    },
-    {
-      "page": "https://myhubon.com/products/detail/1968e115-0dc6-432f-891a-783bed71f31f",
-      "clicks": 11,
-      "impr": 18,
-      "ctr": 0.6111,
-      "pos": 1.9
     },
     {
       "page": "https://myhubon.com/products/detail/84215239-b0c6-4ce7-b1c3-722ca086e788",
@@ -838,9 +845,23 @@
     {
       "page": "https://myhubon.com/products/detail/34685dbc-d1b9-11f0-bcad-d8c497e4b3fb",
       "clicks": 9,
-      "impr": 12,
-      "ctr": 0.75,
+      "impr": 13,
+      "ctr": 0.6923,
       "pos": 1.2
+    },
+    {
+      "page": "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb",
+      "clicks": 9,
+      "impr": 28,
+      "ctr": 0.3214,
+      "pos": 1.5
+    },
+    {
+      "page": "https://myhubon.com/products/detail/360c3318-7e26-4c9d-a3cf-ad3374d398f1",
+      "clicks": 9,
+      "impr": 5,
+      "ctr": 1.8,
+      "pos": 1.0
     },
     {
       "page": "https://myhubon.com/products/detail/6c1980be-ec6c-4f7a-8454-aee9b2a08e52",
@@ -850,39 +871,18 @@
       "pos": 2.2
     },
     {
-      "page": "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb",
+      "page": "https://myhubon.com/products/detail/ed77b913-0b17-4666-a723-67992c703d27",
       "clicks": 8,
-      "impr": 25,
-      "ctr": 0.32,
-      "pos": 1.4
+      "impr": 14,
+      "ctr": 0.5714,
+      "pos": 2.2
     },
     {
-      "page": "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf",
-      "clicks": 8,
-      "impr": 11,
-      "ctr": 0.7273,
-      "pos": 1.0
-    },
-    {
-      "page": "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece",
-      "clicks": 7,
-      "impr": 7,
-      "ctr": 1.0,
-      "pos": 1.9
-    },
-    {
-      "page": "https://myhubon.com/products/detail/e2e6ea49-023a-4426-b519-153b735a1310",
+      "page": "https://myhubon.com/products/detail/71be3cbd-ce24-4d7c-910f-bf5e68d0ddd2",
       "clicks": 7,
       "impr": 5,
       "ctr": 1.4,
-      "pos": 2.4
-    },
-    {
-      "page": "https://myhubon.com/products/detail/34679e28-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 6,
-      "impr": 11,
-      "ctr": 0.5455,
-      "pos": 2.0
+      "pos": 3.2
     }
   ],
   "countries": [],
@@ -1147,6 +1147,52 @@
         "pos": 1.0
       }
     ],
+    "https://myhubon.com/products/detail/1968e115-0dc6-432f-891a-783bed71f31f": [
+      {
+        "query": "0200-89032",
+        "clicks": 9,
+        "impr": 14,
+        "ctr": 0.6429,
+        "pos": 1.5
+      },
+      {
+        "query": "shaft,susceptor support,with pins",
+        "clicks": 1,
+        "impr": 1,
+        "ctr": 1.0,
+        "pos": 5.0
+      },
+      {
+        "query": "tip,shaft susceptor support e2 chamber",
+        "clicks": 1,
+        "impr": 1,
+        "ctr": 1.0,
+        "pos": 1.0
+      },
+      {
+        "query": "tip, shaft, susceptor support e2 chamber",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 1.0
+      },
+      {
+        "query": "ro0200",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 8.0
+      }
+    ],
+    "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf": [
+      {
+        "query": "0021-52244",
+        "clicks": 8,
+        "impr": 11,
+        "ctr": 0.7273,
+        "pos": 1.0
+      }
+    ],
     "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29": [
       {
         "query": "719-003481-385",
@@ -1214,43 +1260,6 @@
         "pos": 1.0
       }
     ],
-    "https://myhubon.com/products/detail/1968e115-0dc6-432f-891a-783bed71f31f": [
-      {
-        "query": "0200-89032",
-        "clicks": 9,
-        "impr": 14,
-        "ctr": 0.6429,
-        "pos": 1.5
-      },
-      {
-        "query": "tip,shaft susceptor support e2 chamber",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 1.0
-      },
-      {
-        "query": "shaft,susceptor support,with pins",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 5.0
-      },
-      {
-        "query": "tip, shaft, susceptor support e2 chamber",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 1.0
-      },
-      {
-        "query": "ro0200",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 8.0
-      }
-    ],
     "https://myhubon.com/products/detail/84215239-b0c6-4ce7-b1c3-722ca086e788": [
       {
         "query": "0200-06840",
@@ -1285,15 +1294,6 @@
         "pos": 1.2
       }
     ],
-    "https://myhubon.com/products/detail/6c1980be-ec6c-4f7a-8454-aee9b2a08e52": [
-      {
-        "query": "0190-25374",
-        "clicks": 6,
-        "impr": 11,
-        "ctr": 0.5455,
-        "pos": 2.3
-      }
-    ],
     "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb": [
       {
         "query": "0021-26828",
@@ -1317,46 +1317,67 @@
         "pos": 10.0
       }
     ],
-    "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf": [
+    "https://myhubon.com/products/detail/360c3318-7e26-4c9d-a3cf-ad3374d398f1": [
       {
-        "query": "0021-52244",
-        "clicks": 8,
-        "impr": 11,
-        "ctr": 0.7273,
+        "query": "0150-18387",
+        "clicks": 6,
+        "impr": 4,
+        "ctr": 1.5,
         "pos": 1.0
       }
     ],
-    "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece": [
+    "https://myhubon.com/products/detail/6c1980be-ec6c-4f7a-8454-aee9b2a08e52": [
       {
-        "query": "0200-15111",
-        "clicks": 3,
+        "query": "0190-25374",
+        "clicks": 6,
+        "impr": 11,
+        "ctr": 0.5455,
+        "pos": 2.3
+      }
+    ],
+    "https://myhubon.com/products/detail/ed77b913-0b17-4666-a723-67992c703d27": [
+      {
+        "query": "0045-00250",
+        "clicks": 2,
         "impr": 4,
-        "ctr": 0.75,
-        "pos": 1.5
+        "ctr": 0.5,
+        "pos": 3.2
       },
       {
-        "query": "amat 0200-15111",
+        "query": "amat liner 0045-00250",
+        "clicks": 2,
+        "impr": 1,
+        "ctr": 2.0,
+        "pos": 2.0
+      },
+      {
+        "query": "amat matched pair 0045-00250",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 5.0
+      },
+      {
+        "query": "amat imatched pair. chamber liner.300mm 0045-00250",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 1.0
+      }
+    ],
+    "https://myhubon.com/products/detail/71be3cbd-ce24-4d7c-910f-bf5e68d0ddd2": [
+      {
+        "query": "5139-000392-11",
         "clicks": 3,
         "impr": 2,
         "ctr": 1.5,
-        "pos": 2.0
-      }
-    ],
-    "https://myhubon.com/products/detail/e2e6ea49-023a-4426-b519-153b735a1310": [
+        "pos": 1.0
+      },
       {
-        "query": "vj3243t-5mz-m5-x45",
-        "clicks": 5,
-        "impr": 4,
-        "ctr": 1.25,
-        "pos": 2.5
-      }
-    ],
-    "https://myhubon.com/products/detail/34679e28-d1b9-11f0-bcad-d8c497e4b3fb": [
-      {
-        "query": "1120-01077",
-        "clicks": 3,
-        "impr": 4,
-        "ctr": 0.75,
+        "query": "amvg-600-jv-b",
+        "clicks": 2,
+        "impr": 1,
+        "ctr": 2.0,
         "pos": 2.0
       }
     ]
