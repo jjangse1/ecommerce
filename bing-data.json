@@ -1,17 +1,10 @@
 {
-  "updated": "2026-08-31",
+  "updated": "2026-09-01",
   "period": {
-    "start": "2026-06-01",
-    "end": "2026-08-29"
+    "start": "2026-06-02",
+    "end": "2026-08-30"
   },
   "daily": [
-    {
-      "date": "2026-06-01",
-      "clicks": 12,
-      "impr": 141,
-      "ctr": 0.0851,
-      "pos": 0
-    },
     {
       "date": "2026-06-02",
       "clicks": 33,
@@ -577,7 +570,7 @@
       "clicks": 22,
       "impr": 125,
       "ctr": 0.176,
-      "pos": 4.5
+      "pos": 4.4
     },
     {
       "date": "2026-08-22",
@@ -633,6 +626,13 @@
       "clicks": 1,
       "impr": 28,
       "ctr": 0.0357,
+      "pos": 0
+    },
+    {
+      "date": "2026-08-30",
+      "clicks": 19,
+      "impr": 131,
+      "ctr": 0.145,
       "pos": 0
     }
   ],
@@ -1154,18 +1154,18 @@
         "pos": 1.5
       },
       {
-        "query": "shaft,susceptor support,with pins",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 5.0
-      },
-      {
         "query": "tip,shaft susceptor support e2 chamber",
         "clicks": 1,
         "impr": 1,
         "ctr": 1.0,
         "pos": 1.0
+      },
+      {
+        "query": "shaft,susceptor support,with pins",
+        "clicks": 1,
+        "impr": 1,
+        "ctr": 1.0,
+        "pos": 5.0
       },
       {
         "query": "0200-71653 support susceptor with recess middle 15k",
@@ -1290,7 +1290,7 @@
         "pos": 9.2
       },
       {
-        "query": "719-003481-881",
+        "query": "719-003481-910",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
@@ -1370,18 +1370,18 @@
         "pos": 2.0
       },
       {
-        "query": "amat matched pair 0045-00250",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 5.0
-      },
-      {
         "query": "amat imatched pair. chamber liner.300mm 0045-00250",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 1.0
+      },
+      {
+        "query": "amat matched pair 0045-00250",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 5.0
       }
     ]
   }
