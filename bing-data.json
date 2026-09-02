@@ -1,17 +1,10 @@
 {
-  "updated": "2026-09-01",
+  "updated": "2026-09-02",
   "period": {
-    "start": "2026-06-02",
-    "end": "2026-08-30"
+    "start": "2026-06-03",
+    "end": "2026-08-31"
   },
   "daily": [
-    {
-      "date": "2026-06-02",
-      "clicks": 33,
-      "impr": 184,
-      "ctr": 0.1793,
-      "pos": 0
-    },
     {
       "date": "2026-06-03",
       "clicks": 19,
@@ -570,7 +563,7 @@
       "clicks": 22,
       "impr": 125,
       "ctr": 0.176,
-      "pos": 4.4
+      "pos": 4.5
     },
     {
       "date": "2026-08-22",
@@ -633,6 +626,13 @@
       "clicks": 19,
       "impr": 131,
       "ctr": 0.145,
+      "pos": 0
+    },
+    {
+      "date": "2026-08-31",
+      "clicks": 27,
+      "impr": 215,
+      "ctr": 0.1256,
       "pos": 0
     }
   ],
@@ -1062,9 +1062,9 @@
     "0021-26828": [
       {
         "page": "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb",
-        "clicks": 6,
-        "impr": 21,
-        "ctr": 0.2857,
+        "clicks": 7,
+        "impr": 23,
+        "ctr": 0.3043,
         "pos": 1.0
       }
     ],
@@ -1240,9 +1240,9 @@
     "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb": [
       {
         "query": "0021-26828",
-        "clicks": 7,
-        "impr": 22,
-        "ctr": 0.3182,
+        "clicks": 9,
+        "impr": 26,
+        "ctr": 0.3462,
         "pos": 1.0
       },
       {
@@ -1258,6 +1258,13 @@
         "impr": 1,
         "ctr": 0.0,
         "pos": 10.0
+      },
+      {
+        "query": "https://myhubon.com/products/detail/34675e08-d1b9-11f0-bcad-d8c497e4b3fb",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 6.0
       }
     ],
     "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29": [
@@ -1333,18 +1340,18 @@
         "pos": 1.0
       },
       {
-        "query": "lam flex45 myhubon",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 4.0
-      },
-      {
         "query": "myhubon endura",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 1.0
+      },
+      {
+        "query": "lam flex45 myhubon",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 4.0
       },
       {
         "query": "https://myhubon.com/products/detail/3467a8b4-d1b9-11f0-bcad-d8c497e4b3fb",
