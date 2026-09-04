@@ -1,17 +1,10 @@
 {
-  "updated": "2026-09-03",
+  "updated": "2026-09-04",
   "period": {
-    "start": "2026-06-04",
-    "end": "2026-09-01"
+    "start": "2026-06-05",
+    "end": "2026-09-02"
   },
   "daily": [
-    {
-      "date": "2026-06-04",
-      "clicks": 12,
-      "impr": 168,
-      "ctr": 0.0714,
-      "pos": 0
-    },
     {
       "date": "2026-06-05",
       "clicks": 6,
@@ -634,6 +627,13 @@
       "impr": 166,
       "ctr": 0.1084,
       "pos": 0
+    },
+    {
+      "date": "2026-09-02",
+      "clicks": 25,
+      "impr": 199,
+      "ctr": 0.1256,
+      "pos": 0
     }
   ],
   "queries": [
@@ -1154,18 +1154,18 @@
         "pos": 1.5
       },
       {
-        "query": "tip,shaft susceptor support e2 chamber",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 1.0
-      },
-      {
         "query": "shaft,susceptor support,with pins",
         "clicks": 1,
         "impr": 1,
         "ctr": 1.0,
         "pos": 5.0
+      },
+      {
+        "query": "tip,shaft susceptor support e2 chamber",
+        "clicks": 1,
+        "impr": 1,
+        "ctr": 1.0,
+        "pos": 1.0
       },
       {
         "query": "0200-71653 support susceptor with recess middle 15k",
@@ -1276,6 +1276,13 @@
         "pos": 1.2
       },
       {
+        "query": "719-003481-910",
+        "clicks": 1,
+        "impr": 4,
+        "ctr": 0.25,
+        "pos": 4.8
+      },
+      {
         "query": "lam 719-003481-385",
         "clicks": 1,
         "impr": 2,
@@ -1292,16 +1299,9 @@
       {
         "query": "719-003481-783",
         "clicks": 0,
-        "impr": 5,
+        "impr": 6,
         "ctr": 0.0,
-        "pos": 9.2
-      },
-      {
-        "query": "719-003481-881",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 10.0
+        "pos": 13.8
       }
     ],
     "https://myhubon.com/products/detail/84215239-b0c6-4ce7-b1c3-722ca086e788": [
@@ -1377,18 +1377,18 @@
         "pos": 2.0
       },
       {
-        "query": "amat imatched pair. chamber liner.300mm 0045-00250",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 1.0
-      },
-      {
         "query": "amat matched pair 0045-00250",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 5.0
+      },
+      {
+        "query": "amat imatched pair. chamber liner.300mm 0045-00250",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 1.0
       }
     ]
   }
