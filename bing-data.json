@@ -1,17 +1,10 @@
 {
-  "updated": "2026-09-05",
+  "updated": "2026-09-06",
   "period": {
-    "start": "2026-06-06",
-    "end": "2026-09-03"
+    "start": "2026-06-07",
+    "end": "2026-09-04"
   },
   "daily": [
-    {
-      "date": "2026-06-06",
-      "clicks": 4,
-      "impr": 23,
-      "ctr": 0.1739,
-      "pos": 0
-    },
     {
       "date": "2026-06-07",
       "clicks": 9,
@@ -542,7 +535,7 @@
       "clicks": 22,
       "impr": 125,
       "ctr": 0.176,
-      "pos": 4.5
+      "pos": 4.4
     },
     {
       "date": "2026-08-22",
@@ -634,6 +627,13 @@
       "impr": 244,
       "ctr": 0.1107,
       "pos": 0
+    },
+    {
+      "date": "2026-09-04",
+      "clicks": 10,
+      "impr": 108,
+      "ctr": 0.0926,
+      "pos": 3.6
     }
   ],
   "queries": [
@@ -667,10 +667,17 @@
     },
     {
       "query": "0021-27234",
-      "clicks": 12,
-      "impr": 19,
-      "ctr": 0.6316,
-      "pos": 1.2
+      "clicks": 13,
+      "impr": 20,
+      "ctr": 0.65,
+      "pos": 1.1
+    },
+    {
+      "query": "0021-26828",
+      "clicks": 13,
+      "impr": 31,
+      "ctr": 0.4194,
+      "pos": 1.0
     },
     {
       "query": "0021-52244",
@@ -750,17 +757,10 @@
       "pos": 2.0
     },
     {
-      "query": "0021-26828",
-      "clicks": 7,
-      "impr": 23,
-      "ctr": 0.3043,
-      "pos": 1.0
-    },
-    {
       "query": "0020-95243",
       "clicks": 6,
-      "impr": 10,
-      "ctr": 0.6,
+      "impr": 11,
+      "ctr": 0.5455,
       "pos": 1.1
     },
     {
@@ -962,6 +962,15 @@
         "pos": 1.2
       }
     ],
+    "0021-26828": [
+      {
+        "page": "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb",
+        "clicks": 7,
+        "impr": 23,
+        "ctr": 0.3043,
+        "pos": 1.0
+      }
+    ],
     "0021-52244": [
       {
         "page": "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf",
@@ -1048,15 +1057,6 @@
         "impr": 8,
         "ctr": 0.625,
         "pos": 2.0
-      }
-    ],
-    "0021-26828": [
-      {
-        "page": "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb",
-        "clicks": 7,
-        "impr": 23,
-        "ctr": 0.3043,
-        "pos": 1.0
       }
     ],
     "0020-95243": [
@@ -1306,18 +1306,18 @@
         "pos": 1.0
       },
       {
-        "query": "lam flex45 myhubon",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 4.0
-      },
-      {
         "query": "myhubon endura",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 1.0
+      },
+      {
+        "query": "lam flex45 myhubon",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 4.0
       },
       {
         "query": "https://myhubon.com/products/detail/3467a8b4-d1b9-11f0-bcad-d8c497e4b3fb",
@@ -1343,18 +1343,18 @@
         "pos": 2.0
       },
       {
-        "query": "amat imatched pair. chamber liner.300mm 0045-00250",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 1.0
-      },
-      {
         "query": "amat matched pair 0045-00250",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 5.0
+      },
+      {
+        "query": "amat imatched pair. chamber liner.300mm 0045-00250",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 1.0
       }
     ],
     "https://myhubon.com/products/detail/b9438361-c6ca-4c3f-9079-4c87274a4a24": [
