@@ -1,17 +1,10 @@
 {
-  "updated": "2026-09-06",
+  "updated": "2026-09-07",
   "period": {
-    "start": "2026-06-07",
-    "end": "2026-09-04"
+    "start": "2026-06-08",
+    "end": "2026-09-05"
   },
   "daily": [
-    {
-      "date": "2026-06-07",
-      "clicks": 9,
-      "impr": 108,
-      "ctr": 0.0833,
-      "pos": 0
-    },
     {
       "date": "2026-06-08",
       "clicks": 16,
@@ -634,6 +627,13 @@
       "impr": 108,
       "ctr": 0.0926,
       "pos": 3.6
+    },
+    {
+      "date": "2026-09-05",
+      "clicks": 0,
+      "impr": 25,
+      "ctr": 0.0,
+      "pos": 0
     }
   ],
   "queries": [
@@ -787,6 +787,13 @@
       "pos": 1.1
     },
     {
+      "page": "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb",
+      "clicks": 16,
+      "impr": 38,
+      "ctr": 0.4211,
+      "pos": 1.4
+    },
+    {
       "page": "https://myhubon.com/products/detail/34675fd9-d1b9-11f0-bcad-d8c497e4b3fb",
       "clicks": 15,
       "impr": 33,
@@ -822,6 +829,13 @@
       "pos": 1.2
     },
     {
+      "page": "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29",
+      "clicks": 11,
+      "impr": 31,
+      "ctr": 0.3548,
+      "pos": 5.3
+    },
+    {
       "page": "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f",
       "clicks": 10,
       "impr": 19,
@@ -829,18 +843,11 @@
       "pos": 2.4
     },
     {
-      "page": "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb",
-      "clicks": 10,
-      "impr": 30,
-      "ctr": 0.3333,
-      "pos": 1.5
-    },
-    {
-      "page": "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29",
+      "page": "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece",
       "clicks": 9,
-      "impr": 30,
-      "ctr": 0.3,
-      "pos": 5.4
+      "impr": 12,
+      "ctr": 0.75,
+      "pos": 1.9
     },
     {
       "page": "https://myhubon.com/products/detail/84215239-b0c6-4ce7-b1c3-722ca086e788",
@@ -864,25 +871,18 @@
       "pos": 2.4
     },
     {
+      "page": "https://myhubon.com/products/detail/74e0391f-1e4c-46c9-8731-8b9dc435dd29",
+      "clicks": 8,
+      "impr": 17,
+      "ctr": 0.4706,
+      "pos": 2.1
+    },
+    {
       "page": "https://myhubon.com/products/detail/ed77b913-0b17-4666-a723-67992c703d27",
       "clicks": 8,
       "impr": 14,
       "ctr": 0.5714,
       "pos": 2.2
-    },
-    {
-      "page": "https://myhubon.com/products/detail/b9438361-c6ca-4c3f-9079-4c87274a4a24",
-      "clicks": 8,
-      "impr": 12,
-      "ctr": 0.6667,
-      "pos": 1.0
-    },
-    {
-      "page": "https://myhubon.com/products/detail/62b7b102-8a8b-41da-99a4-729f280f166e",
-      "clicks": 8,
-      "impr": 15,
-      "ctr": 0.5333,
-      "pos": 3.0
     }
   ],
   "countries": [],
@@ -928,11 +928,11 @@
         "pos": 35.0
       },
       {
-        "page": "https://dev.myhubon.com/signin",
+        "page": "https://seller.myhubon.com/",
         "clicks": 0,
-        "impr": 1,
+        "impr": 3,
         "ctr": 0.0,
-        "pos": 5.0
+        "pos": 4.7
       }
     ],
     "0200-00289": [
@@ -1088,6 +1088,36 @@
         "pos": 1.1
       }
     ],
+    "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb": [
+      {
+        "query": "0021-26828",
+        "clicks": 9,
+        "impr": 26,
+        "ctr": 0.3462,
+        "pos": 1.0
+      },
+      {
+        "query": "pumping port, teflon sleeve, sacvd producer se",
+        "clicks": 1,
+        "impr": 2,
+        "ctr": 0.5,
+        "pos": 1.0
+      },
+      {
+        "query": "teflon washer, pumping port dam, sacvd producer se",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 10.0
+      },
+      {
+        "query": "https://myhubon.com/products/detail/34675e08-d1b9-11f0-bcad-d8c497e4b3fb",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 6.0
+      }
+    ],
     "https://myhubon.com/products/detail/34675fd9-d1b9-11f0-bcad-d8c497e4b3fb": [
       {
         "query": "0200-00289",
@@ -1145,18 +1175,18 @@
         "pos": 1.5
       },
       {
-        "query": "shaft,susceptor support,with pins",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 5.0
-      },
-      {
         "query": "tip,shaft susceptor support e2 chamber",
         "clicks": 1,
         "impr": 1,
         "ctr": 1.0,
         "pos": 1.0
+      },
+      {
+        "query": "shaft,susceptor support,with pins",
+        "clicks": 1,
+        "impr": 1,
+        "ctr": 1.0,
+        "pos": 5.0
       },
       {
         "query": "0200-71653 support susceptor with recess middle 15k",
@@ -1180,66 +1210,6 @@
         "impr": 13,
         "ctr": 0.6923,
         "pos": 1.2
-      }
-    ],
-    "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f": [
-      {
-        "query": "3700-05174",
-        "clicks": 8,
-        "impr": 10,
-        "ctr": 0.8,
-        "pos": 1.0
-      },
-      {
-        "query": "duro blk",
-        "clicks": 1,
-        "impr": 2,
-        "ctr": 0.5,
-        "pos": 4.0
-      },
-      {
-        "query": "oring id .612 csd .103 ep 80 duro blk",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 10.0
-      },
-      {
-        "query": "o-ring oring id.612 csd.103viton 75 duro blk",
-        "clicks": 0,
-        "impr": 4,
-        "ctr": 0.0,
-        "pos": 1.0
-      }
-    ],
-    "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb": [
-      {
-        "query": "0021-26828",
-        "clicks": 9,
-        "impr": 26,
-        "ctr": 0.3462,
-        "pos": 1.0
-      },
-      {
-        "query": "pumping port, teflon sleeve, sacvd producer se",
-        "clicks": 1,
-        "impr": 2,
-        "ctr": 0.5,
-        "pos": 1.0
-      },
-      {
-        "query": "teflon washer, pumping port dam, sacvd producer se",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 10.0
-      },
-      {
-        "query": "https://myhubon.com/products/detail/34675e08-d1b9-11f0-bcad-d8c497e4b3fb",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 6.0
       }
     ],
     "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29": [
@@ -1277,6 +1247,52 @@
         "impr": 4,
         "ctr": 0.0,
         "pos": 16.8
+      }
+    ],
+    "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f": [
+      {
+        "query": "3700-05174",
+        "clicks": 8,
+        "impr": 10,
+        "ctr": 0.8,
+        "pos": 1.0
+      },
+      {
+        "query": "duro blk",
+        "clicks": 1,
+        "impr": 2,
+        "ctr": 0.5,
+        "pos": 4.0
+      },
+      {
+        "query": "oring id .612 csd .103 ep 80 duro blk",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 10.0
+      },
+      {
+        "query": "o-ring oring id.612 csd.103viton 75 duro blk",
+        "clicks": 0,
+        "impr": 4,
+        "ctr": 0.0,
+        "pos": 1.0
+      }
+    ],
+    "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece": [
+      {
+        "query": "amat 0200-15111",
+        "clicks": 4,
+        "impr": 3,
+        "ctr": 1.3333,
+        "pos": 2.0
+      },
+      {
+        "query": "0200-15111",
+        "clicks": 3,
+        "impr": 4,
+        "ctr": 0.75,
+        "pos": 1.5
       }
     ],
     "https://myhubon.com/products/detail/84215239-b0c6-4ce7-b1c3-722ca086e788": [
@@ -1327,6 +1343,43 @@
         "pos": 1.0
       }
     ],
+    "https://myhubon.com/products/detail/74e0391f-1e4c-46c9-8731-8b9dc435dd29": [
+      {
+        "query": "1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5",
+        "clicks": 3,
+        "impr": 4,
+        "ctr": 0.75,
+        "pos": 1.0
+      },
+      {
+        "query": "s-1f sw det ca .01 x 1awg wire mtl sst 304 vinyl",
+        "clicks": 2,
+        "impr": 2,
+        "ctr": 1.0,
+        "pos": 1.0
+      },
+      {
+        "query": "sw det ca .01 x 1awg wire mtl sst 304 vinyl",
+        "clicks": 1,
+        "impr": 5,
+        "ctr": 0.2,
+        "pos": 2.6
+      },
+      {
+        "query": "sw det ca .01 x 1awg wire mtl sst 304 vinyl s-1f",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 3.0
+      },
+      {
+        "query": "1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5 malaysia",
+        "clicks": 0,
+        "impr": 2,
+        "ctr": 0.0,
+        "pos": 2.0
+      }
+    ],
     "https://myhubon.com/products/detail/ed77b913-0b17-4666-a723-67992c703d27": [
       {
         "query": "0045-00250",
@@ -1343,41 +1396,18 @@
         "pos": 2.0
       },
       {
-        "query": "amat matched pair 0045-00250",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 5.0
-      },
-      {
         "query": "amat imatched pair. chamber liner.300mm 0045-00250",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 1.0
-      }
-    ],
-    "https://myhubon.com/products/detail/b9438361-c6ca-4c3f-9079-4c87274a4a24": [
-      {
-        "query": "3880-00333",
-        "clicks": 6,
-        "impr": 10,
-        "ctr": 0.6,
-        "pos": 1.0
       },
       {
-        "query": "wshr flat #10 .500od x .199id x .060thk",
-        "clicks": 1,
+        "query": "amat matched pair 0045-00250",
+        "clicks": 0,
         "impr": 1,
-        "ctr": 1.0,
-        "pos": 1.0
-      },
-      {
-        "query": "amat 3880-00333",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 1.0
+        "ctr": 0.0,
+        "pos": 5.0
       }
     ]
   }
