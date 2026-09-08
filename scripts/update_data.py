@@ -144,8 +144,10 @@ except ImportError:
     subprocess.run(["pip", "install", "openpyxl", "--break-system-packages", "-q"], check=True)
     import openpyxl
 
+MERGE_KEY_COLUMN = "product_code"  # upsert 기준 키 컬럼명 (고유값이어야 함)
+
 def merge_excel(existing_path, new_path, output_path):
-    """기존 엑셀에 새 데이터를 Upsert 병합. 키: 첫 번째 열 값."""
+    """기존 엑셀에 새 데이터를 Upsert 병합. 키: MERGE_KEY_COLUMN 열 값 (기본: product_code)."""
     if not os.path.exists(new_path) or os.path.getsize(new_path) == 0:
         print("  ⚠️ 신규 다운로드 파일이 비어 있습니다. (0바이트) → 이 구간은 병합 스킵")
         return False
@@ -171,6 +173,11 @@ def merge_excel(existing_path, new_path, output_path):
     data_rows = new_rows[1:]
     print(f"  신규 데이터: 헤더 {len(header)}열, 데이터 {len(data_rows)}행")
 
+    if MERGE_KEY_COLUMN not in header:
+        print(f"  ❌ 키 컬럼 '{MERGE_KEY_COLUMN}'을 신규 데이터 헤더에서 찾을 수 없습니다. 병합 스킵.")
+        return False
+    key_idx = header.index(MERGE_KEY_COLUMN)
+
     if not os.path.exists(existing_path):
         import shutil
         shutil.copy2(new_path, output_path)
@@ -191,13 +198,13 @@ def merge_excel(existing_path, new_path, output_path):
 
     ex_data = {}
     for row in ex_rows[1:]:
-        key = row[0]
+        key = row[key_idx] if key_idx < len(row) else None
         if key is not None:
             ex_data[key] = row
 
     added = updated = 0
     for row in data_rows:
-        key = row[0]
+        key = row[key_idx] if key_idx < len(row) else None
         if key is None:
             continue
         if key in ex_data:
