@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 10 * * *'
   workflow_dispatch:
+    inputs:
+      backfill_from:
+        description: '수동 백필 시작일 (YYYY-MM-DD). 비워두면 평소처럼 마지막 동기화 지점부터 이어서 수집합니다.'
+        required: false
+        default: ''
 
 jobs:
   update-data:
@@ -31,4 +36,5 @@ jobs:
         env:
           MYHUBON_EMAIL: ${{ secrets.MYHUBON_EMAIL }}
           MYHUBON_PASSWORD: ${{ secrets.MYHUBON_PASSWORD }}
+          BACKFILL_FROM: ${{ github.event.inputs.backfill_from }}
         run: python scripts/update_data.py
