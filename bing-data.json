@@ -1,17 +1,10 @@
 {
-  "updated": "2026-09-14",
+  "updated": "2026-09-15",
   "period": {
-    "start": "2026-06-15",
-    "end": "2026-09-12"
+    "start": "2026-06-16",
+    "end": "2026-09-13"
   },
   "daily": [
-    {
-      "date": "2026-06-15",
-      "clicks": 20,
-      "impr": 169,
-      "ctr": 0.1183,
-      "pos": 0
-    },
     {
       "date": "2026-06-16",
       "clicks": 10,
@@ -634,6 +627,13 @@
       "impr": 30,
       "ctr": 0.1333,
       "pos": 0
+    },
+    {
+      "date": "2026-09-13",
+      "clicks": 32,
+      "impr": 172,
+      "ctr": 0.186,
+      "pos": 0
     }
   ],
   "queries": [
@@ -898,25 +898,25 @@
         "pos": 1.0
       },
       {
-        "page": "https://dev.myhubon.com/signin",
-        "clicks": 2,
-        "impr": 2,
-        "ctr": 1.0,
-        "pos": 4.5
+        "page": "https://myhubon.com/",
+        "clicks": 3,
+        "impr": 9,
+        "ctr": 0.3333,
+        "pos": 1.8
       },
       {
-        "page": "https://myhubon.com/",
+        "page": "https://dev.myhubon.com/signin",
         "clicks": 2,
-        "impr": 7,
-        "ctr": 0.2857,
-        "pos": 2.0
+        "impr": 4,
+        "ctr": 0.5,
+        "pos": 4.2
       },
       {
         "page": "https://dev.myhubon.com/",
         "clicks": 2,
-        "impr": 2,
-        "ctr": 1.0,
-        "pos": 5.0
+        "impr": 4,
+        "ctr": 0.5,
+        "pos": 4.0
       },
       {
         "page": "https://myhubon.com/products/detail/3a150acb-a354-4bc7-a755-2f63b6577912",
@@ -1010,10 +1010,10 @@
     "719-003481-385": [
       {
         "page": "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29",
-        "clicks": 5,
-        "impr": 12,
-        "ctr": 0.4167,
-        "pos": 1.2
+        "clicks": 8,
+        "impr": 14,
+        "ctr": 0.5714,
+        "pos": 1.1
       }
     ],
     "0200-06842": [
@@ -1160,10 +1160,10 @@
     "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29": [
       {
         "query": "719-003481-385",
-        "clicks": 6,
-        "impr": 12,
-        "ctr": 0.5,
-        "pos": 1.2
+        "clicks": 9,
+        "impr": 16,
+        "ctr": 0.5625,
+        "pos": 1.1
       },
       {
         "query": "719-003481-910",
