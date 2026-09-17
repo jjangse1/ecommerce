@@ -1,17 +1,10 @@
 {
-  "updated": "2026-09-16",
+  "updated": "2026-09-17",
   "period": {
-    "start": "2026-06-17",
-    "end": "2026-09-14"
+    "start": "2026-06-18",
+    "end": "2026-09-15"
   },
   "daily": [
-    {
-      "date": "2026-06-17",
-      "clicks": 24,
-      "impr": 175,
-      "ctr": 0.1371,
-      "pos": 0
-    },
     {
       "date": "2026-06-18",
       "clicks": 8,
@@ -630,9 +623,16 @@
     },
     {
       "date": "2026-09-14",
-      "clicks": 0,
-      "impr": 0,
-      "ctr": 0,
+      "clicks": 21,
+      "impr": 241,
+      "ctr": 0.0871,
+      "pos": 0
+    },
+    {
+      "date": "2026-09-15",
+      "clicks": 13,
+      "impr": 190,
+      "ctr": 0.0684,
       "pos": 0
     }
   ],
@@ -675,9 +675,9 @@
     {
       "query": "0021-27234",
       "clicks": 13,
-      "impr": 19,
-      "ctr": 0.6842,
-      "pos": 1.2
+      "impr": 20,
+      "ctr": 0.65,
+      "pos": 1.1
     },
     {
       "query": "0200-06840",
@@ -1332,10 +1332,17 @@
     "https://myhubon.com/signin": [
       {
         "query": "myhubon",
-        "clicks": 7,
-        "impr": 8,
-        "ctr": 0.875,
+        "clicks": 8,
+        "impr": 10,
+        "ctr": 0.8,
         "pos": 1.0
+      },
+      {
+        "query": "lam flex45 myhubon",
+        "clicks": 0,
+        "impr": 3,
+        "ctr": 0.0,
+        "pos": 3.3
       },
       {
         "query": "myhubon endura",
@@ -1345,18 +1352,18 @@
         "pos": 1.0
       },
       {
-        "query": "lam flex45 myhubon",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 4.0
-      },
-      {
         "query": "https://myhubon.com/products/detail/3467a8b4-d1b9-11f0-bcad-d8c497e4b3fb",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 1.0
+      },
+      {
+        "query": "0021-20718,myhubon",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 3.0
       }
     ],
     "https://myhubon.com/products/detail/74e0391f-1e4c-46c9-8731-8b9dc435dd29": [
