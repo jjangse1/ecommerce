@@ -1,17 +1,10 @@
 {
-  "updated": "2026-09-20",
+  "updated": "2026-09-21",
   "period": {
-    "start": "2026-06-21",
-    "end": "2026-09-18"
+    "start": "2026-06-22",
+    "end": "2026-09-19"
   },
   "daily": [
-    {
-      "date": "2026-06-21",
-      "clicks": 11,
-      "impr": 76,
-      "ctr": 0.1447,
-      "pos": 0
-    },
     {
       "date": "2026-06-22",
       "clicks": 15,
@@ -634,6 +627,13 @@
       "impr": 142,
       "ctr": 0.0493,
       "pos": 4.0
+    },
+    {
+      "date": "2026-09-19",
+      "clicks": 13,
+      "impr": 104,
+      "ctr": 0.125,
+      "pos": 0
     }
   ],
   "queries": [
@@ -780,6 +780,13 @@
   ],
   "pages": [
     {
+      "page": "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29",
+      "clicks": 31,
+      "impr": 59,
+      "ctr": 0.5254,
+      "pos": 3.8
+    },
+    {
       "page": "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb",
       "clicks": 19,
       "impr": 46,
@@ -799,13 +806,6 @@
       "impr": 16,
       "ctr": 0.9375,
       "pos": 1.0
-    },
-    {
-      "page": "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29",
-      "clicks": 14,
-      "impr": 36,
-      "ctr": 0.3889,
-      "pos": 5.0
     },
     {
       "page": "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf",
@@ -836,11 +836,25 @@
       "pos": 2.2
     },
     {
+      "page": "https://myhubon.com/products/detail/b6ba9119-6a4a-4351-b7d2-8bfefa185057",
+      "clicks": 11,
+      "impr": 8,
+      "ctr": 1.375,
+      "pos": 1.0
+    },
+    {
       "page": "https://myhubon.com/products/detail/9ebda141-1756-4da0-998a-f34ffa1e652f",
       "clicks": 10,
       "impr": 19,
       "ctr": 0.5263,
       "pos": 2.4
+    },
+    {
+      "page": "https://myhubon.com/products/detail/ed77b913-0b17-4666-a723-67992c703d27",
+      "clicks": 10,
+      "impr": 15,
+      "ctr": 0.6667,
+      "pos": 2.1
     },
     {
       "page": "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece",
@@ -857,11 +871,11 @@
       "pos": 1.0
     },
     {
-      "page": "https://myhubon.com/products/detail/b6ba9119-6a4a-4351-b7d2-8bfefa185057",
-      "clicks": 9,
-      "impr": 6,
-      "ctr": 1.5,
-      "pos": 1.0
+      "page": "https://myhubon.com/signin",
+      "clicks": 8,
+      "impr": 19,
+      "ctr": 0.4211,
+      "pos": 2.4
     },
     {
       "page": "https://myhubon.com/products/detail/74e0391f-1e4c-46c9-8731-8b9dc435dd29",
@@ -869,20 +883,6 @@
       "impr": 17,
       "ctr": 0.4706,
       "pos": 2.1
-    },
-    {
-      "page": "https://myhubon.com/products/detail/ed77b913-0b17-4666-a723-67992c703d27",
-      "clicks": 8,
-      "impr": 14,
-      "ctr": 0.5714,
-      "pos": 2.2
-    },
-    {
-      "page": "https://myhubon.com/products/detail/ff55fd13-aebd-4b7c-991d-01415498b4c0",
-      "clicks": 8,
-      "impr": 23,
-      "ctr": 0.3478,
-      "pos": 1.9
     }
   ],
   "countries": [],
@@ -892,9 +892,9 @@
     "719-003481-385": [
       {
         "page": "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29",
-        "clicks": 8,
-        "impr": 14,
-        "ctr": 0.5714,
+        "clicks": 22,
+        "impr": 31,
+        "ctr": 0.7097,
         "pos": 1.1
       }
     ],
@@ -1088,6 +1088,43 @@
     ]
   },
   "page_query_drilldown": {
+    "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29": [
+      {
+        "query": "719-003481-385",
+        "clicks": 23,
+        "impr": 33,
+        "ctr": 0.697,
+        "pos": 1.1
+      },
+      {
+        "query": "719-003481-910",
+        "clicks": 3,
+        "impr": 4,
+        "ctr": 0.75,
+        "pos": 2.5
+      },
+      {
+        "query": "lam 719-003481-385",
+        "clicks": 2,
+        "impr": 3,
+        "ctr": 0.6667,
+        "pos": 1.3
+      },
+      {
+        "query": "719-003481-385 lam",
+        "clicks": 2,
+        "impr": 2,
+        "ctr": 1.0,
+        "pos": 1.0
+      },
+      {
+        "query": "mod,wdo,cer,llt,bay,rcpdy,lg,test only",
+        "clicks": 1,
+        "impr": 1,
+        "ctr": 1.0,
+        "pos": 1.0
+      }
+    ],
     "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb": [
       {
         "query": "0021-26828",
@@ -1150,43 +1187,6 @@
         "pos": 1.0
       }
     ],
-    "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29": [
-      {
-        "query": "719-003481-385",
-        "clicks": 9,
-        "impr": 16,
-        "ctr": 0.5625,
-        "pos": 1.1
-      },
-      {
-        "query": "719-003481-910",
-        "clicks": 3,
-        "impr": 4,
-        "ctr": 0.75,
-        "pos": 2.5
-      },
-      {
-        "query": "lam 719-003481-385",
-        "clicks": 1,
-        "impr": 2,
-        "ctr": 0.5,
-        "pos": 1.5
-      },
-      {
-        "query": "mod,wdo,cer,llt,bay,rcpdy,lg,test only",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 1.0
-      },
-      {
-        "query": "719-003481-783",
-        "clicks": 0,
-        "impr": 4,
-        "ctr": 0.0,
-        "pos": 16.8
-      }
-    ],
     "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf": [
       {
         "query": "0021-52244",
@@ -1230,18 +1230,18 @@
         "pos": 1.5
       },
       {
-        "query": "shaft,susceptor support,with pins",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 5.0
-      },
-      {
         "query": "tip,shaft susceptor support e2 chamber",
         "clicks": 1,
         "impr": 1,
         "ctr": 1.0,
         "pos": 1.0
+      },
+      {
+        "query": "shaft,susceptor support,with pins",
+        "clicks": 1,
+        "impr": 1,
+        "ctr": 1.0,
+        "pos": 5.0
       },
       {
         "query": "0200-71653 support susceptor with recess middle 15k",
@@ -1255,6 +1255,29 @@
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
+        "pos": 1.0
+      }
+    ],
+    "https://myhubon.com/products/detail/b6ba9119-6a4a-4351-b7d2-8bfefa185057": [
+      {
+        "query": "3870-02905",
+        "clicks": 5,
+        "impr": 3,
+        "ctr": 1.6667,
+        "pos": 1.0
+      },
+      {
+        "query": "valve repair kit for 3870-02901",
+        "clicks": 3,
+        "impr": 2,
+        "ctr": 1.5,
+        "pos": 1.0
+      },
+      {
+        "query": "3870-02901",
+        "clicks": 1,
+        "impr": 1,
+        "ctr": 1.0,
         "pos": 1.0
       }
     ],
@@ -1286,91 +1309,6 @@
         "impr": 4,
         "ctr": 0.0,
         "pos": 1.0
-      }
-    ],
-    "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece": [
-      {
-        "query": "amat 0200-15111",
-        "clicks": 4,
-        "impr": 3,
-        "ctr": 1.3333,
-        "pos": 2.0
-      },
-      {
-        "query": "0200-15111",
-        "clicks": 3,
-        "impr": 4,
-        "ctr": 0.75,
-        "pos": 1.5
-      }
-    ],
-    "https://myhubon.com/products/detail/360c3318-7e26-4c9d-a3cf-ad3374d398f1": [
-      {
-        "query": "0150-18387",
-        "clicks": 6,
-        "impr": 4,
-        "ctr": 1.5,
-        "pos": 1.0
-      }
-    ],
-    "https://myhubon.com/products/detail/b6ba9119-6a4a-4351-b7d2-8bfefa185057": [
-      {
-        "query": "3870-02905",
-        "clicks": 5,
-        "impr": 3,
-        "ctr": 1.6667,
-        "pos": 1.0
-      },
-      {
-        "query": "valve repair kit for 3870-02901",
-        "clicks": 3,
-        "impr": 2,
-        "ctr": 1.5,
-        "pos": 1.0
-      },
-      {
-        "query": "3870-02901",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 1.0
-      }
-    ],
-    "https://myhubon.com/products/detail/74e0391f-1e4c-46c9-8731-8b9dc435dd29": [
-      {
-        "query": "1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5",
-        "clicks": 3,
-        "impr": 4,
-        "ctr": 0.75,
-        "pos": 1.0
-      },
-      {
-        "query": "s-1f sw det ca .01 x 1awg wire mtl sst 304 vinyl",
-        "clicks": 2,
-        "impr": 2,
-        "ctr": 1.0,
-        "pos": 1.0
-      },
-      {
-        "query": "sw det ca .01 x 1awg wire mtl sst 304 vinyl",
-        "clicks": 1,
-        "impr": 5,
-        "ctr": 0.2,
-        "pos": 2.6
-      },
-      {
-        "query": "sw det ca .01 x 1awg wire mtl sst 304 vinyl s-1f",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 3.0
-      },
-      {
-        "query": "1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5 malaysia",
-        "clicks": 0,
-        "impr": 2,
-        "ctr": 0.0,
-        "pos": 2.0
       }
     ],
     "https://myhubon.com/products/detail/ed77b913-0b17-4666-a723-67992c703d27": [
@@ -1410,25 +1348,101 @@
         "pos": 5.0
       }
     ],
-    "https://myhubon.com/products/detail/ff55fd13-aebd-4b7c-991d-01415498b4c0": [
+    "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece": [
       {
-        "query": "0020-95243",
-        "clicks": 6,
-        "impr": 13,
-        "ctr": 0.4615,
-        "pos": 1.1
+        "query": "amat 0200-15111",
+        "clicks": 4,
+        "impr": 3,
+        "ctr": 1.3333,
+        "pos": 2.0
       },
       {
-        "query": "0200-95243",
-        "clicks": 0,
+        "query": "0200-15111",
+        "clicks": 3,
         "impr": 4,
+        "ctr": 0.75,
+        "pos": 1.5
+      }
+    ],
+    "https://myhubon.com/products/detail/360c3318-7e26-4c9d-a3cf-ad3374d398f1": [
+      {
+        "query": "0150-18387",
+        "clicks": 6,
+        "impr": 4,
+        "ctr": 1.5,
+        "pos": 1.0
+      }
+    ],
+    "https://myhubon.com/signin": [
+      {
+        "query": "myhubon",
+        "clicks": 7,
+        "impr": 9,
+        "ctr": 0.7778,
+        "pos": 1.0
+      },
+      {
+        "query": "lam flex45 myhubon",
+        "clicks": 0,
+        "impr": 3,
+        "ctr": 0.0,
+        "pos": 3.3
+      },
+      {
+        "query": "myhubon endura",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 1.0
+      },
+      {
+        "query": "https://myhubon.com/products/detail/3467a8b4-d1b9-11f0-bcad-d8c497e4b3fb",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 1.0
+      },
+      {
+        "query": "0021-20718,myhubon",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 3.0
+      }
+    ],
+    "https://myhubon.com/products/detail/74e0391f-1e4c-46c9-8731-8b9dc435dd29": [
+      {
+        "query": "1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5",
+        "clicks": 3,
+        "impr": 4,
+        "ctr": 0.75,
+        "pos": 1.0
+      },
+      {
+        "query": "s-1f sw det ca .01 x 1awg wire mtl sst 304 vinyl",
+        "clicks": 2,
+        "impr": 2,
+        "ctr": 1.0,
+        "pos": 1.0
+      },
+      {
+        "query": "sw det ca .01 x 1awg wire mtl sst 304 vinyl",
+        "clicks": 1,
+        "impr": 5,
+        "ctr": 0.2,
+        "pos": 2.6
+      },
+      {
+        "query": "sw det ca .01 x 1awg wire mtl sst 304 vinyl s-1f",
+        "clicks": 0,
+        "impr": 1,
         "ctr": 0.0,
         "pos": 3.0
       },
       {
-        "query": "应用材料，料号0020-95243",
+        "query": "1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5 malaysia",
         "clicks": 0,
-        "impr": 1,
+        "impr": 2,
         "ctr": 0.0,
         "pos": 2.0
       }
