@@ -1,17 +1,10 @@
 {
-  "updated": "2026-09-26",
+  "updated": "2026-09-27",
   "period": {
-    "start": "2026-06-27",
-    "end": "2026-09-24"
+    "start": "2026-06-28",
+    "end": "2026-09-25"
   },
   "daily": [
-    {
-      "date": "2026-06-27",
-      "clicks": 1,
-      "impr": 31,
-      "ctr": 0.0323,
-      "pos": 0
-    },
     {
       "date": "2026-06-28",
       "clicks": 10,
@@ -634,14 +627,21 @@
       "impr": 158,
       "ctr": 0.0823,
       "pos": 0
+    },
+    {
+      "date": "2026-09-25",
+      "clicks": 0,
+      "impr": 83,
+      "ctr": 0.0,
+      "pos": 4.5
     }
   ],
   "queries": [
     {
       "query": "719-003481-385",
-      "clicks": 21,
-      "impr": 29,
-      "ctr": 0.7241,
+      "clicks": 23,
+      "impr": 32,
+      "ctr": 0.7188,
       "pos": 1.1
     },
     {
@@ -757,6 +757,13 @@
       "pos": 2.0
     },
     {
+      "query": "3870-01165",
+      "clicks": 6,
+      "impr": 9,
+      "ctr": 0.6667,
+      "pos": 1.8
+    },
+    {
       "query": "0040-63457",
       "clicks": 6,
       "impr": 11,
@@ -769,13 +776,6 @@
       "impr": 11,
       "ctr": 0.5455,
       "pos": 2.0
-    },
-    {
-      "query": "0500-01047",
-      "clicks": 6,
-      "impr": 7,
-      "ctr": 0.8571,
-      "pos": 2.4
     }
   ],
   "pages": [
@@ -1059,6 +1059,15 @@
         "pos": 2.1
       }
     ],
+    "3870-01165": [
+      {
+        "page": "https://myhubon.com/products/detail/34683b22-d1b9-11f0-bcad-d8c497e4b3fb",
+        "clicks": 5,
+        "impr": 8,
+        "ctr": 0.625,
+        "pos": 1.8
+      }
+    ],
     "0040-63457": [
       {
         "page": "https://myhubon.com/products/detail/7b386a73-40fc-43c9-83cc-59432da89102",
@@ -1075,15 +1084,6 @@
         "impr": 8,
         "ctr": 0.625,
         "pos": 2.0
-      }
-    ],
-    "0500-01047": [
-      {
-        "page": "https://myhubon.com/products/detail/34678df0-d1b9-11f0-bcad-d8c497e4b3fb",
-        "clicks": 4,
-        "impr": 4,
-        "ctr": 1.0,
-        "pos": 3.5
       }
     ]
   },
@@ -1396,7 +1396,7 @@
         "pos": 2.0
       },
       {
-        "query": "(1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5)",
+        "query": "(1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5 malaysia",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
@@ -1426,18 +1426,18 @@
         "pos": 1.0
       },
       {
-        "query": "wshr,flt,#6x.03thk,blk ny",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 4.0
-      },
-      {
         "query": "wshr  flat #10 .195id x .354od x .060thk sst#TAB#asm co",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 10.0
+      },
+      {
+        "query": "wshr,flt,#6x.03thk,blk ny",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 4.0
       }
     ]
   }
