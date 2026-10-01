@@ -1,17 +1,10 @@
 {
-  "updated": "2026-09-30",
+  "updated": "2026-10-01",
   "period": {
-    "start": "2026-07-01",
-    "end": "2026-09-28"
+    "start": "2026-07-02",
+    "end": "2026-09-29"
   },
   "daily": [
-    {
-      "date": "2026-07-01",
-      "clicks": 12,
-      "impr": 167,
-      "ctr": 0.0719,
-      "pos": 0
-    },
     {
       "date": "2026-07-02",
       "clicks": 31,
@@ -367,7 +360,7 @@
       "clicks": 22,
       "impr": 125,
       "ctr": 0.176,
-      "pos": 4.5
+      "pos": 4.4
     },
     {
       "date": "2026-08-22",
@@ -630,6 +623,13 @@
     },
     {
       "date": "2026-09-28",
+      "clicks": 10,
+      "impr": 160,
+      "ctr": 0.0625,
+      "pos": 0
+    },
+    {
+      "date": "2026-09-29",
       "clicks": 0,
       "impr": 0,
       "ctr": 0,
@@ -1187,18 +1187,18 @@
         "pos": 1.0
       },
       {
-        "query": "amat imatched pair. chamber liner.300mm 0045-00250",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 1.0
-      },
-      {
         "query": "amat matched pair 0045-00250",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 5.0
+      },
+      {
+        "query": "amat imatched pair. chamber liner.300mm 0045-00250",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 1.0
       }
     ],
     "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf": [
@@ -1373,7 +1373,7 @@
         "pos": 2.0
       },
       {
-        "query": "(1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5)",
+        "query": "(1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5 malaysia",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
@@ -1412,13 +1412,6 @@
         "pos": 1.0
       },
       {
-        "query": "amat 3880-00333",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 1.0
-      },
-      {
         "query": "wshr flat #10 .500od x .199id x .060thk",
         "clicks": 1,
         "impr": 1,
@@ -1426,11 +1419,11 @@
         "pos": 1.0
       },
       {
-        "query": "wshr  flat #10 .195id x .354od x .060thk sst#TAB#asm co",
-        "clicks": 0,
+        "query": "amat 3880-00333",
+        "clicks": 1,
         "impr": 1,
-        "ctr": 0.0,
-        "pos": 10.0
+        "ctr": 1.0,
+        "pos": 1.0
       },
       {
         "query": "wshr,flt,#6x.03thk,blk ny",
@@ -1438,6 +1431,13 @@
         "impr": 1,
         "ctr": 0.0,
         "pos": 4.0
+      },
+      {
+        "query": "wshr  flat #10 .195id x .354od x .060thk sst#TAB#asm co",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 10.0
       }
     ]
   }
