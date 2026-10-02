@@ -1,17 +1,10 @@
 {
-  "updated": "2026-10-01",
+  "updated": "2026-10-02",
   "period": {
-    "start": "2026-07-02",
-    "end": "2026-09-29"
+    "start": "2026-07-03",
+    "end": "2026-09-30"
   },
   "daily": [
-    {
-      "date": "2026-07-02",
-      "clicks": 31,
-      "impr": 223,
-      "ctr": 0.139,
-      "pos": 0
-    },
     {
       "date": "2026-07-03",
       "clicks": 3,
@@ -360,7 +353,7 @@
       "clicks": 22,
       "impr": 125,
       "ctr": 0.176,
-      "pos": 4.4
+      "pos": 4.5
     },
     {
       "date": "2026-08-22",
@@ -630,6 +623,13 @@
     },
     {
       "date": "2026-09-29",
+      "clicks": 14,
+      "impr": 204,
+      "ctr": 0.0686,
+      "pos": 0
+    },
+    {
+      "date": "2026-09-30",
       "clicks": 0,
       "impr": 0,
       "ctr": 0,
@@ -1412,13 +1412,6 @@
         "pos": 1.0
       },
       {
-        "query": "wshr flat #10 .500od x .199id x .060thk",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 1.0
-      },
-      {
         "query": "amat 3880-00333",
         "clicks": 1,
         "impr": 1,
@@ -1426,11 +1419,11 @@
         "pos": 1.0
       },
       {
-        "query": "wshr,flt,#6x.03thk,blk ny",
-        "clicks": 0,
+        "query": "wshr flat #10 .500od x .199id x .060thk",
+        "clicks": 1,
         "impr": 1,
-        "ctr": 0.0,
-        "pos": 4.0
+        "ctr": 1.0,
+        "pos": 1.0
       },
       {
         "query": "wshr  flat #10 .195id x .354od x .060thk sst#TAB#asm co",
@@ -1438,6 +1431,13 @@
         "impr": 1,
         "ctr": 0.0,
         "pos": 10.0
+      },
+      {
+        "query": "wshr,flt,#6x.03thk,blk ny",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 4.0
       }
     ]
   }
