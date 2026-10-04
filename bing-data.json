@@ -1,17 +1,10 @@
 {
-  "updated": "2026-10-03",
+  "updated": "2026-10-04",
   "period": {
-    "start": "2026-07-04",
-    "end": "2026-10-01"
+    "start": "2026-07-05",
+    "end": "2026-10-02"
   },
   "daily": [
-    {
-      "date": "2026-07-04",
-      "clicks": 1,
-      "impr": 21,
-      "ctr": 0.0476,
-      "pos": 0
-    },
     {
       "date": "2026-07-05",
       "clicks": 15,
@@ -630,10 +623,17 @@
     },
     {
       "date": "2026-10-01",
-      "clicks": 0,
-      "impr": 0,
-      "ctr": 0,
+      "clicks": 6,
+      "impr": 98,
+      "ctr": 0.0612,
       "pos": 0
+    },
+    {
+      "date": "2026-10-02",
+      "clicks": 3,
+      "impr": 80,
+      "ctr": 0.0375,
+      "pos": 11.8
     }
   ],
   "queries": [
@@ -675,8 +675,8 @@
     {
       "query": "myhubon",
       "clicks": 12,
-      "impr": 101,
-      "ctr": 0.1188,
+      "impr": 107,
+      "ctr": 0.1121,
       "pos": 4.9
     },
     {
@@ -685,6 +685,13 @@
       "impr": 17,
       "ctr": 0.5882,
       "pos": 1.0
+    },
+    {
+      "query": "amat 0200-15111",
+      "clicks": 10,
+      "impr": 8,
+      "ctr": 1.25,
+      "pos": 1.4
     },
     {
       "query": "0150-18387",
@@ -769,13 +776,6 @@
       "impr": 11,
       "ctr": 0.5455,
       "pos": 2.0
-    },
-    {
-      "query": "0500-01047",
-      "clicks": 6,
-      "impr": 7,
-      "ctr": 0.8571,
-      "pos": 2.4
     }
   ],
   "pages": [
@@ -980,6 +980,15 @@
         "pos": 1.0
       }
     ],
+    "amat 0200-15111": [
+      {
+        "page": "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece",
+        "clicks": 4,
+        "impr": 3,
+        "ctr": 1.3333,
+        "pos": 2.0
+      }
+    ],
     "0150-18387": [
       {
         "page": "https://myhubon.com/products/detail/360c3318-7e26-4c9d-a3cf-ad3374d398f1",
@@ -1066,15 +1075,6 @@
         "impr": 8,
         "ctr": 0.625,
         "pos": 2.0
-      }
-    ],
-    "0500-01047": [
-      {
-        "page": "https://myhubon.com/products/detail/34678df0-d1b9-11f0-bcad-d8c497e4b3fb",
-        "clicks": 4,
-        "impr": 4,
-        "ctr": 1.0,
-        "pos": 3.5
       }
     ]
   },
@@ -1178,18 +1178,18 @@
         "pos": 1.0
       },
       {
-        "query": "amat imatched pair. chamber liner.300mm 0045-00250",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 1.0
-      },
-      {
         "query": "amat matched pair 0045-00250",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 5.0
+      },
+      {
+        "query": "amat imatched pair. chamber liner.300mm 0045-00250",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 1.0
       }
     ],
     "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf": [
@@ -1387,14 +1387,14 @@
         "pos": 1.0
       },
       {
-        "query": "amat 3880-00333",
+        "query": "wshr flat #10 .500od x .199id x .060thk",
         "clicks": 1,
         "impr": 1,
         "ctr": 1.0,
         "pos": 1.0
       },
       {
-        "query": "wshr flat #10 .500od x .199id x .060thk",
+        "query": "amat 3880-00333",
         "clicks": 1,
         "impr": 1,
         "ctr": 1.0,
@@ -1438,14 +1438,14 @@
         "pos": 9.0
       },
       {
-        "query": "3691-01357 scr cap skt hd 10-32x1/2l torx t27 applied materials",
+        "query": "3691-01357",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 8.0
       },
       {
-        "query": "3691-01357",
+        "query": "3691-01357 scr cap skt hd 10-32x1/2l torx t27 applied materials",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
