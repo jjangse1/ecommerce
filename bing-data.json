@@ -1,17 +1,10 @@
 {
-  "updated": "2026-10-06",
+  "updated": "2026-10-07",
   "period": {
-    "start": "2026-07-07",
-    "end": "2026-10-04"
+    "start": "2026-07-08",
+    "end": "2026-10-05"
   },
   "daily": [
-    {
-      "date": "2026-07-07",
-      "clicks": 20,
-      "impr": 197,
-      "ctr": 0.1015,
-      "pos": 0
-    },
     {
       "date": "2026-07-08",
       "clicks": 23,
@@ -634,6 +627,13 @@
       "impr": 69,
       "ctr": 0.0435,
       "pos": 0
+    },
+    {
+      "date": "2026-10-05",
+      "clicks": 0,
+      "impr": 0,
+      "ctr": 0,
+      "pos": 0
     }
   ],
   "queries": [
@@ -750,18 +750,18 @@
       "pos": 2.0
     },
     {
-      "query": "0200-06842",
-      "clicks": 6,
-      "impr": 12,
-      "ctr": 0.5,
-      "pos": 3.1
-    },
-    {
       "query": "3870-01165",
       "clicks": 6,
       "impr": 9,
       "ctr": 0.6667,
       "pos": 1.8
+    },
+    {
+      "query": "0200-06842",
+      "clicks": 6,
+      "impr": 12,
+      "ctr": 0.5,
+      "pos": 3.1
     },
     {
       "query": "0040-63457",
@@ -1034,6 +1034,15 @@
         "pos": 2.1
       }
     ],
+    "3870-01165": [
+      {
+        "page": "https://myhubon.com/products/detail/34683b22-d1b9-11f0-bcad-d8c497e4b3fb",
+        "clicks": 5,
+        "impr": 8,
+        "ctr": 0.625,
+        "pos": 1.8
+      }
+    ],
     "0200-06842": [
       {
         "page": "https://myhubon.com/products/detail/46f1edf4-dc50-4247-b204-ba0583d99fc6",
@@ -1048,15 +1057,6 @@
         "impr": 1,
         "ctr": 0.0,
         "pos": 10.0
-      }
-    ],
-    "3870-01165": [
-      {
-        "page": "https://myhubon.com/products/detail/34683b22-d1b9-11f0-bcad-d8c497e4b3fb",
-        "clicks": 5,
-        "impr": 8,
-        "ctr": 0.625,
-        "pos": 1.8
       }
     ],
     "0040-63457": [
@@ -1178,18 +1178,18 @@
         "pos": 1.0
       },
       {
-        "query": "amat matched pair 0045-00250",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 5.0
-      },
-      {
         "query": "amat imatched pair. chamber liner.300mm 0045-00250",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 1.0
+      },
+      {
+        "query": "amat matched pair 0045-00250",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 5.0
       }
     ],
     "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf": [
