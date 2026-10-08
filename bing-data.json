@@ -1,17 +1,10 @@
 {
-  "updated": "2026-10-07",
+  "updated": "2026-10-08",
   "period": {
-    "start": "2026-07-08",
-    "end": "2026-10-05"
+    "start": "2026-07-09",
+    "end": "2026-10-06"
   },
   "daily": [
-    {
-      "date": "2026-07-08",
-      "clicks": 23,
-      "impr": 246,
-      "ctr": 0.0935,
-      "pos": 0
-    },
     {
       "date": "2026-07-09",
       "clicks": 21,
@@ -630,9 +623,16 @@
     },
     {
       "date": "2026-10-05",
-      "clicks": 0,
-      "impr": 0,
-      "ctr": 0,
+      "clicks": 2,
+      "impr": 119,
+      "ctr": 0.0168,
+      "pos": 0
+    },
+    {
+      "date": "2026-10-06",
+      "clicks": 5,
+      "impr": 220,
+      "ctr": 0.0227,
       "pos": 0
     }
   ],
@@ -1178,18 +1178,18 @@
         "pos": 1.0
       },
       {
-        "query": "amat imatched pair. chamber liner.300mm 0045-00250",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 1.0
-      },
-      {
         "query": "amat matched pair 0045-00250",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 5.0
+      },
+      {
+        "query": "amat imatched pair. chamber liner.300mm 0045-00250",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 1.0
       }
     ],
     "https://myhubon.com/products/detail/f78a08cc-22f8-489a-a99a-f849d17c92cf": [
@@ -1220,10 +1220,10 @@
     "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece": [
       {
         "query": "amat 0200-15111",
-        "clicks": 4,
-        "impr": 3,
-        "ctr": 1.3333,
-        "pos": 2.0
+        "clicks": 10,
+        "impr": 8,
+        "ctr": 1.25,
+        "pos": 1.4
       },
       {
         "query": "0200-15111",
@@ -1270,7 +1270,7 @@
         "pos": 2.0
       },
       {
-        "query": "(1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5 malaysia",
+        "query": "(1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5)",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
@@ -1332,18 +1332,18 @@
         "pos": 1.7
       },
       {
-        "query": "shaft,susceptor support,with pins",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 5.0
-      },
-      {
         "query": "tip,shaft susceptor support e2 chamber",
         "clicks": 1,
         "impr": 1,
         "ctr": 1.0,
         "pos": 1.0
+      },
+      {
+        "query": "shaft,susceptor support,with pins",
+        "clicks": 1,
+        "impr": 1,
+        "ctr": 1.0,
+        "pos": 5.0
       },
       {
         "query": "0200-71653 support susceptor with recess middle 15k",
@@ -1424,18 +1424,18 @@
         "pos": 1.0
       },
       {
-        "query": "wshr  flat #10 .195id x .354od x .060thk sst#TAB#asm co",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 10.0
-      },
-      {
         "query": "wshr,flt,#6x.03thk,blk ny",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 4.0
+      },
+      {
+        "query": "wshr  flat #10 .195id x .354od x .060thk sst#TAB#asm co",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 10.0
       }
     ]
   }
