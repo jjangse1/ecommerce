@@ -1,17 +1,10 @@
 {
-  "updated": "2026-10-14",
+  "updated": "2026-10-15",
   "period": {
-    "start": "2026-07-15",
-    "end": "2026-10-12"
+    "start": "2026-07-16",
+    "end": "2026-10-13"
   },
   "daily": [
-    {
-      "date": "2026-07-15",
-      "clicks": 34,
-      "impr": 255,
-      "ctr": 0.1333,
-      "pos": 0
-    },
     {
       "date": "2026-07-16",
       "clicks": 20,
@@ -269,7 +262,7 @@
       "clicks": 22,
       "impr": 125,
       "ctr": 0.176,
-      "pos": 4.4
+      "pos": 4.5
     },
     {
       "date": "2026-08-22",
@@ -630,6 +623,13 @@
     },
     {
       "date": "2026-10-12",
+      "clicks": 10,
+      "impr": 277,
+      "ctr": 0.0361,
+      "pos": 0
+    },
+    {
+      "date": "2026-10-13",
       "clicks": 0,
       "impr": 0,
       "ctr": 0,
@@ -889,6 +889,15 @@
   "daily_country": [],
   "country_supported": false,
   "query_page_drilldown": {
+    "719-003481-385": [
+      {
+        "page": "https://myhubon.com/products/detail/135f81ec-f7e4-4519-9146-73949692db29",
+        "clicks": 20,
+        "impr": 26,
+        "ctr": 0.7692,
+        "pos": 1.0
+      }
+    ],
     "0021-26828": [
       {
         "page": "https://myhubon.com/products/detail/34685da3-d1b9-11f0-bcad-d8c497e4b3fb",
@@ -1190,18 +1199,18 @@
         "pos": 1.0
       },
       {
-        "query": "amat matched pair 0045-00250",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 5.0
-      },
-      {
         "query": "amat imatched pair. chamber liner.300mm 0045-00250",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 1.0
+      },
+      {
+        "query": "amat matched pair 0045-00250",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 5.0
       }
     ],
     "https://myhubon.com/products/detail/84215239-b0c6-4ce7-b1c3-722ca086e788": [
@@ -1314,13 +1323,6 @@
         "pos": 1.0
       },
       {
-        "query": "wshr flat #10 .500od x .199id x .060thk",
-        "clicks": 1,
-        "impr": 1,
-        "ctr": 1.0,
-        "pos": 1.0
-      },
-      {
         "query": "amat 3880-00333",
         "clicks": 1,
         "impr": 1,
@@ -1328,11 +1330,11 @@
         "pos": 1.0
       },
       {
-        "query": "wshr  flat #10 .195id x .354od x .060thk sst#TAB#asm co",
-        "clicks": 0,
+        "query": "wshr flat #10 .500od x .199id x .060thk",
+        "clicks": 1,
         "impr": 1,
-        "ctr": 0.0,
-        "pos": 10.0
+        "ctr": 1.0,
+        "pos": 1.0
       },
       {
         "query": "wshr,flt,#6x.03thk,blk ny",
@@ -1340,6 +1342,13 @@
         "impr": 1,
         "ctr": 0.0,
         "pos": 4.0
+      },
+      {
+        "query": "wshr  flat #10 .195id x .354od x .060thk sst#TAB#asm co",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 10.0
       }
     ],
     "https://myhubon.com/products/detail/360c3318-7e26-4c9d-a3cf-ad3374d398f1": [
