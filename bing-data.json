@@ -1,17 +1,10 @@
 {
-  "updated": "2026-10-17",
+  "updated": "2026-10-18",
   "period": {
-    "start": "2026-07-18",
-    "end": "2026-10-15"
+    "start": "2026-07-19",
+    "end": "2026-10-16"
   },
   "daily": [
-    {
-      "date": "2026-07-18",
-      "clicks": 2,
-      "impr": 50,
-      "ctr": 0.04,
-      "pos": 0
-    },
     {
       "date": "2026-07-19",
       "clicks": 17,
@@ -634,6 +627,13 @@
       "impr": 269,
       "ctr": 0.0818,
       "pos": 0
+    },
+    {
+      "date": "2026-10-16",
+      "clicks": 12,
+      "impr": 148,
+      "ctr": 0.0811,
+      "pos": 4.4
     }
   ],
   "queries": [
@@ -673,6 +673,13 @@
       "pos": 1.0
     },
     {
+      "query": "3880-00333",
+      "clicks": 11,
+      "impr": 13,
+      "ctr": 0.8462,
+      "pos": 1.0
+    },
+    {
       "query": "0150-18387",
       "clicks": 9,
       "impr": 5,
@@ -708,11 +715,11 @@
       "pos": 1.0
     },
     {
-      "query": "3880-00333",
+      "query": "0040-63457",
       "clicks": 7,
-      "impr": 9,
-      "ctr": 0.7778,
-      "pos": 1.0
+      "impr": 12,
+      "ctr": 0.5833,
+      "pos": 2.7
     },
     {
       "query": "amat 0200-15111",
@@ -727,13 +734,6 @@
       "impr": 8,
       "ctr": 0.875,
       "pos": 2.0
-    },
-    {
-      "query": "0040-63457",
-      "clicks": 6,
-      "impr": 11,
-      "ctr": 0.5455,
-      "pos": 2.7
     },
     {
       "query": "3870-04135",
@@ -962,6 +962,15 @@
         "pos": 1.0
       }
     ],
+    "3880-00333": [
+      {
+        "page": "https://myhubon.com/products/detail/b9438361-c6ca-4c3f-9079-4c87274a4a24",
+        "clicks": 5,
+        "impr": 8,
+        "ctr": 0.625,
+        "pos": 1.0
+      }
+    ],
     "0150-18387": [
       {
         "page": "https://myhubon.com/products/detail/360c3318-7e26-4c9d-a3cf-ad3374d398f1",
@@ -989,13 +998,13 @@
         "pos": 1.0
       }
     ],
-    "3880-00333": [
+    "0040-63457": [
       {
-        "page": "https://myhubon.com/products/detail/b9438361-c6ca-4c3f-9079-4c87274a4a24",
-        "clicks": 5,
-        "impr": 8,
-        "ctr": 0.625,
-        "pos": 1.0
+        "page": "https://myhubon.com/products/detail/7b386a73-40fc-43c9-83cc-59432da89102",
+        "clicks": 6,
+        "impr": 10,
+        "ctr": 0.6,
+        "pos": 2.7
       }
     ],
     "amat 0200-15111": [
@@ -1005,15 +1014,6 @@
         "impr": 1,
         "ctr": 1.0,
         "pos": 2.0
-      }
-    ],
-    "0040-63457": [
-      {
-        "page": "https://myhubon.com/products/detail/7b386a73-40fc-43c9-83cc-59432da89102",
-        "clicks": 6,
-        "impr": 10,
-        "ctr": 0.6,
-        "pos": 2.7
       }
     ],
     "3870-04135": [
@@ -1169,7 +1169,7 @@
         "pos": 2.0
       },
       {
-        "query": "(1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5 malaysia",
+        "query": "(1270-01392- sw det ca .01 x 1awg wire mtl sst 304 vinyl x 10.5)",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
@@ -1275,18 +1275,18 @@
         "pos": 1.0
       },
       {
-        "query": "wshr  flat #10 .195id x .354od x .060thk sst#TAB#asm co",
-        "clicks": 0,
-        "impr": 1,
-        "ctr": 0.0,
-        "pos": 10.0
-      },
-      {
         "query": "wshr,flt,#6x.03thk,blk ny",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 4.0
+      },
+      {
+        "query": "wshr  flat #10 .195id x .354od x .060thk sst#TAB#asm co",
+        "clicks": 0,
+        "impr": 1,
+        "ctr": 0.0,
+        "pos": 10.0
       }
     ],
     "https://myhubon.com/products/detail/192ef336-d298-497e-bacb-bfb22d26dece": [
@@ -1344,14 +1344,14 @@
         "pos": 9.0
       },
       {
-        "query": "3691-01357 scr cap skt hd 10-32x1/2l torx t27 applied materials",
+        "query": "3691-01357",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
         "pos": 8.0
       },
       {
-        "query": "3691-01357",
+        "query": "3691-01357 scr cap skt hd 10-32x1/2l torx t27 applied materials",
         "clicks": 0,
         "impr": 1,
         "ctr": 0.0,
