@@ -1451,6 +1451,8 @@ window._BING_QUERY_DAILY      = [];   // [날짜, 검색어, 클릭, 노출, 순
 window._BING_PAGE_DAILY       = [];   // [날짜, 페이지, 클릭, 노출, 순위]
 window._BING_QUERY_PAGE_DAILY = {};   // 검색어 → [[날짜, 페이지, 클릭, 노출], ...]
 window._BING_PAGE_QUERY_DAILY = {};   // 페이지 → [[날짜, 검색어, 클릭, 노출], ...]
+window._BING_DRILL_MISSING    = {};   // 드릴다운이 비어있는 항목과 사유 (fetch_bing.py 진단)
+window._BING_RANGE            = {from:'', to:''};   // 현재 화면의 조회 기간 (CSV 다운로드용)
 window._BING_LOADED    = false;
 
 (async function fetchBingJson(){
@@ -1472,6 +1474,7 @@ window._BING_LOADED    = false;
       window._BING_PAGE_DAILY       = json.page_daily       || [];
       window._BING_QUERY_PAGE_DAILY = json.query_page_daily || {};
       window._BING_PAGE_QUERY_DAILY = json.page_query_daily || {};
+      window._BING_DRILL_MISSING    = json.drill_missing    || {};
       window._BING_LOADED    = true;
       const badge = document.getElementById('bingDataBadge');
       if(badge){ badge.textContent=`🔷 Bing 갱신 · ${json.updated||'최신'}`; badge.style.display='inline-flex'; }
@@ -2564,26 +2567,81 @@ function aggBingRows(rows, from, to, n){
   out.sort((x,y)=> y.clicks-x.clicks || y.impr-x.impr);
   return out.slice(0, n);
 }
+// ⚠ Bing 검색어/페이지 통계는 "일별"이 아니라 주간 버킷(금요일 날짜 = 직전 토~금 7일)으로만 내려온다.
+//   → 선택 기간과 하루라도 겹치는 주 버킷을 모두 합산한다. (금요일이 없는 짧은 기간도 빈 표가 안 되도록)
+function _addDaysStr(str, n){ const d=_utcDate(str); d.setUTCDate(d.getUTCDate()+n); return _ymd(d); }
+function _bingBucketRange(from, to){ return [from, to ? _addDaysStr(to, 6) : to]; }   // D>=from && D-6<=to
 function getBingTopQueries(from, to){
   const rows = window._BING_QUERY_DAILY||[];
-  if(rows.length) return aggBingRows(rows, from, to, BING_TOP_N).map(r=>({query:r.key, clicks:r.clicks, impr:r.impr, ctr:r.ctr, pos:r.pos}));
+  if(rows.length){ const [f,t]=_bingBucketRange(from,to);
+    return aggBingRows(rows, f, t, BING_TOP_N).map(r=>({query:r.key, clicks:r.clicks, impr:r.impr, ctr:r.ctr, pos:r.pos})); }
   return (window._BING_QUERIES||[]).slice(0, BING_TOP_N);   // 구버전 json 폴백
 }
 function getBingTopPages(from, to){
   const rows = window._BING_PAGE_DAILY||[];
-  if(rows.length) return aggBingRows(rows, from, to, BING_TOP_N).map(r=>({page:r.key, clicks:r.clicks, impr:r.impr, ctr:r.ctr, pos:r.pos}));
+  if(rows.length){ const [f,t]=_bingBucketRange(from,to);
+    return aggBingRows(rows, f, t, BING_TOP_N).map(r=>({page:r.key, clicks:r.clicks, impr:r.impr, ctr:r.ctr, pos:r.pos})); }
   return (window._BING_PAGES||[]).slice(0, BING_TOP_N);     // 구버전 json 폴백
 }
-// 드릴다운: 일자별 행이 있으면 기간 합산(상위 5), 없으면 구버전 집계본 사용
 function getBingDrillQuery(query, from, to){
   const daily = (window._BING_QUERY_PAGE_DAILY||{})[query];
-  if(daily) return aggBingRows(daily, from, to, 5).map(r=>({page:r.key, clicks:r.clicks, impr:r.impr}));
+  if(daily){ const [f,t]=_bingBucketRange(from,to);
+    return aggBingRows(daily, f, t, 5).map(r=>({page:r.key, clicks:r.clicks, impr:r.impr})); }
   return (window._BING_QUERY_PAGE_DRILL||{})[query] || [];
 }
 function getBingDrillPage(page, from, to){
   const daily = (window._BING_PAGE_QUERY_DAILY||{})[page];
-  if(daily) return aggBingRows(daily, from, to, 5).map(r=>({query:r.key, clicks:r.clicks, impr:r.impr}));
+  if(daily){ const [f,t]=_bingBucketRange(from,to);
+    return aggBingRows(daily, f, t, 5).map(r=>({query:r.key, clicks:r.clicks, impr:r.impr})); }
   return (window._BING_PAGE_QUERY_DRILL||{})[page] || [];
+}
+// 표 위 안내: 실제로 합산된 주 구간
+function bingWeekNote(kind, from, to){
+  const rows = (kind==='q' ? window._BING_QUERY_DAILY : window._BING_PAGE_DAILY)||[];
+  if(!rows.length) return '';
+  const [f,t]=_bingBucketRange(from,to);
+  const ds=[...new Set(rows.filter(r=>r[0]>=f && r[0]<=t).map(r=>r[0]))].sort();
+  if(!ds.length) return '';
+  return `<div style="font-size:10px;color:var(--text-muted);margin:-4px 0 8px;font-family:'DM Mono',monospace">ⓘ Bing은 주간(토~금) 단위로만 제공 · ${_addDaysStr(ds[0],-6)} ~ ${ds[ds.length-1]} (${ds.length}주) 합산</div>`;
+}
+
+// 드릴다운이 비어있을 때 사유 안내
+function bingDrillMissingNote(kind, key){
+  const dm = (window._BING_DRILL_MISSING||{})[kind==='q'?'queries':'pages'] || {};
+  const daily = kind==='q' ? window._BING_QUERY_PAGE_DAILY : window._BING_PAGE_QUERY_DAILY;
+  if(daily && daily[key])                      return '선택한 기간에는 세부 유입 데이터가 없습니다 (다른 기간에는 있음).';
+  if((dm.error||[]).includes(key))            return 'Bing API 오류로 세부 데이터를 받지 못했습니다. fetch_bing.py를 다시 실행하면 채워질 수 있습니다.';
+  if((dm.empty||[]).includes(key))            return 'Bing API가 이 항목의 세부 유입 데이터를 제공하지 않았습니다 (Bing 측 한계).';
+  if((dm.out_of_range||[]).includes(key))     return '수집 기간(90일) 내 세부 데이터가 없습니다.';
+  return '세부 데이터 수집 대상 밖이거나 구버전 bing-data.json입니다. fetch_bing.py를 다시 실행해 주세요.';
+}
+
+// ── 주간 검색어 Top 15 CSV 다운로드 ──
+// Bing 검색어 데이터는 원래 주간(토~금, 금요일 날짜로 표기) 단위이므로 그 주 단위 그대로 Top 15를 뽑는다.
+// 조회 기간과 겹치는 주만 포함.
+function _utcDate(str){ const [y,m,d]=str.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)); }
+function _ymd(dt){ return dt.toISOString().slice(0,10); }
+function downloadBingWeeklyTopCsv(){
+  const rows = window._BING_QUERY_DAILY||[];
+  if(!rows.length){ alert('주간 검색어 데이터가 없습니다.\nfetch_bing.py(새 버전)를 실행해 bing-data.json을 갱신해 주세요.'); return; }
+  const rg = window._BING_RANGE||{};
+  const from = rg.from || '0000-00-00', to = rg.to || '9999-12-31';
+  const [f,t] = _bingBucketRange(from, to==='9999-12-31' ? null : to);
+  const weeks = [...new Set(rows.filter(r=>r[0]>=f && (!t || r[0]<=t)).map(r=>r[0]))].sort();
+  if(!weeks.length){ alert('선택한 기간에 검색어 데이터가 없습니다.'); return; }
+  const csvCell = v => { v = String(v ?? ''); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+  const lines = [['주 시작(토)','주 종료(금)','순위','검색어','클릭','노출','CTR(%)','평균순위']];
+  weeks.forEach(w=>{
+    aggBingRows(rows, w, w, BING_TOP_N).forEach((r,i)=>
+      lines.push([_addDaysStr(w,-6), w, i+1, r.key, r.clicks, r.impr, (r.ctr*100).toFixed(1), r.pos]));
+  });
+  const csv = '\uFEFF' + lines.map(l=>l.map(csvCell).join(',')).join('\r\n');   // BOM: 엑셀 한글 깨짐 방지
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `bing_weekly_top${BING_TOP_N}_queries_${_addDaysStr(weeks[0],-6)}_${weeks[weeks.length-1]}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 }
 function toggleBingDrillRow(rowId){
   const row=document.getElementById(rowId);
@@ -2611,6 +2669,7 @@ function renderBingSection(from, to){
   const f=from||BING[0]?.date;
   const t=to||BING[BING.length-1]?.date;
 
+  window._BING_RANGE={from:f,to:t};
   const bFilt=BING.filter(d=>d.date>=f&&d.date<=t);
   const gFilt=GSC.filter(d=>d.date>=f&&d.date<=t);
 
@@ -2679,7 +2738,9 @@ function renderBingSection(from, to){
     <!-- 검색어 / 페이지 -->
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-header"><div class="panel-title"><span class="dot" style="background:#7C3AED"></span> Bing 인기 검색어 Top 15</div></div>
+        <div class="panel-header"><div class="panel-title"><span class="dot" style="background:#7C3AED"></span> Bing 인기 검색어 Top 15</div>
+          <button type="button" onclick="downloadBingWeeklyTopCsv()" title="조회 기간과 겹치는 Bing 주간(토~금) 단위로 주별 Top 15 검색어를 CSV로 저장"
+            style="margin-left:auto;font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text-dim);cursor:pointer;font-family:'DM Mono',monospace">⬇ 주간 Top 15 CSV</button></div>
         <div id="bingQueryTable"></div>
       </div>
       <div class="panel">
@@ -2732,14 +2793,15 @@ function renderBingSection(from, to){
   const bQ=getBingTopQueries(f,t);
   const mQ=Math.max(...bQ.map(q=>q.clicks),1);
   document.getElementById('bingQueryTable').innerHTML=bQ.length
-    ?`<table class="gsc-table"><thead><tr><th>#</th><th>검색어</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead><tbody>
+    ?bingWeekNote('q',f,t)+`<table class="gsc-table"><thead><tr><th>#</th><th>검색어</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead><tbody>
       ${bQ.map((q,i)=>{
         const drill=getBingDrillQuery(q.query,f,t);
         const rowId=`bqDrill${i}`;
-        const hasDrill=drill.length>0;
+        const hasDrill=true;
+        const noteHtml=drill.length?'':`<div style="font-size:11px;color:var(--text-muted)">ⓘ ${bingDrillMissingNote('q',q.query)}</div>`;
         return `<tr${hasDrill?` style="cursor:pointer" onclick="toggleBingDrillRow('${rowId}')"`:''}>
         <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
-        <td style="font-weight:500;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(q.query)}${hasDrill?' <span style="opacity:.45;font-size:9px">▾</span>':''}</td>
+        <td style="font-weight:500;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(q.query)}${hasDrill?` <span style="opacity:${drill.length?.45:.25};font-size:9px">${drill.length?'▾':'▹'}</span>`:''}</td>
         <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(q.clicks/mQ*60).toFixed(0)}px;background:#F97316"></div>
             <span style="font-family:'DM Mono',monospace;color:#F97316;font-weight:600">${q.clicks}</span></div></td>
         <td style="font-family:'DM Mono',monospace">${q.impr}</td>
@@ -2749,6 +2811,7 @@ function renderBingSection(from, to){
         <td></td>
         <td colspan="5" style="padding:6px 10px 10px 22px">
           <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;font-weight:600">🔗 이 검색어로 유입된 페이지</div>
+          ${noteHtml}
           ${drill.map(d=>{
             const url=d.page.startsWith('http')?d.page:'https://myhubon.com'+d.page;
             const short=(d.page.replace('https://myhubon.com','')||'/').slice(0,34);
@@ -2766,19 +2829,20 @@ function renderBingSection(from, to){
   const bP=getBingTopPages(f,t);
   const mP=Math.max(...bP.map(p=>p.clicks),1);
   document.getElementById('bingPageTable').innerHTML=bP.length
-    ?`<table class="gsc-table"><thead><tr><th>#</th><th>페이지</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead><tbody>
+    ?bingWeekNote('p',f,t)+`<table class="gsc-table"><thead><tr><th>#</th><th>페이지</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead><tbody>
       ${bP.map((p,i)=>{
         const url=p.page.startsWith('http')?p.page:'https://myhubon.com'+p.page;
         const short=(p.page.replace('https://myhubon.com','')||'/').slice(0,26);
         const drill=getBingDrillPage(p.page,f,t);
         const rowId=`bpDrill${i}`;
-        const hasDrill=drill.length>0;
+        const hasDrill=true;
+        const noteHtml=drill.length?'':`<div style="font-size:11px;color:var(--text-muted)">ⓘ ${bingDrillMissingNote('p',p.page)}</div>`;
         return`<tr${hasDrill?` style="cursor:pointer" onclick="toggleBingDrillRow('${rowId}')"`:''}>
           <td style="color:var(--text-muted);font-family:'DM Mono',monospace">${i+1}</td>
           <td style="font-size:11px;max-width:150px">
             <a href="${url}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
                style="color:#F97316;text-decoration:none;display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace"
-               title="${url}"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(short)}</span><span style="font-size:9px;opacity:.6">↗</span></a>${hasDrill?' <span style="opacity:.45;font-size:9px">▾</span>':''}</td>
+               title="${url}"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(short)}</span><span style="font-size:9px;opacity:.6">↗</span></a>${hasDrill?` <span style="opacity:${drill.length?.45:.25};font-size:9px">${drill.length?'▾':'▹'}</span>`:''}</td>
           <td><div class="gsc-bar-cell"><div class="gsc-bar" style="width:${(p.clicks/mP*60).toFixed(0)}px;background:#F97316"></div>
               <span style="font-family:'DM Mono',monospace;color:#F97316;font-weight:600">${p.clicks}</span></div></td>
           <td style="font-family:'DM Mono',monospace;color:var(--text-dim)">${p.impr||'-'}</td>
@@ -2788,6 +2852,7 @@ function renderBingSection(from, to){
           <td></td>
           <td colspan="5" style="padding:6px 10px 10px 22px">
             <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;font-weight:600">🔍 이 페이지로 유입된 검색어</div>
+            ${noteHtml}
             ${drill.map(d=>`<div style="display:flex;justify-content:space-between;gap:10px;font-size:11px;padding:2px 0;font-family:'DM Mono',monospace">
               <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%">${escapeHtml(d.query)}</span>
               <span style="color:var(--text-dim);white-space:nowrap">클릭 ${d.clicks} · 노출 ${d.impr}</span>
