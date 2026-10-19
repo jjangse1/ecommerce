@@ -42,6 +42,7 @@ Bing Webmaster API 공식 WSDL(https://ssl.bing.com/webmasterapi/api.svc?singleW
 import os
 import re
 import json
+import time
 import requests
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -57,8 +58,9 @@ BASE_URL = "https://ssl.bing.com/webmaster/api.svc/json"
 HEADERS  = {"Content-Type": "application/json; charset=utf-8"}
 
 TOP_N        = 15   # 대시보드 표시 개수
-DRILL_QUERIES = 50  # 드릴다운(검색어→페이지)을 받아둘 검색어 수 (90일 클릭 상위)
-DRILL_PAGES   = 50  # 드릴다운(페이지→검색어)을 받아둘 페이지 수 (90일 클릭 상위)
+DRILL_QUERIES = 150 # 드릴다운(검색어→페이지)을 받아둘 검색어 수 (90일 클릭 상위, 클릭 0 제외)
+DRILL_PAGES   = 150 # 드릴다운(페이지→검색어)을 받아둘 페이지 수 (90일 클릭 상위, 클릭 0 제외)
+DRILL_SLEEP   = 0.25 # 드릴다운 호출 사이 대기(초) — 레이트리밋으로 빈 응답이 오는 것 방지
 
 # ── 조회 기간: 최근 90일 ───────────────────────────────────
 end_date   = datetime.utcnow().date() - timedelta(days=2)
@@ -88,25 +90,41 @@ def extract_rows(data):
         return []
     return data.get("Results", [])
 
-# ── 공통 GET 헬퍼 ─────────────────────────────────────────
-def bing_get(endpoint, params=None):
+# ── 공통 GET 헬퍼 (재시도 포함) ───────────────────────────
+# 마지막 호출 결과 상태: "ok" / "empty" / "error"  (드릴다운 누락 원인 진단용)
+last_status = "ok"
+
+def bing_get(endpoint, params=None, retries=3):
+    global last_status
     p = {"apikey": BING_API_KEY}
     if params:
         p.update(params)
-    try:
-        resp = requests.get(f"{BASE_URL}/{endpoint}", headers=HEADERS, params=p, timeout=30)
-    except requests.RequestException as e:
-        print(f"  ⚠ {endpoint} 요청 실패: {e}")
-        return []
-    if resp.status_code != 200:
-        print(f"  ⚠ {endpoint} 실패 ({resp.status_code}): {resp.text[:200]}")
-        return []
-    try:
-        data = resp.json()
-    except ValueError:
-        print(f"  ⚠ {endpoint} JSON 파싱 실패: {resp.text[:200]}")
-        return []
-    return extract_rows(data)
+    for attempt in range(1, retries + 1):
+        try:
+            resp = requests.get(f"{BASE_URL}/{endpoint}", headers=HEADERS, params=p, timeout=30)
+        except requests.RequestException as e:
+            print(f"  ⚠ {endpoint} 요청 실패({attempt}/{retries}): {e}")
+            time.sleep(1.5 * attempt)
+            continue
+        if resp.status_code in (429, 500, 502, 503, 504):
+            print(f"  ⚠ {endpoint} 일시 오류 {resp.status_code} ({attempt}/{retries}) → 재시도")
+            time.sleep(1.5 * attempt)
+            continue
+        if resp.status_code != 200:
+            print(f"  ⚠ {endpoint} 실패 ({resp.status_code}): {resp.text[:200]}")
+            last_status = "error"
+            return []
+        try:
+            data = resp.json()
+        except ValueError:
+            print(f"  ⚠ {endpoint} JSON 파싱 실패: {resp.text[:200]}")
+            last_status = "error"
+            return []
+        rows = extract_rows(data)
+        last_status = "ok" if rows else "empty"
+        return rows
+    last_status = "error"
+    return []
 
 # ── Bing의 "/Date(1699999999000)/" 형식 파싱 ────────────────
 _DATE_RE = re.compile(r"/Date\((-?\d+)")
@@ -258,9 +276,12 @@ pages_data = pages_data[:TOP_N]
 # ════════════════════════════════════════════════════════════
 print("📡 [4/6] 검색어→페이지 드릴다운 (GetQueryPageStats)...")
 query_page_daily = {}
-for q in queries_all[:DRILL_QUERIES]:
+diag_q = {"error": [], "empty": [], "out_of_range": []}
+for q in [x for x in queries_all if x["clicks"] > 0][:DRILL_QUERIES]:
     qtext = q["query"]
     rows = bing_get("GetQueryPageStats", {"siteUrl": SITE_URL, "query": qtext})
+    status = last_status
+    time.sleep(DRILL_SLEEP)
     items = []
     for r in rows:
         d = parse_bing_date(r.get("Date"))
@@ -275,6 +296,12 @@ for q in queries_all[:DRILL_QUERIES]:
             items.append([d, url, clicks, impr])
     if items:
         query_page_daily[qtext] = items
+    elif status == "error":
+        diag_q["error"].append(qtext)
+    elif status == "empty":
+        diag_q["empty"].append(qtext)      # Bing가 이 검색어의 페이지 상세를 아예 안 줌
+    else:
+        diag_q["out_of_range"].append(qtext)  # 응답은 있었지만 조회 기간 밖 날짜뿐
 
 # ════════════════════════════════════════════════════════════
 # 6. 페이지 → 검색어 드릴다운 (GetPageQueryStats)
@@ -282,9 +309,12 @@ for q in queries_all[:DRILL_QUERIES]:
 # ════════════════════════════════════════════════════════════
 print("📡 [5/6] 페이지→검색어 드릴다운 (GetPageQueryStats)...")
 page_query_daily = {}
-for p in pages_all[:DRILL_PAGES]:
+diag_p = {"error": [], "empty": [], "out_of_range": []}
+for p in [x for x in pages_all if x["clicks"] > 0][:DRILL_PAGES]:
     purl = p["page"]
     rows = bing_get("GetPageQueryStats", {"siteUrl": SITE_URL, "page": purl})
+    status = last_status
+    time.sleep(DRILL_SLEEP)
     items = []
     for r in rows:
         d = parse_bing_date(r.get("Date"))
@@ -299,6 +329,24 @@ for p in pages_all[:DRILL_PAGES]:
             items.append([d, qtext, clicks, impr])
     if items:
         page_query_daily[purl] = items
+    elif status == "error":
+        diag_p["error"].append(purl)
+    elif status == "empty":
+        diag_p["empty"].append(purl)
+    else:
+        diag_p["out_of_range"].append(purl)
+
+def print_diag(title, diag, total):
+    print(f"  ▶ {title}: 대상 {total}개 → 상세 없음 {sum(len(v) for v in diag.values())}개")
+    print(f"      API 오류/재시도 실패 : {len(diag['error'])}개  (→ 다시 실행하면 채워질 수 있음)")
+    print(f"      Bing 빈 응답         : {len(diag['empty'])}개  (→ Bing이 상세 데이터를 제공하지 않음)")
+    print(f"      기간 밖 데이터만     : {len(diag['out_of_range'])}개")
+    for k in ("error", "empty"):
+        for x in diag[k][:5]:
+            print(f"        - [{k}] {x[:80]}")
+print("🔎 드릴다운 누락 진단")
+print_diag("검색어→페이지", diag_q, min(DRILL_QUERIES, len([x for x in queries_all if x['clicks'] > 0])))
+print_diag("페이지→검색어", diag_p, min(DRILL_PAGES, len([x for x in pages_all if x['clicks'] > 0])))
 
 # ════════════════════════════════════════════════════════════
 # 4. 국가별 데이터 — Bing Webmaster API 공식 미지원
@@ -329,6 +377,10 @@ output = {
     "page_daily":            page_daily,
     "query_page_daily":      query_page_daily,
     "page_query_daily":      page_query_daily,
+    "drill_missing": {     # 드릴다운이 비어있는 항목과 사유 (프론트 안내 문구용)
+        "queries": {k: v for k, v in diag_q.items()},
+        "pages":   {k: v for k, v in diag_p.items()},
+    },
 }
 
 # 일자별 행이 많아 indent 없이 compact하게 저장 (파일 크기 절약)
