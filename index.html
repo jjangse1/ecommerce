@@ -1447,6 +1447,10 @@ window._BING_COUNTRIES = [];
 window._BING_COUNTRY_SUPPORTED = true;
 window._BING_QUERY_PAGE_DRILL  = {};   // 검색어 → 페이지 목록
 window._BING_PAGE_QUERY_DRILL  = {};   // 페이지 → 검색어 목록
+window._BING_QUERY_DAILY      = [];   // [날짜, 검색어, 클릭, 노출, 순위]
+window._BING_PAGE_DAILY       = [];   // [날짜, 페이지, 클릭, 노출, 순위]
+window._BING_QUERY_PAGE_DAILY = {};   // 검색어 → [[날짜, 페이지, 클릭, 노출], ...]
+window._BING_PAGE_QUERY_DAILY = {};   // 페이지 → [[날짜, 검색어, 클릭, 노출], ...]
 window._BING_LOADED    = false;
 
 (async function fetchBingJson(){
@@ -1464,6 +1468,10 @@ window._BING_LOADED    = false;
       window._BING_COUNTRY_SUPPORTED = json.country_supported !== false;
       window._BING_QUERY_PAGE_DRILL  = json.query_page_drilldown || {};
       window._BING_PAGE_QUERY_DRILL  = json.page_query_drilldown || {};
+      window._BING_QUERY_DAILY      = json.query_daily      || [];
+      window._BING_PAGE_DAILY       = json.page_daily       || [];
+      window._BING_QUERY_PAGE_DAILY = json.query_page_daily || {};
+      window._BING_PAGE_QUERY_DAILY = json.page_query_daily || {};
       window._BING_LOADED    = true;
       const badge = document.getElementById('bingDataBadge');
       if(badge){ badge.textContent=`🔷 Bing 갱신 · ${json.updated||'최신'}`; badge.style.display='inline-flex'; }
@@ -2535,6 +2543,48 @@ function renderGSC(from, to){
 function escapeHtml(s){
   return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+// ── Bing 일자별 행 → 선택 기간 합산 Top N ──
+// rows: [날짜, 키, 클릭, 노출, (순위)]  /  반환: [{key,clicks,impr,ctr,pos}] 클릭순(동률이면 노출순)
+const BING_TOP_N = 15;
+function aggBingRows(rows, from, to, n){
+  const m = new Map();
+  for(const r of rows){
+    const d = r[0];
+    if((from && d < from) || (to && d > to)) continue;
+    let a = m.get(r[1]);
+    if(!a){ a = {key:r[1], clicks:0, impr:0, ps:0, pi:0}; m.set(r[1], a); }
+    a.clicks += r[2]; a.impr += r[3];
+    if(r[4] > 0 && r[3] > 0){ a.ps += r[4]*r[3]; a.pi += r[3]; }
+  }
+  const out = [...m.values()].map(a=>({
+    key:a.key, clicks:a.clicks, impr:a.impr,
+    ctr: a.impr ? a.clicks/a.impr : 0,
+    pos: a.pi ? Math.round(a.ps/a.pi*10)/10 : 0
+  }));
+  out.sort((x,y)=> y.clicks-x.clicks || y.impr-x.impr);
+  return out.slice(0, n);
+}
+function getBingTopQueries(from, to){
+  const rows = window._BING_QUERY_DAILY||[];
+  if(rows.length) return aggBingRows(rows, from, to, BING_TOP_N).map(r=>({query:r.key, clicks:r.clicks, impr:r.impr, ctr:r.ctr, pos:r.pos}));
+  return (window._BING_QUERIES||[]).slice(0, BING_TOP_N);   // 구버전 json 폴백
+}
+function getBingTopPages(from, to){
+  const rows = window._BING_PAGE_DAILY||[];
+  if(rows.length) return aggBingRows(rows, from, to, BING_TOP_N).map(r=>({page:r.key, clicks:r.clicks, impr:r.impr, ctr:r.ctr, pos:r.pos}));
+  return (window._BING_PAGES||[]).slice(0, BING_TOP_N);     // 구버전 json 폴백
+}
+// 드릴다운: 일자별 행이 있으면 기간 합산(상위 5), 없으면 구버전 집계본 사용
+function getBingDrillQuery(query, from, to){
+  const daily = (window._BING_QUERY_PAGE_DAILY||{})[query];
+  if(daily) return aggBingRows(daily, from, to, 5).map(r=>({page:r.key, clicks:r.clicks, impr:r.impr}));
+  return (window._BING_QUERY_PAGE_DRILL||{})[query] || [];
+}
+function getBingDrillPage(page, from, to){
+  const daily = (window._BING_PAGE_QUERY_DAILY||{})[page];
+  if(daily) return aggBingRows(daily, from, to, 5).map(r=>({query:r.key, clicks:r.clicks, impr:r.impr}));
+  return (window._BING_PAGE_QUERY_DRILL||{})[page] || [];
+}
 function toggleBingDrillRow(rowId){
   const row=document.getElementById(rowId);
   if(!row) return;
@@ -2629,11 +2679,11 @@ function renderBingSection(from, to){
     <!-- 검색어 / 페이지 -->
     <div class="grid-2">
       <div class="panel">
-        <div class="panel-header"><div class="panel-title"><span class="dot" style="background:#7C3AED"></span> Bing 인기 검색어 Top 10</div></div>
+        <div class="panel-header"><div class="panel-title"><span class="dot" style="background:#7C3AED"></span> Bing 인기 검색어 Top 15</div></div>
         <div id="bingQueryTable"></div>
       </div>
       <div class="panel">
-        <div class="panel-header"><div class="panel-title"><span class="dot" style="background:#059669"></span> Bing 인기 페이지 Top 10</div></div>
+        <div class="panel-header"><div class="panel-title"><span class="dot" style="background:#059669"></span> Bing 인기 페이지 Top 15</div></div>
         <div id="bingPageTable"></div>
       </div>
     </div>
@@ -2679,12 +2729,12 @@ function renderBingSection(from, to){
   });
 
   // ── Bing 검색어 테이블 (클릭 시 → 연결된 페이지 드릴다운) ──
-  const bQ=(window._BING_QUERIES||[]).slice(0,10);
+  const bQ=getBingTopQueries(f,t);
   const mQ=Math.max(...bQ.map(q=>q.clicks),1);
   document.getElementById('bingQueryTable').innerHTML=bQ.length
     ?`<table class="gsc-table"><thead><tr><th>#</th><th>검색어</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead><tbody>
       ${bQ.map((q,i)=>{
-        const drill=window._BING_QUERY_PAGE_DRILL[q.query]||[];
+        const drill=getBingDrillQuery(q.query,f,t);
         const rowId=`bqDrill${i}`;
         const hasDrill=drill.length>0;
         return `<tr${hasDrill?` style="cursor:pointer" onclick="toggleBingDrillRow('${rowId}')"`:''}>
@@ -2713,14 +2763,14 @@ function renderBingSection(from, to){
     :`<div class="gsc-empty">Bing 검색어 데이터 없음</div>`;
 
   // ── Bing 페이지 테이블 (클릭 시 → 연결된 검색어 드릴다운) ──
-  const bP=(window._BING_PAGES||[]).slice(0,10);
+  const bP=getBingTopPages(f,t);
   const mP=Math.max(...bP.map(p=>p.clicks),1);
   document.getElementById('bingPageTable').innerHTML=bP.length
     ?`<table class="gsc-table"><thead><tr><th>#</th><th>페이지</th><th>클릭</th><th>노출</th><th>CTR</th><th>순위</th></tr></thead><tbody>
       ${bP.map((p,i)=>{
         const url=p.page.startsWith('http')?p.page:'https://myhubon.com'+p.page;
         const short=(p.page.replace('https://myhubon.com','')||'/').slice(0,26);
-        const drill=window._BING_PAGE_QUERY_DRILL[p.page]||[];
+        const drill=getBingDrillPage(p.page,f,t);
         const rowId=`bpDrill${i}`;
         const hasDrill=drill.length>0;
         return`<tr${hasDrill?` style="cursor:pointer" onclick="toggleBingDrillRow('${rowId}')"`:''}>
