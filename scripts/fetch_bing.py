@@ -2,8 +2,11 @@
 fetch_bing.py — Bing Webmaster Tools API 데이터 수집 (v2)
 수집 항목:
   - daily    : 날짜별 클릭/노출/CTR/순위 (최근 90일)
-  - queries  : 인기 검색어 Top 20
-  - pages    : 인기 페이지 Top 15
+  - queries  : 인기 검색어 Top 15 (최근 90일 전체 기준 · 폴백용)
+  - pages    : 인기 페이지 Top 15 (최근 90일 전체 기준 · 폴백용)
+  - query_daily / page_daily : 검색어·페이지 "일자별" 원본 행 → 대시보드가 선택한 기간으로
+                               직접 합산해서 Top 15를 다시 계산함 (날짜 필터 연동)
+  - query_page_daily / page_query_daily : 드릴다운도 일자별 행으로 저장 (기간 연동)
   - countries / daily_country : Bing API 미지원으로 항상 빈 배열 (아래 설명 참고)
 
 ── v2에서 바뀐 점 (중요) ─────────────────────────────────────
@@ -52,6 +55,10 @@ if not BING_API_KEY:
 
 BASE_URL = "https://ssl.bing.com/webmaster/api.svc/json"
 HEADERS  = {"Content-Type": "application/json; charset=utf-8"}
+
+TOP_N        = 15   # 대시보드 표시 개수
+DRILL_QUERIES = 50  # 드릴다운(검색어→페이지)을 받아둘 검색어 수 (90일 클릭 상위)
+DRILL_PAGES   = 50  # 드릴다운(페이지→검색어)을 받아둘 페이지 수 (90일 클릭 상위)
 
 # ── 조회 기간: 최근 90일 ───────────────────────────────────
 end_date   = datetime.utcnow().date() - timedelta(days=2)
@@ -196,7 +203,12 @@ for query, (clicks, impr, pos_sum, pos_impr) in q_agg.items():
         "pos":    round(pos_sum / pos_impr, 1) if pos_impr else 0,
     })
 queries_data.sort(key=lambda r: r["clicks"], reverse=True)
-queries_data = queries_data[:20]
+queries_all  = queries_data            # 드릴다운 대상 선정용 (전체)
+queries_data = queries_data[:TOP_N]    # 폴백용 Top 15
+
+# 일자별 원본 행 (프론트가 기간 필터로 재합산): [날짜, 검색어, 클릭, 노출, 순위]
+query_daily = [[q["date"], q["query"], q["clicks"], q["impr"], round(q["pos"], 1)]
+               for q in q_rows if q["query"] and (q["clicks"] or q["impr"])]
 
 # ════════════════════════════════════════════════════════════
 # 3. 페이지별 트래픽 (GetPageStats)
@@ -205,6 +217,7 @@ queries_data = queries_data[:20]
 print("📡 [3/6] 페이지별 트래픽 (GetPageStats)...")
 raw_pages_all = bing_get("GetPageStats", {"siteUrl": SITE_URL})
 p_agg = defaultdict(lambda: [0, 0, 0.0, 0])
+page_daily = []   # [날짜, 페이지URL, 클릭, 노출, 순위]
 for r in raw_pages_all:
     d = parse_bing_date(r.get("Date"))
     if not in_range(d):
@@ -215,6 +228,8 @@ for r in raw_pages_all:
     clicks = int(r.get("Clicks", 0) or 0)
     impr   = int(r.get("Impressions", 0) or 0)
     pos    = float(r.get("AvgImpressionPosition", 0) or 0)
+    if clicks or impr:
+        page_daily.append([d, url, clicks, impr, round(pos, 1)])
     a = p_agg[url]
     a[0] += clicks
     a[1] += impr
@@ -232,19 +247,21 @@ for url, (clicks, impr, pos_sum, pos_impr) in p_agg.items():
         "pos":    round(pos_sum / pos_impr, 1) if pos_impr else 0,
     })
 pages_data.sort(key=lambda r: r["clicks"], reverse=True)
-pages_data = pages_data[:15]
+pages_all  = pages_data
+pages_data = pages_data[:TOP_N]
 
 # ════════════════════════════════════════════════════════════
 # 5. 검색어 → 페이지 드릴다운 (GetQueryPageStats)
-#    Top 20 검색어 각각에 대해 "이 검색어로 어떤 페이지가 클릭됐는지" 조회
+#    90일 클릭 상위 DRILL_QUERIES개 검색어에 대해 "일자별" 행을 저장
+#    (기간을 바꿔도 프론트에서 해당 기간만 다시 합산할 수 있도록)
 #    ⚠ 응답은 GetPageStats와 같은 QueryStats 타입이라 페이지 URL이 "Query" 필드에 담김
 # ════════════════════════════════════════════════════════════
 print("📡 [4/6] 검색어→페이지 드릴다운 (GetQueryPageStats)...")
-query_page_drilldown = {}
-for q in queries_data:
+query_page_daily = {}
+for q in queries_all[:DRILL_QUERIES]:
     qtext = q["query"]
     rows = bing_get("GetQueryPageStats", {"siteUrl": SITE_URL, "query": qtext})
-    agg = defaultdict(lambda: [0, 0, 0.0, 0])
+    items = []
     for r in rows:
         d = parse_bing_date(r.get("Date"))
         if not in_range(d):
@@ -254,30 +271,21 @@ for q in queries_data:
             continue
         clicks = int(r.get("Clicks", 0) or 0)
         impr   = int(r.get("Impressions", 0) or 0)
-        pos    = float(r.get("AvgImpressionPosition", 0) or 0)
-        a = agg[url]
-        a[0] += clicks; a[1] += impr
-        if impr > 0:
-            a[2] += pos * impr; a[3] += impr
-    items = [{
-        "page": url, "clicks": c, "impr": i,
-        "ctr": round(c / i, 4) if i else 0,
-        "pos": round(ps / pi_, 1) if pi_ else 0,
-    } for url, (c, i, ps, pi_) in agg.items()]
-    items.sort(key=lambda x: x["clicks"], reverse=True)
+        if clicks or impr:
+            items.append([d, url, clicks, impr])
     if items:
-        query_page_drilldown[qtext] = items[:5]
+        query_page_daily[qtext] = items
 
 # ════════════════════════════════════════════════════════════
 # 6. 페이지 → 검색어 드릴다운 (GetPageQueryStats)
-#    Top 15 페이지 각각에 대해 "이 페이지가 어떤 검색어로 유입됐는지" 조회
+#    90일 클릭 상위 DRILL_PAGES개 페이지에 대해 "일자별" 행을 저장
 # ════════════════════════════════════════════════════════════
 print("📡 [5/6] 페이지→검색어 드릴다운 (GetPageQueryStats)...")
-page_query_drilldown = {}
-for p in pages_data:
+page_query_daily = {}
+for p in pages_all[:DRILL_PAGES]:
     purl = p["page"]
     rows = bing_get("GetPageQueryStats", {"siteUrl": SITE_URL, "page": purl})
-    agg = defaultdict(lambda: [0, 0, 0.0, 0])
+    items = []
     for r in rows:
         d = parse_bing_date(r.get("Date"))
         if not in_range(d):
@@ -287,19 +295,10 @@ for p in pages_data:
             continue
         clicks = int(r.get("Clicks", 0) or 0)
         impr   = int(r.get("Impressions", 0) or 0)
-        pos    = float(r.get("AvgImpressionPosition", 0) or 0)
-        a = agg[qtext]
-        a[0] += clicks; a[1] += impr
-        if impr > 0:
-            a[2] += pos * impr; a[3] += impr
-    items = [{
-        "query": qtext, "clicks": c, "impr": i,
-        "ctr": round(c / i, 4) if i else 0,
-        "pos": round(ps / pi_, 1) if pi_ else 0,
-    } for qtext, (c, i, ps, pi_) in agg.items()]
-    items.sort(key=lambda x: x["clicks"], reverse=True)
+        if clicks or impr:
+            items.append([d, qtext, clicks, impr])
     if items:
-        page_query_drilldown[purl] = items[:5]
+        page_query_daily[purl] = items
 
 # ════════════════════════════════════════════════════════════
 # 4. 국가별 데이터 — Bing Webmaster API 공식 미지원
@@ -326,12 +325,15 @@ output = {
     "countries":             countries_data,
     "daily_country":         daily_country,
     "country_supported":     country_supported,
-    "query_page_drilldown":  query_page_drilldown,
-    "page_query_drilldown":  page_query_drilldown,
+    "query_daily":           query_daily,
+    "page_daily":            page_daily,
+    "query_page_daily":      query_page_daily,
+    "page_query_daily":      page_query_daily,
 }
 
+# 일자별 행이 많아 indent 없이 compact하게 저장 (파일 크기 절약)
 with open("bing-data.json", "w", encoding="utf-8") as f:
-    json.dump(output, f, ensure_ascii=False, indent=2)
+    json.dump(output, f, ensure_ascii=False, separators=(",", ":"))
 
 total_clicks = sum(r["clicks"] for r in daily_data)
 total_impr   = sum(r["impr"]   for r in daily_data)
@@ -341,6 +343,7 @@ print(f"   총 클릭  : {total_clicks:,}  |  총 노출: {total_impr:,}")
 if total_impr: print(f"   평균 CTR : {total_clicks/total_impr*100:.1f}%")
 print(f"   검색어   : {len(queries_data)}개")
 print(f"   페이지   : {len(pages_data)}개")
-print(f"   검색어→페이지 드릴다운 : {len(query_page_drilldown)}개 검색어")
-print(f"   페이지→검색어 드릴다운 : {len(page_query_drilldown)}개 페이지")
+print(f"   검색어 일자별 행 : {len(query_daily)}건 / 페이지 일자별 행 : {len(page_daily)}건")
+print(f"   검색어→페이지 드릴다운 : {len(query_page_daily)}개 검색어")
+print(f"   페이지→검색어 드릴다운 : {len(page_query_daily)}개 페이지")
 print(f"   국가     : 미지원 (Bing API 자체 미제공)")
