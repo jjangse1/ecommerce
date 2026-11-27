@@ -91,6 +91,54 @@ def query_gsc(dimensions, row_limit=100, extra=None):
         body.update(extra)
     return service.searchanalytics().query(siteUrl=SITE_URL, body=body).execute()
 
+# ════════════════════════════════════════════════════════════
+# 누적 저장 설정
+#  - 일별(daily / daily_*) 데이터는 GSC가 보관하는 최대 16개월(≈480일)까지 수집
+#  - 기존 gsc-data.json 이 있으면 읽어서 "새로 받은 구간"만 교체하고 이전 날짜는 그대로 유지(누적)
+#    → GSC 보관기간(16개월)이 지나 사라져도 우리 JSON에는 계속 남음
+#  - 최초 1회(backfill_done 없음)는 480일 전체 백필, 이후는 최근 14일 겹쳐서 증분 갱신
+# ════════════════════════════════════════════════════════════
+TREND_DAYS  = 480
+PREV_PATH   = "gsc-data.json"
+trend_start = end_date - timedelta(days=TREND_DAYS - 1)
+
+prev = {}
+if os.path.exists(PREV_PATH):
+    try:
+        with open(PREV_PATH, encoding="utf-8") as _f:
+            prev = json.load(_f)
+    except Exception as e:
+        print(f"⚠ 기존 {PREV_PATH} 읽기 실패 → 새로 생성: {e}")
+        prev = {}
+
+if prev.get("backfill_done") and prev.get("daily"):
+    last_prev   = max(r["date"] for r in prev["daily"])
+    fetch_start = max(trend_start, datetime.strptime(last_prev, "%Y-%m-%d").date() - timedelta(days=14))
+    print(f"♻ 증분 갱신 모드: {fetch_start} ~ {end_date} (이전 누적 데이터 유지)")
+else:
+    fetch_start = trend_start
+    print(f"📦 최초 백필 모드: {fetch_start} ~ {end_date}")
+fetch_start_s = fetch_start.strftime("%Y-%m-%d")
+trend_range = {"startDate": fetch_start_s, "endDate": end_date.strftime("%Y-%m-%d")}
+
+def query_gsc_all(dimensions, rng=None, page_size=25000):
+    """startRow 페이징으로 전체 행 수집 (rowLimit 잘림 방지)"""
+    rows, start_row = [], 0
+    while True:
+        body = {**(rng or trend_range), "dimensions": dimensions,
+                "rowLimit": page_size, "startRow": start_row}
+        batch = service.searchanalytics().query(siteUrl=SITE_URL, body=body).execute().get("rows", [])
+        rows.extend(batch)
+        if len(batch) < page_size:
+            break
+        start_row += page_size
+    return rows
+
+def merge_hist(key, new_rows):
+    """이전에 저장된 행 중 이번에 새로 받은 구간(fetch_start 이전)만 유지 + 새 행 추가"""
+    kept = [r for r in prev.get(key, []) if r.get("date", "") < fetch_start_s]
+    return kept + new_rows
+
 # 국가 코드 → 한국어 이름 매핑 (공통 사용)
 COUNTRY_NAMES = {
     "kor":"한국","usa":"미국","jpn":"일본","chn":"중국","ind":"인도",
@@ -107,8 +155,8 @@ DEVICE_NAMES = {"DESKTOP":"데스크톱","MOBILE":"모바일","TABLET":"태블�
 # 1. 날짜별 집계 (90일)
 # ════════════════════════════════════════════════════════════
 print("📡 [1/9] 날짜별 데이터 수집 중...")
-resp_daily = query_gsc(["date"], row_limit=90)
-daily_data = [parse_row(r, "date") for r in resp_daily.get("rows", [])]
+rows_daily = query_gsc_all(["date"])
+daily_data = merge_hist("daily", [parse_row(r, "date") for r in rows_daily])
 daily_data.sort(key=lambda r: r["date"])
 
 # ════════════════════════════════════════════════════════════
@@ -159,9 +207,9 @@ pages_data.sort(key=lambda r: r["clicks"], reverse=True)
 #    90일 × 최대 15개국 = 최대 1,350행 → rowLimit 2000으로 여유있게
 # ════════════════════════════════════════════════════════════
 print("📡 [6/9] 날짜×국가 일별 데이터 수집 중...")
-resp_dc = query_gsc(["date", "country"], row_limit=2000)
+rows_dc = query_gsc_all(["date", "country"])
 daily_country = []
-for r in resp_dc.get("rows", []):
+for r in rows_dc:
     date_val = r["keys"][0]
     code     = r["keys"][1].lower()
     daily_country.append({
@@ -173,6 +221,7 @@ for r in resp_dc.get("rows", []):
         "ctr":     round(float(r.get("ctr", 0)), 4),
         "pos":     round(float(r.get("position", 0)), 1),
     })
+daily_country = merge_hist("daily_country", daily_country)
 daily_country.sort(key=lambda r: (r["date"], r["country"]))
 
 # ════════════════════════════════════════════════════════════
@@ -180,9 +229,9 @@ daily_country.sort(key=lambda r: (r["date"], r["country"]))
 #    90일 × 3기기 = 최대 270행
 # ════════════════════════════════════════════════════════════
 print("📡 [7/9] 날짜×기기 일별 데이터 수집 중...")
-resp_dd = query_gsc(["date", "device"], row_limit=500)
+rows_dd = query_gsc_all(["date", "device"])
 daily_device = []
-for r in resp_dd.get("rows", []):
+for r in rows_dd:
     date_val = r["keys"][0]
     raw      = r["keys"][1].upper()
     daily_device.append({
@@ -193,6 +242,7 @@ for r in resp_dd.get("rows", []):
         "ctr":    round(float(r.get("ctr", 0)), 4),
         "pos":    round(float(r.get("position", 0)), 1),
     })
+daily_device = merge_hist("daily_device", daily_device)
 daily_device.sort(key=lambda r: (r["date"], r["device"]))
 
 # ════════════════════════════════════════════════════════════
@@ -201,9 +251,9 @@ daily_device.sort(key=lambda r: (r["date"], r["device"]))
 #    rowLimit 5000으로 넉넉하게 (GSC API 최대 25,000)
 # ════════════════════════════════════════════════════════════
 print("📡 [8/9] 날짜×검색어 일별 데이터 수집 중...")
-resp_dq = query_gsc(["date", "query"], row_limit=5000)
+rows_dq = query_gsc_all(["date", "query"])
 daily_query = []
-for r in resp_dq.get("rows", []):
+for r in rows_dq:
     date_val = r["keys"][0]
     query_val = r["keys"][1]
     daily_query.append({
@@ -214,6 +264,7 @@ for r in resp_dq.get("rows", []):
         "ctr":    round(float(r.get("ctr", 0)), 4),
         "pos":    round(float(r.get("position", 0)), 1),
     })
+daily_query = merge_hist("daily_query", daily_query)
 daily_query.sort(key=lambda r: (r["date"], r["query"]))
 
 # ════════════════════════════════════════════════════════════
@@ -221,9 +272,9 @@ daily_query.sort(key=lambda r: (r["date"], r["query"]))
 #    90일 × Top 15 페이지 = 최대 1,350행
 # ════════════════════════════════════════════════════════════
 print("📡 [9/9] 날짜×페이지 일별 데이터 수집 중...")
-resp_dp = query_gsc(["date", "page"], row_limit=5000)
+rows_dp = query_gsc_all(["date", "page"])
 daily_page = []
-for r in resp_dp.get("rows", []):
+for r in rows_dp:
     date_val = r["keys"][0]
     page_val = r["keys"][1]
     daily_page.append({
@@ -234,6 +285,7 @@ for r in resp_dp.get("rows", []):
         "ctr":    round(float(r.get("ctr", 0)), 4),
         "pos":    round(float(r.get("position", 0)), 1),
     })
+daily_page = merge_hist("daily_page", daily_page)
 daily_page.sort(key=lambda r: (r["date"], r["page"]))
 
 # ════════════════════════════════════════════════════════════
@@ -242,9 +294,10 @@ daily_page.sort(key=lambda r: (r["date"], r["page"]))
 output = {
     "updated": datetime.utcnow().strftime("%Y-%m-%d"),
     "period": {
-        "start": start_date.strftime("%Y-%m-%d"),
+        "start": daily_data[0]["date"] if daily_data else start_date.strftime("%Y-%m-%d"),
         "end":   end_date.strftime("%Y-%m-%d"),
     },
+    "backfill_done": True,   # 다음 실행부터 증분 갱신 + 누적
     "daily":         daily_data,
     "queries":       queries_data,
     "countries":     countries_data,
@@ -256,14 +309,15 @@ output = {
     "daily_page":    daily_page,    # ← 신규
 }
 
+# 누적으로 커지므로 compact 저장 (indent 제거)
 with open("gsc-data.json", "w", encoding="utf-8") as f:
-    json.dump(output, f, ensure_ascii=False, indent=2)
+    json.dump(output, f, ensure_ascii=False, separators=(",", ":"))
 
 # ── 결과 요약 출력 ───────────────────────────────────────
 total_clicks = sum(r["clicks"] for r in daily_data)
 total_impr   = sum(r["impr"]   for r in daily_data)
 print(f"\n✅ GSC 데이터 수집 완료")
-print(f"   기간             : {start_date} ~ {end_date} ({len(daily_data)}일)")
+print(f"   기간(누적)       : {daily_data[0]['date'] if daily_data else '-'} ~ {end_date} ({len(daily_data)}일)")
 print(f"   총 클릭          : {total_clicks:,}  |  총 노출: {total_impr:,}")
 if total_impr:
     print(f"   평균 CTR         : {total_clicks/total_impr*100:.1f}%")
