@@ -64,7 +64,32 @@ DRILL_SLEEP   = 0.25 # 드릴다운 호출 사이 대기(초) — 레이트리�
 
 # ── 조회 기간: 최근 90일 ───────────────────────────────────
 end_date   = datetime.utcnow().date() - timedelta(days=2)
-start_date = end_date - timedelta(days=89)
+TREND_DAYS = 480                                   # 일별/주간 데이터 수집 범위 (Bing이 보유한 만큼)
+start_date = end_date - timedelta(days=TREND_DAYS - 1)
+
+# ── 누적 저장: 기존 bing-data.json 을 읽어 이전 날짜 데이터는 유지하고 새 데이터로 덮어씀 ──
+PREV_PATH = "bing-data.json"
+prev = {}
+if os.path.exists(PREV_PATH):
+    try:
+        with open(PREV_PATH, encoding="utf-8") as _f:
+            prev = json.load(_f)
+    except Exception as e:
+        print(f"⚠ 기존 {PREV_PATH} 읽기 실패 → 새로 생성: {e}")
+        prev = {}
+
+def merge_rows(prev_rows, new_rows):
+    """[날짜, 키, ...] 리스트 병합 — (날짜,키) 기준, 새 값이 우선"""
+    m = {(r[0], r[1]): r for r in (prev_rows or [])}
+    for r in new_rows:
+        m[(r[0], r[1])] = r
+    return sorted(m.values(), key=lambda r: (r[0], r[1]))
+
+def merge_drill(prev_dict, new_dict):
+    out = {k: list(v) for k, v in (prev_dict or {}).items()}
+    for k, rows in new_dict.items():
+        out[k] = merge_rows(out.get(k, []), rows)
+    return out
 
 def fmt(d): return d.strftime("%Y-%m-%d")
 
@@ -199,6 +224,18 @@ while cur <= end_date:
     })
     cur += timedelta(days=1)
 
+# 이전 누적 daily 와 병합: 새 값에 데이터가 있으면 새 값, 없으면 이전 값 유지
+_pm = {r["date"]: r for r in prev.get("daily", [])}
+_nm = {r["date"]: r for r in daily_data}
+_merged = []
+for _d in sorted(set(_pm) | set(_nm)):
+    n, p = _nm.get(_d), _pm.get(_d)
+    _merged.append(n if (n and (n["clicks"] or n["impr"])) else (p or n))
+daily_data = _merged
+# Bing 데이터가 시작되기 전의 0 구간은 제거 (그래프에 0으로 깔리지 않게)
+while daily_data and not (daily_data[0]["clicks"] or daily_data[0]["impr"]):
+    daily_data.pop(0)
+
 # 인기 검색어 Top 20 (검색어별로 합산)
 q_agg = defaultdict(lambda: [0, 0, 0.0, 0])  # clicks, impr, pos*impr합, impr합(pos용)
 for q in q_rows:
@@ -227,6 +264,7 @@ queries_data = queries_data[:TOP_N]    # 폴백용 Top 15
 # 일자별 원본 행 (프론트가 기간 필터로 재합산): [날짜, 검색어, 클릭, 노출, 순위]
 query_daily = [[q["date"], q["query"], q["clicks"], q["impr"], round(q["pos"], 1)]
                for q in q_rows if q["query"] and (q["clicks"] or q["impr"])]
+query_daily = merge_rows(prev.get("query_daily"), query_daily)
 
 # ════════════════════════════════════════════════════════════
 # 3. 페이지별 트래픽 (GetPageStats)
@@ -254,6 +292,8 @@ for r in raw_pages_all:
     if impr > 0:
         a[2] += pos * impr
         a[3] += impr
+
+page_daily = merge_rows(prev.get("page_daily"), page_daily)
 
 pages_data = []
 for url, (clicks, impr, pos_sum, pos_impr) in p_agg.items():
@@ -336,6 +376,9 @@ for p in [x for x in pages_all if x["clicks"] > 0][:DRILL_PAGES]:
     else:
         diag_p["out_of_range"].append(purl)
 
+query_page_daily = merge_drill(prev.get("query_page_daily"), query_page_daily)
+page_query_daily = merge_drill(prev.get("page_query_daily"), page_query_daily)
+
 def print_diag(title, diag, total):
     print(f"  ▶ {title}: 대상 {total}개 → 상세 없음 {sum(len(v) for v in diag.values())}개")
     print(f"      API 오류/재시도 실패 : {len(diag['error'])}개  (→ 다시 실행하면 채워질 수 있음)")
@@ -366,7 +409,7 @@ country_supported = False
 # ════════════════════════════════════════════════════════════
 output = {
     "updated": datetime.utcnow().strftime("%Y-%m-%d"),
-    "period":  {"start": fmt(start_date), "end": fmt(end_date)},
+    "period":  {"start": daily_data[0]["date"] if daily_data else fmt(start_date), "end": fmt(end_date)},
     "daily":                 daily_data,
     "queries":               queries_data,
     "pages":                 pages_data,
@@ -390,7 +433,7 @@ with open("bing-data.json", "w", encoding="utf-8") as f:
 total_clicks = sum(r["clicks"] for r in daily_data)
 total_impr   = sum(r["impr"]   for r in daily_data)
 print(f"\n✅ bing-data.json 저장 완료")
-print(f"   기간     : {fmt(start_date)} ~ {fmt(end_date)} ({len(daily_data)}일)")
+print(f"   기간(누적): {daily_data[0]['date'] if daily_data else '-'} ~ {fmt(end_date)} ({len(daily_data)}일)")
 print(f"   총 클릭  : {total_clicks:,}  |  총 노출: {total_impr:,}")
 if total_impr: print(f"   평균 CTR : {total_clicks/total_impr*100:.1f}%")
 print(f"   검색어   : {len(queries_data)}개")
